@@ -1,0 +1,1 @@
+My BTP, trying to do it in React and Redux. VanillaJS became too much data to manage and update stuff.
