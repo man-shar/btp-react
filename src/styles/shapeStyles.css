@@ -1,0 +1,11 @@
+rect, circle {
+  fill: transparent;
+  stroke: steelblue;
+  stroke-width: 1;
+}
+
+.anchor {
+  fill: orange;
+  fill-opacity: 0.7;
+  stroke: orange;
+}

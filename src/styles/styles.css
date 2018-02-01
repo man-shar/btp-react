@@ -1,0 +1,143 @@
+body {
+  margin: 0;
+  padding: 0;
+  color: #3a3a3a;
+}
+
+* {
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box; /* Firefox, other Gecko */ 
+  box-sizing: border-box; /* Opera/IE 8+ */ 
+}
+
+#main-container {
+  font-size: 0;
+  margin: 0 auto;
+}
+
+#chart-container, #things {
+  font-size: 12px;
+  display: inline-block;
+  overflow-x: auto;
+  vertical-align:top;
+}
+
+#chart-container {
+  width: 74%;
+  background-color: white;
+  min-width: 300px;
+  position: relative;
+}
+
+#things {
+  font-family: "Lato";
+  width: 25%;
+  min-width: 200px;
+  text-align: center;
+  position: relative;
+  background-color: #F5F5F5;
+}
+
+.things-label {
+  background-color: steelblue;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  height: 20px;
+  position: sticky;
+  left: 0;
+  top: 0;
+  box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+}
+
+#data-drop-container, #attributes-container {
+  
+}
+
+#data-drop-container > #data-drop-placeholder-text {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+#data-drop-container > #data-drop-placeholder-text:hover {
+  opacity: 1;
+}
+
+#data-drop-container {
+  height: 30%;
+  overflow: auto;
+}
+
+#data-drop-placeholder-text {
+  font-family: "Lato";
+  font-size: 25px;
+  color: #3a3a3a;
+}
+
+#attributes-container {
+  height: 70%;
+  overflow: auto;
+}
+
+#tooltip {
+  font-family: "Lato";
+  display: none;
+  position: absolute;
+  padding: 10px;
+  background-color: #F5F5F5;
+  border: 1px solid steelblue;
+  font-size: 1em;
+}
+
+.tooltip-label {
+  color: #3a3a3a;
+}
+
+.tooltip-label p {
+  width: 50px;
+  display: inline-table;
+}
+
+.column-drop-div, .tooltip-label > .CodeMirror{
+  display: inline-block;
+  min-width: 100px;
+  border: 0px;
+  background: #fff;
+  height: auto;
+  min-height: 25px;
+  border-bottom: 1px dashed #3a3a3a50;
+  -moz-appearance: textfield-multiline;
+  -webkit-appearance: textarea;
+  border: 1px solid gray;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+#data-table-container {
+  padding: 10px;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.data-table {
+  display: table;
+}
+
+.data-table-row {
+  display: table-row;
+}
+
+.data-table-cell {
+  display: table-cell;
+  padding: 5px;
+}
+
+.column-name {
+  cursor: pointer;
+  color: white;
+  background-color: steelblue;
+  font-style: italic;
+  font-weight: bold;
+}
+
+table { border-collapse: collapse; }
