@@ -8,7 +8,6 @@ class Layer extends React.Component {
     const shapes = this.props.shapes;
     const type = this.props.type;
     const dimensions = this.props.dimensions;
-    console.log(shapes);
 
     if (type === "rect") {
       return (

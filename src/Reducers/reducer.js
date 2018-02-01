@@ -1,22 +1,27 @@
-import {START_DRAG_DRAW } from "../Actions/actions";
-import { dragDrawShape } from "../Shape Handlers/shapeMethods";
+import {START_DRAG_DRAW, UPDATE_DRAG_DRAW, END_DRAG_DRAW } from "../Actions/actions";
+import { startDragDrawShape, updateShapeBeingDrawn } from "../Shape Handlers/shapeMethods";
 
 const initialState = {
   "width": 900,
   "height": 600,
-  "current-shape": "rect",
-  "initial-shapes": [],
+  "currentShape": "rect",
+  "initialShapes": [],
   "layers": [],
-  "being-dragged": false,
+  "beingDrawn": false,
 }
 
 function manageActions(state = initialState, action) {
-  switch (action.type) {
+  let initialShapes,
+      newShape,
+      layers,
+      shapeBeingDrawn,
+      updatedShapeBeingDrawn;
 
+  switch (action.type) {
     case START_DRAG_DRAW:
-      const initialShapes = state["initial-shapes"].slice();
-      const layers = state["layers"].slice();
-      const newShape = dragDrawShape(state["current-shape"], action.e);
+      initialShapes = state.initialShapes.slice();
+      layers = state.layers.slice();
+      newShape = startDragDrawShape(state.currentShape, action.e);
 
       layers.push({});
       layers[layers.length - 1]["shapes"] = [];
@@ -27,9 +32,28 @@ function manageActions(state = initialState, action) {
       initialShapes.push(newShape);
 
       return Object.assign({}, state, {
-        "initial-shapes": initialShapes,
-        "being-dragged": true,
+        "initialShapes": initialShapes,
+        "beingDrawn": true,
         "layers": layers
+      });
+
+    case UPDATE_DRAG_DRAW:
+      if(!state.beingDrawn)
+        return state
+
+      layers = state.layers.slice();
+      shapeBeingDrawn = layers[layers.length - 1]["shapes"][0];
+      updatedShapeBeingDrawn = updateShapeBeingDrawn(shapeBeingDrawn, action.e);
+
+      layers[layers.length - 1]["shapes"][0] = updatedShapeBeingDrawn;
+
+      return Object.assign({}, state, {
+        layers: layers,
+      });
+
+    case END_DRAG_DRAW:
+      return Object.assign({}, state, {
+        beingDrawn: false,
       });
 
     default:
