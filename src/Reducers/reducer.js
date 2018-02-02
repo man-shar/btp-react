@@ -1,16 +1,26 @@
-import {START_DRAG_DRAW, UPDATE_DRAG_DRAW, END_DRAG_DRAW } from "../Actions/actions";
+import { combineReducers } from 'redux'
+import { START_DRAG_DRAW, UPDATE_DRAG_DRAW, END_DRAG_DRAW, TOGGLE_CURRENT_SHAPE } from "../Actions/actions";
 import { startDragDrawShape, updateShapeBeingDrawn } from "../Shape Handlers/shapeMethods";
 
 const initialState = {
-  "width": 900,
-  "height": 600,
-  "currentShape": "rect",
-  "initialShapes": [],
-  "layers": [],
-  "beingDrawn": false,
-}
+  "overallAttributes": {
+    "width": 900,
+    "height": 600,
+  },
+  drawing: {
+    "currentShape": "rect",
+    "initialShapes": [],
+    "layers": [],
+    "beingDrawn": false
+  }
+};
 
-function manageActions(state = initialState, action) {
+const keyToShape = {
+  "r": "rect",
+  "c": "circle"
+};
+
+function manageDrawingActions(state = initialState["drawing"], action) {
   let initialShapes,
       newShape,
       layers,
@@ -56,11 +66,27 @@ function manageActions(state = initialState, action) {
         beingDrawn: false,
       });
 
+    case TOGGLE_CURRENT_SHAPE:
+    return Object.assign({}, state, {
+      currentShape: (keyToShape[action.newShape] === undefined ? keyToShape["r"] : keyToShape[action.newShape])
+    });
+
     default:
       return state
   }
 
   return state;
 }
+
+function manageChangesToOverallAttributes(state = initialState["overallAttributes"], action) {
+  return state;
+}
+
+const manageActions = combineReducers({
+  overallAttributes: manageChangesToOverallAttributes,
+  drawing: manageDrawingActions
+});
+
+
 
 export default manageActions;

@@ -2,6 +2,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import { connect } from 'react-redux';
 import Rect from "./Rect"
+import Circle from "./Circle"
 
 class Layer extends React.Component {
   render() {
@@ -13,6 +14,14 @@ class Layer extends React.Component {
       return (
         shapes.map((shape, i) => 
           <Rect key={i} dimensions={shape.dimensions}/>
+        )
+      );
+    }
+
+    if (type === "circle") {
+      return (
+        shapes.map((shape, i) => 
+          <Circle key={i} dimensions={shape.dimensions}/>
         )
       );
     }

@@ -1,16 +1,25 @@
 import React from 'react';
-import {render} from 'react-dom';
+import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw } from '../Actions/actions';
+import keydown from 'react-keydown';
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
 import Layer from './Layer'
+
+// Handles svg mouse events. Drag draw etc. Dispatches actions for user drawing.
 
 class Chart extends React.Component {
   constructor() {
     super();
 
+    // slight lag on mousemove updates so throttling the action to be dispatched every "x" (guessed from trial and error) events. Declaring local state because throttle not really needed elsewhere (yet).
+
     this.state = {
       throttle: 0,
     }
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", this.props.onKeyDown, false);
   }
 
   render () {
@@ -21,6 +30,8 @@ class Chart extends React.Component {
     const onMouseUp = this.props.onMouseUp;
     const currentShape = this.props.currentShape;
     const layers = this.props.layers;
+
+    // SVG doesn't support ondrag events so have to work with mousedown, mousemove and mouseup here.
 
     return (
       <div id="chart-container">
@@ -36,14 +47,16 @@ class Chart extends React.Component {
           onMouseMove={(e) => {
             e.preventDefault();
 
-            if(this.state.throttle % 3 === 0)
-            {
-              onMouseMove(e);
-            }
+            if(this.props.beingDrawn) {
+              if(this.state.throttle % 2 === 0)
+              {
+                onMouseMove(e);
+              }
 
-            this.setState({
-              throttle: this.state.throttle + 1
-            });
+              this.setState({
+                throttle: this.state.throttle + 1
+              });
+            }
           }}
           onMouseUp={(e) => {
             e.preventDefault();
@@ -54,9 +67,11 @@ class Chart extends React.Component {
               throttle: 0
             }) 
           }}>
+
           {layers.map((layer, i) => 
             <Layer key={i} shapes={layer.shapes} type={layer.type} dimensions={layer.dimensions}/>
           )}
+
         </svg>
       </div>
     );
@@ -65,9 +80,10 @@ class Chart extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    "size": [state.width, state.height],
-    "currentShape": state.currentShape,
-    "layers": state.layers
+    "size": [state.overallAttributes.width, state.overallAttributes.height],
+    "currentShape": state.drawing.currentShape,
+    "layers": state.drawing.layers,
+    "beingDrawn": state.drawing.beingDrawn
   }
 }
 
@@ -81,6 +97,9 @@ const mapDispatchToProps = dispatch => {
     },
     onMouseUp: (e) => {
       dispatch(endDragDraw(e));
+    },
+    onKeyDown: (e) => {
+      dispatch(toggleCurrentShape(e.key));
     }
   }
 }
