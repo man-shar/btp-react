@@ -7,7 +7,7 @@ class Rect extends React.Component {
     const { x, y, width, height } = this.props.dimensions;
 
     return (
-      <rect x={x} y={y} width={width} height={height}></rect>
+      <rect shape={this.props.shape} id={this.props.shape.id} name={this.props.shape.name} x={x} y={y} width={width} height={height}></rect>
     );
   }
 }

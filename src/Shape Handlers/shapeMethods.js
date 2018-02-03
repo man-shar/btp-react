@@ -3,27 +3,28 @@ export const startDragDrawShape = function(shape, e) {
 
   if(shape === "rect")
   {
-    dimensions = {
+    return {
+      "type": shape.type,
       "x": e.nativeEvent.offsetX,
       "y": e.nativeEvent.offsetY,
       "width": 0,
-      "height": 0
-    }
+      "height": 0,
+      "dimensions": ["x", "y", "width", "height"]
+    };
   }
 
   if(shape === "circle")
   {
-    dimensions = {
+    return {
+      "type": shape.type,
       "cx": e.nativeEvent.offsetX,
       "cy": e.nativeEvent.offsetY,
-      "r": 0
-    }
+      "r": 0,
+      "dimensions": ["cx", "cy", "r"]
+    };
   }
 
-  return {
-    type: shape,
-    dimensions: dimensions
-  }
+  return {};
 }
 
 export const updateShapeBeingDrawn = function(shape, e) {

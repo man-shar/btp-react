@@ -7,7 +7,7 @@ class Circle extends React.Component {
     const { cx, cy, r } = dimensions;
 
     return (
-      <circle cx={cx} cy={cy} r={r}></circle>
+      <circle shape={shape} id={shape.id} name={shape.name} cx={cx} cy={cy} r={r}></circle>
     );
   }
 }

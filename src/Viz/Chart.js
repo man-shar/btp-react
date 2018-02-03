@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import keydown from 'react-keydown';
 import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
 import Layer from './Layer'
 
@@ -30,6 +29,11 @@ class Chart extends React.Component {
     const onMouseUp = this.props.onMouseUp;
     const currentShape = this.props.currentShape;
     const layers = this.props.layers;
+
+    const backgroundStyles = {
+      "fill": this.props.overallAttributes["background-fill"],
+      "stroke": this.props.overallAttributes.border
+    }
 
     // SVG doesn't support ondrag events so have to work with mousedown, mousemove and mouseup here.
 
@@ -67,6 +71,7 @@ class Chart extends React.Component {
               throttle: 0
             }) 
           }}>
+          <rect width={width} height={height} style={backgroundStyles}></rect>
 
           {layers.map((layer, i) => 
             <Layer key={i} shapes={layer.shapes} type={layer.type} dimensions={layer.dimensions}/>
@@ -81,9 +86,10 @@ class Chart extends React.Component {
 const mapStateToProps = state => {
   return {
     "size": [state.overallAttributes.width, state.overallAttributes.height],
+    "overallAttributes": state.overallAttributes,
     "currentShape": state.drawing.currentShape,
     "layers": state.drawing.layers,
-    "beingDrawn": state.drawing.beingDrawn
+    "beingDrawn": state.drawing.beingDrawn,
   }
 }
 

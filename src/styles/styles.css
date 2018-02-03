@@ -13,17 +13,16 @@ body {
 #main-container {
   font-size: 0;
   margin: 0 auto;
+  display: flex;
 }
 
 #chart-container, #things {
   font-size: 12px;
-  display: inline-block;
   overflow-x: auto;
   vertical-align:top;
 }
 
 #chart-container {
-  width: 74%;
   background-color: white;
   min-width: 300px;
   position: relative;
@@ -31,8 +30,8 @@ body {
 
 #things {
   font-family: "Lato";
-  width: 25%;
-  min-width: 200px;
+  min-width: 300px;
+  flex-grow: 1000; 
   text-align: center;
   position: relative;
   background-color: #F5F5F5;
@@ -48,6 +47,7 @@ body {
   left: 0;
   top: 0;
   box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  z-index: 1;
 }
 
 #data-drop-container, #attributes-container {
@@ -70,32 +70,14 @@ body {
 
 #data-drop-placeholder-text {
   font-family: "Lato";
-  font-size: 25px;
+  font-size: 14px;
+  font-style: italic;
   color: #3a3a3a;
 }
 
 #attributes-container {
   height: 70%;
   overflow: auto;
-}
-
-#tooltip {
-  font-family: "Lato";
-  display: none;
-  position: absolute;
-  padding: 10px;
-  background-color: #F5F5F5;
-  border: 1px solid steelblue;
-  font-size: 1em;
-}
-
-.tooltip-label {
-  color: #3a3a3a;
-}
-
-.tooltip-label p {
-  width: 50px;
-  display: inline-table;
 }
 
 .column-drop-div, .tooltip-label > .CodeMirror{
@@ -113,11 +95,11 @@ body {
   vertical-align: middle;
 }
 
-#data-table-container {
+/* #data-table-container {
   padding: 10px;
   font-size: 12px;
   display: inline-block;
-}
+} */
 
 .data-table {
   display: table;

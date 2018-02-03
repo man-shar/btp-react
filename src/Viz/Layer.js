@@ -7,21 +7,22 @@ import Circle from "./Circle"
 class Layer extends React.Component {
   render() {
     const shapes = this.props.shapes;
+    const shapeIds = this.props.shapeIds;
     const type = this.props.type;
     const dimensions = this.props.dimensions;
 
     if (type === "rect") {
       return (
-        shapes.map((shape, i) => 
-          <Rect key={i} dimensions={shape.dimensions}/>
+        shapeIds.map((shapeId, i) => 
+          <Rect shape={shapes[shapeId]} id={shapes[shapeId].id} name={shapes[shapeId].name} key={i} dimensions={shapes[shapeId].dimensions}/>
         )
       );
     }
 
     if (type === "circle") {
       return (
-        shapes.map((shape, i) => 
-          <Circle key={i} dimensions={shape.dimensions}/>
+        shapeIds.map((shapeId, i) => 
+          <Circle shape={shapes[shapeId]} id={shapes[shapeId].id} name={shapes[shapeId].name} key={i} dimensions={shapes[shapeId].dimensions}/>
         )
       );
     }
