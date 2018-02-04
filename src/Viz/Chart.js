@@ -29,6 +29,7 @@ class Chart extends React.Component {
     const onMouseUp = this.props.onMouseUp;
     const currentShape = this.props.currentShape;
     const layers = this.props.layers;
+    const layerIds = Object.keys(layers);
 
     const backgroundStyles = {
       "fill": this.props.overallAttributes["background-fill"],
@@ -52,7 +53,7 @@ class Chart extends React.Component {
             e.preventDefault();
 
             if(this.props.beingDrawn) {
-              if(this.state.throttle % 2 === 0)
+              if(this.state.throttle % 1 === 0)
               {
                 onMouseMove(e);
               }
@@ -73,8 +74,8 @@ class Chart extends React.Component {
           }}>
           <rect width={width} height={height} style={backgroundStyles}></rect>
 
-          {layers.map((layer, i) => 
-            <Layer key={i} shapes={layer.shapes} type={layer.type} dimensions={layer.dimensions}/>
+          {layerIds.map((layerId, i) =>
+            <Layer key={i} layer={layers[layerId]} id={layerId} type={layers[layerId].type} dimensions={layers[layerId].dimensions}/>
           )}
 
         </svg>
@@ -112,4 +113,4 @@ const mapDispatchToProps = dispatch => {
 
 Chart = connect(mapStateToProps, mapDispatchToProps)(Chart);
 
-module.exports = Chart;
+export default Chart;

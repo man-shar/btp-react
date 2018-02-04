@@ -5,17 +5,16 @@ export const initialState = {
     "background-fill": "#fff",
     "border": "#3a3a3a"
   },
-  drawing: {
+  "drawing": {
+    "beingDrawn": false,
     "currentShape": "rect",
     "activeLayerId" : "",
     "activeShapeId" : "",
-    "layers": [],
-    "layerIds": [],
-    "beingDrawn": false
+    "layers": {},
   },
-  data: [],
-  file: {
-    isLoaded: false,
+  "data": [],
+  "file": {
+    "isLoaded": false,
   },
 };
 

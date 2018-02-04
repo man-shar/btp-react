@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from 'react-dom';
+import { render } from 'react-dom';
 
 class Circle extends React.Component {
   render () {
@@ -7,9 +7,9 @@ class Circle extends React.Component {
     const { cx, cy, r } = dimensions;
 
     return (
-      <circle shape={shape} id={shape.id} name={shape.name} cx={cx} cy={cy} r={r}></circle>
+      <circle shape={this.props.shape} id={this.props.shape.id} name={this.props.shape.name} cx={cx} cy={cy} r={r}></circle>
     );
   }
 }
 
-module.exports = Circle;
+export default Circle;

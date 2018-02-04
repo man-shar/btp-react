@@ -1,6 +1,7 @@
 import { START_DRAG_DRAW, UPDATE_DRAG_DRAW, END_DRAG_DRAW, TOGGLE_CURRENT_SHAPE } from "../Actions/actions";
 import { startDragDrawShape, updateShapeBeingDrawn } from "../Shape Handlers/shapeMethods";
 import { initialState, keyToShape } from "./init.js";
+import cloneDeep from "lodash.clonedeep";
 
 export function manageDrawingActions(state = initialState["drawing"], action) {
   let newShape,
@@ -10,29 +11,38 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
   switch (action.type) {
     case START_DRAG_DRAW:
-      layers = state.layers.slice();
+      // deep clone. yeah, sorry.
+      layers = cloneDeep(state.layers);
       newShape = startDragDrawShape(state.currentShape, action.e);
+      let layerCount = Object.keys(layers).length;
 
-      var newLayerName = "Layer " + (layers.count - 1);
-      var newLayerId = "layer" + (layers.count - 1);
-      var newShapeName = newShape.type + " 0";
-      var newShapeId = newLayerId + "-" + newShapeName;
+      let newLayerName = "Layer " + (layerCount);
+      let newLayerId = "layer" + (layerCount);
 
       layers[newLayerId] = {};
-      layers[newLayerId]["shapes"] = {}
-      layers[layers.length - 1]["shapes"] = {};
-      layers[layers.length - 1]["id"] = "layer-" + (layers.length - 1);
-      layers[layers.length - 1]["type"] = newShape.type;
-      layers[layers.length - 1]["dimensions"] = Object.keys(newShape.dimensions);
-      layers[layers.length - 1]["name"] = ;
+      layers[newLayerId]["shapes"] = {};
 
-      newShape.name = ;
-      newShape.id = 
+      let shapeCount = Object.keys(layers[newLayerId]["shapes"]).length;
 
-      layers[layers.length - 1]["shapes"].push(Object.assign({}, newShape));
+      let newShapeName = newShape.type + " " + shapeCount;
+      let newShapeId = newLayerId + newShape.type + shapeCount;
+
+      layers[newLayerId]["id"] = newLayerId;
+      layers[newLayerId]["type"] = state.currentShape;
+      layers[newLayerId]["dimensions"] = Object.keys(newShape.dimensions);
+      layers[newLayerId]["name"] = newLayerName;
+      layers[newLayerId]["shapeIds"] = [newShapeId];
+
+      newShape["name"] = newShapeName;
+      newShape["id"] = newShapeId;
+
+      layers[newLayerId]["shapes"][newShapeId] = newShape;
 
       return Object.assign({}, state, {
         "beingDrawn": true,
+        "currentShape": state.currentShape,
+        "activeLayerId" : newLayerId,
+        "activeShapeId" : newShapeId,
         "layers": layers
       });
 
@@ -40,11 +50,15 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       if(!state.beingDrawn)
         return state
 
-      layers = state.layers.slice();
-      shapeBeingDrawn = layers[layers.length - 1]["shapes"][0];
+      // really sorry.
+      layers = cloneDeep(state.layers);
+      let activeLayerId = state.activeLayerId;
+      let activeShapeId = state.activeShapeId;
+
+      shapeBeingDrawn = layers[activeLayerId]["shapes"][activeShapeId];
       updatedShapeBeingDrawn = updateShapeBeingDrawn(shapeBeingDrawn, action.e);
 
-      layers[layers.length - 1]["shapes"][0] = updatedShapeBeingDrawn;
+      layers[activeLayerId]["shapes"][activeShapeId] = updatedShapeBeingDrawn;
 
       return Object.assign({}, state, {
         layers: layers,
@@ -56,9 +70,9 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
     case TOGGLE_CURRENT_SHAPE:
-    return Object.assign({}, state, {
-      currentShape: (keyToShape[action.newShape] === undefined ? keyToShape["r"] : keyToShape[action.newShape])
-    });
+      return Object.assign({}, state, {
+        currentShape: (keyToShape[action.newShape] === undefined ? keyToShape["r"] : keyToShape[action.newShape])
+      });
 
     default:
       return state

@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from 'react-dom';
+import { render } from 'react-dom';
 
 class Rect extends React.Component {
   render () {
@@ -12,4 +12,4 @@ class Rect extends React.Component {
   }
 }
 
-module.exports = Rect;
+export default Rect;
