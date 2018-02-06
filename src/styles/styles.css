@@ -50,7 +50,7 @@ body {
   z-index: 1;
 }
 
-#data-drop-container, #attributes-container {
+#data-drop-container, #attribute-container {
   
 }
 
@@ -75,7 +75,7 @@ body {
   color: #3a3a3a;
 }
 
-#attributes-container {
+#attribute-container {
   height: 70%;
   overflow: auto;
 }

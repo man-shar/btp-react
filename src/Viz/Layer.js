@@ -1,8 +1,8 @@
-import React from 'react';
-import { render } from 'react-dom';
-import { connect } from 'react-redux';
-import Rect from "./Rect"
-import Circle from "./Circle"
+import React from "react";
+import { render } from "react-dom";
+import { connect } from "react-redux";
+import Rect from "./Rect";
+import Circle from "./Circle";
 
 class Layer extends React.Component {
   render() {
@@ -12,28 +12,34 @@ class Layer extends React.Component {
     const drawing = this.props.drawing;
 
     if (type === "rect") {
-      return (
-        shapeIds.map((shapeId, i) => 
-          <Rect id={shapeId} index={this.props.drawing[shapeId + "$index"]} layerId={layerId} key={i}/>
-        )
-      );
+      return shapeIds.map((shapeId, i) => (
+        <Rect
+          id={shapeId}
+          index={this.props.drawing[shapeId + "$index"]}
+          layerId={layerId}
+          key={i}
+        />
+      ));
     }
 
     if (type === "circle") {
-      return (
-        shapeIds.map((shapeId, i) => 
-          <Circle id={shapeId} index={this.props.drawing[shapeId + "$index"]} layerId={layerId} key={i}/>
-        )
-      );
+      return shapeIds.map((shapeId, i) => (
+        <Circle
+          id={shapeId}
+          index={this.props.drawing[shapeId + "$index"]}
+          layerId={layerId}
+          key={i}
+        />
+      ));
     }
   }
 }
 
 const mapStateToProps = state => {
   return {
-    "drawing": state.drawing,
-  }
-}
+    drawing: state.drawing
+  };
+};
 
 Layer = connect(mapStateToProps)(Layer);
 

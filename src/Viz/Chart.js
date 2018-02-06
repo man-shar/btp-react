@@ -76,7 +76,7 @@ class Chart extends React.Component {
           <rect width={width} height={height} style={backgroundStyles}></rect>
 
           {layerIds.map((layerId, i) =>
-            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributes={drawing[layerId + "$attributes"]}/>
+            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]}/>
           )}
 
         </svg>
