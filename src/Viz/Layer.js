@@ -14,7 +14,7 @@ class Layer extends React.Component {
     if (type === "rect") {
       return (
         shapeIds.map((shapeId, i) => 
-          <Rect id={shapeId} key={i}/>
+          <Rect id={shapeId} index={this.props.drawing[shapeId + "$index"]} layerId={layerId} key={i}/>
         )
       );
     }
@@ -22,7 +22,7 @@ class Layer extends React.Component {
     if (type === "circle") {
       return (
         shapeIds.map((shapeId, i) => 
-          <Circle id={shapeId} key={i}/>
+          <Circle id={shapeId} index={this.props.drawing[shapeId + "$index"]} layerId={layerId} key={i}/>
         )
       );
     }

@@ -7,7 +7,7 @@ class AttributeFlexRow extends React.Component {
     const attribute = this.props.attribute;
 
     return (
-      
+      <div></div>      
       }
     );
   }

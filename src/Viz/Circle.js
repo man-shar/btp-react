@@ -1,15 +1,16 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { getAttributes } from '../Util/Util'
+import Util from '../Util/Util'
 
 class Circle extends React.Component {
   render () {
-    const attributes = getAttributes(this.props.id, this.props.drawing);
+    const attributes = Util.getAttributeValue(this.props.id, this.props.layerId, this.props.drawing);
     const shapeId = this.props.id;
+    const index = this.props.index;
 
     return (
-      <circle id={shapeId} name={this.props.drawing[shapeId + "$name"]}  {...attributes}></circle>
+      <circle id={shapeId} index={index} name={this.props.drawing[shapeId + "$name"]}  {...attributes}></circle>
     );
   }
 }

@@ -1,16 +1,17 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { getAttributes } from '../Util/Util'
+import Util from '../Util/Util'
 
 
 class Rect extends React.Component {
   render () {
-    const attributes = getAttributes(this.props.id, this.props.drawing);
-    const shapeId = this.props.id
+    const attributes = Util.getAttributeValue(this.props.id, this.props.layerId, this.props.drawing);
+    const shapeId = this.props.id;
+    const index = this.props.index;
 
     return (
-      <rect id={shapeId} name={this.props.drawing[shapeId + "$name"]} {...attributes}></rect>
+      <rect id={shapeId} index={index} name={this.props.drawing[shapeId + "$name"]} {...attributes}></rect>
     );
   }
 }

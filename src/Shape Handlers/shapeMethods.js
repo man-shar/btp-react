@@ -15,7 +15,8 @@ export const startDragDrawShape = function(shape, e) {
       "x$exprString": "" + e.nativeEvent.offsetX,
       "y$exprString": "" + e.nativeEvent.offsetY,
       "width$exprString": "" + 0,
-      "height$exprString": "" + 0
+      "height$exprString": "" + 0,
+      "list": ["width", "height", "x", "y"]
     }
   }
 
@@ -30,7 +31,8 @@ export const startDragDrawShape = function(shape, e) {
       "r$name": "Radius",
       "cx$exprString": "" + e.nativeEvent.offsetX,
       "cy$exprString": "" + e.nativeEvent.offsetY,
-      "r$exprString": "" + 0,      
+      "r$exprString": "" + 0,
+      "list": ["cx", "cy", "r"]
     }
   }
 
@@ -40,20 +42,25 @@ export const startDragDrawShape = function(shape, e) {
   }
 }
 
-export const updateShapeBeingDrawn = function(shapeId, state, e) {
-  let type = state[shapeId + "$type"];
+export const updateDragDrawShape = function(activeShapeId, activeLayerId, state, e) {
+  let type = state[activeLayerId + "$type"];
   let newObj = {};
 
   if(type === "rect")
   {
-    newObj[shapeId + "$width$value"] = e.nativeEvent.offsetX - state[shapeId + "$x"] - 5;
-    newObj[shapeId + "$height$value"] = e.nativeEvent.offsetY - state[shapeId + "$y"] - 5;
+    newObj[activeLayerId + "$width$value"] = e.nativeEvent.offsetX - state[activeLayerId + "$x$value"] - 5;
+    newObj[activeLayerId + "$width$exprString"] = "" + newObj[activeLayerId + "$width$value"];
+    newObj[activeLayerId + "$height$value"] = e.nativeEvent.offsetY - state[activeLayerId + "$y$value"] - 5;
+    newObj[activeLayerId + "$height$exprString"] = "" + newObj[activeLayerId + "$height$value"];
   }
 
   if(type === "circle")
   {
-    newObj[shapeId + "$r$value"] = e.nativeEvent.offsetX - state[shapeId + "$cx"];
+    newObj[activeLayerId + "$r$value"] = e.nativeEvent.offsetX - state[activeLayerId + "$cx$value"];
+    newObj[activeLayerId + "$r$exprString"] = "" + newObj[activeLayerId + "$r$value"];
   }
+
+  console.log(newObj)
 
   return newObj;
 }
