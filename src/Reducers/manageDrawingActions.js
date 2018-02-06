@@ -7,62 +7,68 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
   let newShape,
       layers,
       shapeBeingDrawn,
-      updatedShapeBeingDrawn;
+      updatedShapeAttributes;
 
   switch (action.type) {
     case START_DRAG_DRAW:
-      // deep clone. yeah, sorry.
-      layers = cloneDeep(state.layers);
+      let layerIds = state.layerIds.slice();
+      let layerCount = layerIds.length;
+
+      let newObj = {};
+
       newShape = startDragDrawShape(state.currentShape, action.e);
-      let layerCount = Object.keys(layers).length;
 
       let newLayerName = "Layer " + (layerCount);
       let newLayerId = "layer" + (layerCount);
 
-      layers[newLayerId] = {};
-      layers[newLayerId]["shapes"] = {};
+      let shapeIds = [];
+      let shapeCount = shapeIds.length;
 
-      let shapeCount = Object.keys(layers[newLayerId]["shapes"]).length;
+      layerIds.push(newLayerId);
 
       let newShapeName = newShape.type + " " + shapeCount;
       let newShapeId = newLayerId + newShape.type + shapeCount;
 
-      layers[newLayerId]["id"] = newLayerId;
-      layers[newLayerId]["type"] = state.currentShape;
-      layers[newLayerId]["dimensions"] = Object.keys(newShape.dimensions);
-      layers[newLayerId]["name"] = newLayerName;
-      layers[newLayerId]["shapeIds"] = [newShapeId];
+      shapeIds.push(newShapeId);
 
-      newShape["name"] = newShapeName;
-      newShape["id"] = newShapeId;
-
-      layers[newLayerId]["shapes"][newShapeId] = newShape;
-
-      return Object.assign({}, state, {
+      var newObj = {      
         "beingDrawn": true,
         "currentShape": state.currentShape,
         "activeLayerId" : newLayerId,
         "activeShapeId" : newShapeId,
-        "layers": layers
+        "layerIds": layerIds
+      }
+
+      newObj[newLayerId + "$shapeIds"] = shapeIds;
+      newObj[newLayerId + "$name"] = newLayerName;
+      newObj[newLayerId + "$id"] = newLayerId;
+      newObj[newLayerId + "$type"] = state.currentShape;
+      newObj[newLayerId + "$attributes"] = [];
+
+      newObj[newShapeId + "$name"] = newShapeName;
+      newObj[newShapeId + "$id"] = newShapeId;
+      newObj[newShapeId + "$type"] = state.currentShape;
+      newObj[newShapeId + "$attributes"] = [];
+
+      Object.keys(newShape.dimensions).forEach(dim => {
+        newObj[newShapeId + "$" + dim] = newShape["dimensions"][dim];
+        newObj[newShapeId + "$attributes"].push(dim);
+        newObj[newLayerId + "$attributes"].push(dim);
       });
+
+      return Object.assign({}, state, newObj);
 
     case UPDATE_DRAG_DRAW:
       if(!state.beingDrawn)
         return state
 
-      // really sorry.
-      layers = cloneDeep(state.layers);
       let activeLayerId = state.activeLayerId;
       let activeShapeId = state.activeShapeId;
 
-      shapeBeingDrawn = layers[activeLayerId]["shapes"][activeShapeId];
-      updatedShapeBeingDrawn = updateShapeBeingDrawn(shapeBeingDrawn, action.e);
+      updatedShapeAttributes = updateShapeBeingDrawn(activeShapeId, state, action.e);
+      console.log(updatedShapeAttributes);
 
-      layers[activeLayerId]["shapes"][activeShapeId] = updatedShapeBeingDrawn;
-
-      return Object.assign({}, state, {
-        layers: layers,
-      });
+      return Object.assign({}, state, updatedShapeAttributes);
 
     case END_DRAG_DRAW:
       return Object.assign({}, state, {

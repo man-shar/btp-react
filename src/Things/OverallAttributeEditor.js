@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { AttributeFlexContainer } from './AttributeFlexContainer'
 
 // Attributes are both dimensions and styles.
 
@@ -9,7 +8,8 @@ class OverallAttributeEditor extends React.Component {
     const overallAttributes = this.props.overallAttributes;
 
     return (
-      <AttributeFlexContainer attributes={overallAttributes}/>
+      <div>
+      </div>
     );
   }
 }

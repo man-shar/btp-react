@@ -1,51 +1,59 @@
 export const startDragDrawShape = function(shape, e) {
-  let dimensions;
+  let attributes;
 
   if(shape === "rect")
   {
-    dimensions = {
-      "x": e.nativeEvent.offsetX,
-      "y": e.nativeEvent.offsetY,
-      "width": 0,
-      "height": 0
+    attributes = {
+      "x$value": e.nativeEvent.offsetX,
+      "y$value": e.nativeEvent.offsetY,
+      "width$value": 0,
+      "height$value": 0,
+      "x$name": "Top Left X",
+      "y$name": "Top Left Y",
+      "width$name": "Width",
+      "height$name": "Height",
+      "x$exprString": "" + e.nativeEvent.offsetX,
+      "y$exprString": "" + e.nativeEvent.offsetY,
+      "width$exprString": "" + 0,
+      "height$exprString": "" + 0
     }
   }
 
   if(shape === "circle")
   {
-    dimensions = {
-      "cx": e.nativeEvent.offsetX,
-      "cy": e.nativeEvent.offsetY,
-      "r": 0
+    attributes = {
+      "cx$value": e.nativeEvent.offsetX,
+      "cy$value": e.nativeEvent.offsetY,
+      "r$value": 0,
+      "cx$name": "Centre X",
+      "cy$name": "Center Y",
+      "r$name": "Radius",
+      "cx$exprString": "" + e.nativeEvent.offsetX,
+      "cy$exprString": "" + e.nativeEvent.offsetY,
+      "r$exprString": "" + 0,      
     }
   }
 
   return {
     type: shape,
-    dimensions: dimensions
+    attributes: attributes
   }
 }
 
-export const updateShapeBeingDrawn = function(shape, e) {
-  let dimensions = shape.dimensions;
-  let type = shape.type
+export const updateShapeBeingDrawn = function(shapeId, state, e) {
+  let type = state[shapeId + "$type"];
+  let newObj = {};
 
   if(type === "rect")
   {
-    dimensions = Object.assign({}, dimensions, {
-      "width": e.nativeEvent.offsetX - dimensions["x"] - 5,
-      "height": e.nativeEvent.offsetY - dimensions["y"] - 5
-    });
+    newObj[shapeId + "$width$value"] = e.nativeEvent.offsetX - state[shapeId + "$x"] - 5;
+    newObj[shapeId + "$height$value"] = e.nativeEvent.offsetY - state[shapeId + "$y"] - 5;
   }
 
   if(type === "circle")
   {
-    dimensions = Object.assign({}, dimensions, {
-      "r": e.nativeEvent.offsetX - dimensions["cx"],
-    });
+    newObj[shapeId + "$r$value"] = e.nativeEvent.offsetX - state[shapeId + "$cx"];
   }
 
-  return Object.assign({}, shape, {
-    dimensions: dimensions
-  });
+  return newObj;
 }

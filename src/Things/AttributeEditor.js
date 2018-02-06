@@ -9,30 +9,27 @@ import ShapeAttributesEditor from './ShapeAttributesEditor';
 
 class AttributeEditor extends React.Component {
   render() {
-    const activeLayerId = this.props.drawing.activeLayerId;
-    const activeShapeId = this.props.drawing.activeShapeId;
-    const activeLayer = this.props.drawing.layers[activeLayerId];
-    const activeShape = activeLayer ? this.props.drawing.layers[activeLayerId][activeShapeId] : [];
+    const drawing = this.props.drawing;
+    const activeLayerId = drawing.activeLayerId;
+    const activeShapeId = drawing.activeShapeId;
 
     return (
       <div id="attributes-container">
         <div className="things-label" draggable="true">Attributes</div>
-        <OverallAttributeEditor />
-        <LayerAttributesEditor />
-        <ShapeAttributesEditor />
+        <OverallAttributeEditor/>
       </div>
     );
   }
 }
 
-// const mapStateToProps = state => {
-//   return {
-//     "overallAttributes": state["overallAttributes"],
-//     "drawing": state["drawing"]
-//   }
-// }
+const mapStateToProps = state => {
+  return {
+    "overallAttributes": state["overallAttributes"],
+    "drawing": state["drawing"]
+  }
+}
 
 
-// AttributeEditor = connect(mapStateToProps)(AttributeEditor);
+AttributeEditor = connect(mapStateToProps)(AttributeEditor);
 
 export default AttributeEditor;

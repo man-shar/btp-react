@@ -7,15 +7,14 @@ import Circle from "./Circle"
 class Layer extends React.Component {
   render() {
     const layerId = this.props.id;
-    const layer = this.props.layer
-    const shapes = layer.shapes;
-    const shapeIds = layer.shapeIds;
-    const type = layer.type;
+    const shapeIds = this.props.drawing[layerId + "$shapeIds"];
+    const type = this.props.drawing[layerId + "$type"];
+    const drawing = this.props.drawing;
 
     if (type === "rect") {
       return (
         shapeIds.map((shapeId, i) => 
-          <Rect id={shapes[shapeId].id} name={shapes[shapeId].name} key={i} dimensions={shapes[shapeId].dimensions} shape={shapes[shapeId]}/>
+          <Rect id={shapeId} key={i}/>
         )
       );
     }
@@ -23,7 +22,7 @@ class Layer extends React.Component {
     if (type === "circle") {
       return (
         shapeIds.map((shapeId, i) => 
-          <Circle id={shapes[shapeId].id} name={shapes[shapeId].name} key={i} dimensions={shapes[shapeId].dimensions} shape={shapes[shapeId]}/>
+          <Circle id={shapeId} key={i}/>
         )
       );
     }
@@ -32,7 +31,7 @@ class Layer extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    "layers": state.drawing.layers,
+    "drawing": state.drawing,
   }
 }
 

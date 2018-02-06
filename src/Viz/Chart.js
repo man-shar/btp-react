@@ -27,9 +27,10 @@ class Chart extends React.Component {
     const onMouseDown = this.props.onMouseDown;
     const onMouseMove = this.props.onMouseMove;
     const onMouseUp = this.props.onMouseUp;
-    const currentShape = this.props.currentShape;
-    const layers = this.props.layers;
-    const layerIds = Object.keys(layers);
+    const drawing = this.props.drawing;
+    const currentShape = drawing.currentShape;
+    const layerIds = drawing.layerIds;
+    const beingDrawn = drawing.beingDrawn;
 
     const backgroundStyles = {
       "fill": this.props.overallAttributes["background-fill"],
@@ -52,7 +53,7 @@ class Chart extends React.Component {
           onMouseMove={(e) => {
             e.preventDefault();
 
-            if(this.props.beingDrawn) {
+            if(beingDrawn) {
               if(this.state.throttle % 1 === 0)
               {
                 onMouseMove(e);
@@ -75,7 +76,7 @@ class Chart extends React.Component {
           <rect width={width} height={height} style={backgroundStyles}></rect>
 
           {layerIds.map((layerId, i) =>
-            <Layer key={i} layer={layers[layerId]} id={layerId} type={layers[layerId].type} dimensions={layers[layerId].dimensions}/>
+            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributes={drawing[layerId + "$attributes"]}/>
           )}
 
         </svg>
@@ -88,9 +89,7 @@ const mapStateToProps = state => {
   return {
     "size": [state.overallAttributes.width, state.overallAttributes.height],
     "overallAttributes": state.overallAttributes,
-    "currentShape": state.drawing.currentShape,
-    "layers": state.drawing.layers,
-    "beingDrawn": state.drawing.beingDrawn,
+    "drawing": state.drawing,
   }
 }
 

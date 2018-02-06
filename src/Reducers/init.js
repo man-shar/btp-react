@@ -10,7 +10,7 @@ export const initialState = {
     "currentShape": "rect",
     "activeLayerId" : "",
     "activeShapeId" : "",
-    "layers": {},
+    "layerIds": [],
   },
   "data": [],
   "file": {
