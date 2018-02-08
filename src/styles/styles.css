@@ -1,7 +1,9 @@
 body {
   margin: 0;
   padding: 0;
-  color: #3a3a3a;
+  color: #304352;
+  font-size: 12px;
+  font-family: "Lato";
 }
 
 * {
@@ -11,9 +13,9 @@ body {
 }
 
 #main-container {
-  font-size: 0;
   margin: 0 auto;
   display: flex;
+  height: 100%;
 }
 
 #chart-container, #things {
@@ -29,17 +31,21 @@ body {
 }
 
 #things {
-  font-family: "Lato";
-  min-width: 300px;
-  flex-grow: 1000; 
-  text-align: center;
-  position: relative;
-  background-color: #F5F5F5;
+  min-width: 400px;
+  max-width: 400px;
+  /* position: absolute; */
+  flex-grow: 1;
+  border-left: 0.1em solid #ddd;
+  background-color: #fff;
+  right: 0;
+  top: 0;
+  height: 100%;
+  
 }
 
 .things-label {
-  background-color: steelblue;
-  color: white;
+  background-color: #e1e0e0;
+  text-align: center;
   font-weight: bold;
   font-size: 16px;
   height: 20px;
@@ -47,7 +53,7 @@ body {
   left: 0;
   top: 0;
   box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  z-index: 1;
+  z-index: 10;
 }
 
 #data-drop-container, #attribute-container {
@@ -57,6 +63,7 @@ body {
 #data-drop-container > #data-drop-placeholder-text {
   cursor: pointer;
   opacity: 0.7;
+  text-align: center;
 }
 
 #data-drop-container > #data-drop-placeholder-text:hover {
@@ -69,10 +76,8 @@ body {
 }
 
 #data-drop-placeholder-text {
-  font-family: "Lato";
   font-size: 14px;
   font-style: italic;
-  color: #3a3a3a;
 }
 
 #attribute-container {
@@ -80,46 +85,72 @@ body {
   overflow: auto;
 }
 
-.column-drop-div, .tooltip-label > .CodeMirror{
-  display: inline-block;
-  min-width: 100px;
-  border: 0px;
-  background: #fff;
-  height: auto;
-  min-height: 25px;
-  border-bottom: 1px dashed #3a3a3a50;
-  -moz-appearance: textfield-multiline;
-  -webkit-appearance: textarea;
-  border: 1px solid gray;
-  border-radius: 2px;
-  vertical-align: middle;
-}
-
-/* #data-table-container {
-  padding: 10px;
-  font-size: 12px;
-  display: inline-block;
-} */
-
-.data-table {
-  display: table;
-}
-
-.data-table-row {
-  display: table-row;
-}
-
-.data-table-cell {
-  display: table-cell;
-  padding: 5px;
-}
-
 .column-name {
   cursor: pointer;
   color: white;
-  background-color: steelblue;
+  background-color: #e1e0e0;
   font-style: italic;
   font-weight: bold;
 }
 
-table { border-collapse: collapse; }
+.AttributeFlexRow {
+  display: flex;
+  padding: 0em 0.5em;
+  align-items: start;
+}
+
+.AttributeFlexContainer {
+  text-align: left;
+  padding: 0.2em 0.5em;
+  padding: 1em;
+}
+
+.AttributeFlexName {
+  width: 10em;
+  display: flex;
+  background-color: #e1e0e0;
+  border-radius: 10px;
+  padding: 0.2em 0.5em;
+  margin-right: 1em;
+  cursor: -webkit-grab;
+  cursor:-moz-grab;
+}
+
+.AttributeFlexName:active { 
+  cursor: -webkit-grabbing;
+  cursor:-moz-grabbing;
+}
+
+.AttributeFlexExpression {
+  flex-grow: 1;
+}
+
+.AttributeFlexExpressionEditable {
+  padding: 0.2em 0.5em;
+}
+
+.AttributeFlexValue {
+  padding: 0.2em 0.5em;
+  color: #aaa;
+}
+
+.CodeMirror {
+  height: intrinsic;           /* Safari/WebKit uses a non-standard name */
+  height: -moz-max-content;    /* Firefox/Gecko */
+  height: -webkit-max-content; /* Chrome */
+}
+
+ .AttributesSection {
+  font-size: 1.2em;
+  color: #aaa;
+  margin: 0.5em 0.5em;
+}
+
+.EditableTextAttributeFlexName {
+  display: inline-block;
+  cursor: text;
+}
+
+[contenteditable]:focus {
+    outline: 0px solid transparent;
+}

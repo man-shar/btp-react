@@ -6,6 +6,9 @@ import logger from "redux-logger";
 import thunkMiddleware from "redux-thunk";
 import manageActions from "./Reducers/reducer";
 import { startDrag } from "./Actions/actions";
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import 'codemirror/lib/codemirror.css'
 import "./styles/styles.css";
 import "./styles/shapeStyles.css";
 
@@ -20,13 +23,15 @@ import Viz from "./Viz/Viz";
 class App extends React.Component {
   render() {
     return (
-      <div id="main-container">
-        <Viz />
-        <Things />
-      </div>
+        <div id="main-container">
+          <Viz />
+          <Things />
+        </div>
     );
   }
 }
+
+App = DragDropContext(HTML5Backend)(App)
 
 render(
   <Provider store={store}>

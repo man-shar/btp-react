@@ -5,10 +5,11 @@ import ShapeUtil from "../Util/ShapeUtil";
 
 class Circle extends React.Component {
   render() {
-    const [allShapeAttributes, foundInShape] = ShapeUtil.getAllShapeAttributeValues(
+    const [allShapeAttributes, foundInShape] = ShapeUtil.getAllShapeAttributesProperty(
       this.props.id,
       this.props.layerId,
       this.props.drawing,
+      "value"
     );
     const shapeId = this.props.id;
     const index = this.props.index;

@@ -5,6 +5,9 @@ export const END_DRAG_DRAW = "end-drag-draw";
 export const TOGGLE_CURRENT_SHAPE = "toggle-current-shape"
 export const READ_FILE = "read-file";
 export const FILE_LOADED_AND_PARSED = "file-loaded-and-parsed";
+export const CHANGE_ATTRIBUTE_EXPRESSION_STRING = "change-attribute-expression-string";
+export const ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE = "add-attribute-reference-to-attribute";
+
 
 export function startDragDraw(e) {
   const action = {
@@ -76,4 +79,31 @@ export function readFile(file) {
 
     reader.readAsText(file);
   }
+}
+
+export function changeAttributeExpressionString(attributeId, newExprString) {
+  const action = {
+    type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
+    attributeId: attributeId,
+    newExprString: newExprString
+  };
+  return action;
+}
+
+export function addAttributeReferenceToAttribute(attributeId, droppedAttributeMonitorItem) {
+  console.log(attributeId, droppedAttributeMonitorItem);
+
+  const droppedAttributeId = droppedAttributeMonitorItem.attributeId;
+  const droppedShapeOrLayerId = droppedAttributeMonitorItem.shapeOrLayerId;
+  const droppedShapeOrLayer = droppedAttributeMonitorItem.shapeOrLayer;
+
+  const action = {
+    type: ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
+    attributeId: attributeId,
+    droppedAttributeId: droppedAttributeId,
+    droppedShapeOrLayerId: droppedShapeOrLayerId,
+    droppedShapeOrLayer: droppedShapeOrLayer
+  };
+
+  return action;
 }

@@ -2,26 +2,26 @@ import {
   START_DRAG_DRAW,
   UPDATE_DRAG_DRAW,
   END_DRAG_DRAW,
-  TOGGLE_CURRENT_SHAPE
+  TOGGLE_CURRENT_SHAPE,
+  CHANGE_ATTRIBUTE_EXPRESSION_STRING
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState, keyToShape } from "./init.js";
-import cloneDeep from "lodash.clonedeep";
 
 export function manageDrawingActions(state = initialState["drawing"], action) {
   switch (action.type) {
     case START_DRAG_DRAW:
       let layerIds = state.layerIds.slice(),
-        layerCount = layerIds.length,
-        currentShape = state.currentShape,
-        newObj = {},
-        newLayerName = "",
-        newLayerId = "",
-        shapeIds = [],
-        shapeCount = 0,
-        newShapeName = "",
-        newShapeId = "",
-        newLayer;
+          layerCount = layerIds.length,
+          currentShape = state.currentShape,
+          newObj = {},
+          newLayerName = "",
+          newLayerId = "",
+          shapeIds = [],
+          shapeCount = 0,
+          newShapeName = "",
+          newShapeId = "",
+          newLayer;
 
       // startDragDrawShape returns a layer. A shape is not initialised with any attributes. It takes it's attributes from the layer.
       newLayer = ShapeUtil.startDragDrawShape(currentShape, action.e);
@@ -97,9 +97,14 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       return Object.assign({}, state, {
         currentShape:
           keyToShape[action.newShape] === undefined
-            ? keyToShape["r"]
+            ? state.currentShape
             : keyToShape[action.newShape]
       });
+
+    case CHANGE_ATTRIBUTE_EXPRESSION_STRING:
+      let newObj2 = {};
+      newObj2[action.attrId + "$exprString"] = action.newExprString;
+      return Object.assign({}, state, newObj2);
 
     default:
       return state;

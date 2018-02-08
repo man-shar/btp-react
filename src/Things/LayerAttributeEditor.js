@@ -20,9 +20,22 @@ class LayerAttributeEditor extends React.Component {
     if(attributeList)
     {
       return (
-        <div className="AttributeFlexContainer" layerId={layerId} containsAttributesFor="layer">
-          {attributeList.map((attr, i) =>
-            (<AttributeFlexRow attribute={attr} key={i} attributeId={layerId + "$" + attr} type="layer"/>)
+        <div className="AttributeFlexContainer">
+          {attributeList.map((attribute, i) =>
+            {
+              const attributeName = allLayerAttributesEverything[layerId + "$" + attribute + "$name"];
+              const attributeValue = allLayerAttributesEverything[layerId + "$" + attribute + "$value"];
+              const attributeExprString = allLayerAttributesEverything[layerId + "$" + attribute + "$exprString"];
+              return (<AttributeFlexRow
+                  key={i}
+                  attributeId={layerId + "$" + attribute}
+                  attributeName={attributeName}
+                  attributeValue={attributeValue}
+                  attributeExprString={attributeExprString}
+                  shapeOrLayerId={layerId}
+                  shapeOrLayer="layer"
+                />)
+            }
           )}
         </div>
       );

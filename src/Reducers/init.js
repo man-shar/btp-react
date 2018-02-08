@@ -3,7 +3,7 @@ export const initialState = {
     "width": 900,
     "height": 600,
     "background-fill": "#fff",
-    "border": "#3a3a3a"
+    "border": "#f5f5f5"
   },
   "drawing": {
     "beingDrawn": false,
