@@ -49,7 +49,7 @@ class AttributeFlexExpressionEditable extends React.Component {
       return;
     }
 
-    this.props.onAttributeReferenceDrop(attributeId, monitor.getItem());
+    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem());
   }
 
   render() {
@@ -96,8 +96,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(changeAttributeExpressionString(attributeId, newExprString));
       console.log(attributeId, newExprString)
     },
-    onAttributeReferenceDrop: (attributeId, droppedAttributeMonitorItem) => {
-      dispatch(addAttributeReferenceToAttribute(attributeId, droppedAttributeMonitorItem));
+    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem) => {
+      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem));
     }
   }
 }

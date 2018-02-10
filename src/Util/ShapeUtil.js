@@ -2,10 +2,10 @@ const ShapeUtil = {};
 
 // initializes layer and a shape.
 ShapeUtil.startDragDrawShape = function(shape, e) {
-  let attributeList;
+  let dimensionList;
 
   if (shape === "rect") {
-    attributeList = {
+    dimensionList = {
       x$value: e.nativeEvent.offsetX,
       y$value: e.nativeEvent.offsetY,
       width$value: 0,
@@ -23,7 +23,7 @@ ShapeUtil.startDragDrawShape = function(shape, e) {
   }
 
   if (shape === "circle") {
-    attributeList = {
+    dimensionList = {
       cx$value: e.nativeEvent.offsetX,
       cy$value: e.nativeEvent.offsetY,
       r$value: 0,
@@ -39,17 +39,12 @@ ShapeUtil.startDragDrawShape = function(shape, e) {
 
   return {
     type: shape,
-    attributeList: attributeList
+    dimensionList: dimensionList
   };
 };
 
 // update shape being draw drawn
-ShapeUtil.updateDragDrawShape = function(
-  activeShapeId,
-  activeLayerId,
-  state,
-  e
-) {
+ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e) {
   let type = state[activeLayerId + "$type"];
   let newObj = {};
 
@@ -68,89 +63,348 @@ ShapeUtil.updateDragDrawShape = function(
   return newObj;
 };
 
-// get **property**: value, name or expressionString from all attributes of a shape by first looking in the shape, then the layer.
-ShapeUtil.getAllLayerAttributesProperty = function(layerId, drawing, property) {
-  // if no layer is formed yet/some random error
-  if (!layerId) return;
+// A lot of these functions are redundant or repetitive. But I like to have them just in case.
 
-  const attributeList = drawing[layerId + "$attributeList"].slice();
+// ################################################
+// Shape functions
+// ################################################
 
-  const allLayerAttributes = attributeList.reduce((acc, attribute) => {
-    acc[layerId + "$" + attribute + "$" + property] = drawing[layerId + "$" + attribute + "$" + property];
+// get a particular dimension property from a shape. returns just the property of the dimension, not an object.
+ShapeUtil.getShapeDimensionProperty = function(dimension, shapeId, layerId, drawing, overallAttributes, property) {
+  // check if this dimension is defined in the shape.
+  if(drawing[shapeId + "$" + dimension + "$" + property])
+    return drawing[shapeId + "$" + dimension + "$" + property];
 
-    return acc;
-  }, {});
+  // otherwise check in layer.
+  return getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, property)
+}
 
-  return allLayerAttributes;
+// get a particular style property from a shape. returns just the property of the style, not an object.
+ShapeUtil.getShapeStyleProperty = function(style, shapeId, layerId, drawing, overallAttributes, property) {
+  // check if this style is defined in the shape.
+  if(drawing[shapeId + "$" + style + "$" + property])
+    return drawing[shapeId + "$" + style + "$" + property];
+
+  // otherwise check in layer.
+  return getLayerStyleProperty(style, layerId, drawing, overallAttributes, property)
+}
+
+// get all own dimension **property**: value, name or expressionString from a shape.
+ShapeUtil.getAllShapeOwnDimensionsProperty = function(shapeId, layerId, drawing, property) {
+  let allShapeOwnDimensions = {}
+
+  const ownDimensionList = drawing[shapeId + "$ownDimensionList"].slice();
+
+  ownDimensionList.forEach((dimension) => {
+    allShapeOwnDimensions[dimension] = drawing[shapeId + "$" + dimension + "$" + property];
+  });
+
+  return allShapeOwnDimensions;
 };
 
-// get all the attributes' value, expression string and name from a layer.
-ShapeUtil.getAllLayerAttributesEverything = function(layerId, drawing) {
-  // if no layer is formed yet/some random error
-  if (!layerId) return;
+// get all inherited dimension **property**: value, name or expressionString from a shape. Basically call getOwnDimensionProperty of 
+ShapeUtil.getAllShapeInheritedDimensionsProperty = function(shapeId, layerId, drawing, overallAttributes, property) {
+  const self = this;
+  let allShapeInheritedDimensions = {}
 
-  const attributeList = drawing[layerId + "$attributeList"].slice();
+  const inheritedDimensionList = drawing[shapeId + "$inheritedDimensionList"].slice();
 
-  const allLayerAttributes = attributeList.reduce((acc, attribute) => {
-    acc[layerId + "$" + attribute + "$value"] = drawing[layerId + "$" + attribute + "$value"];
-    acc[layerId + "$" + attribute + "$name"] = drawing[layerId + "$" + attribute + "$name"];
-    acc[layerId + "$" + attribute + "$exprString"] = drawing[layerId + "$" + attribute + "$exprString"];
+  inheritedDimensionList.forEach((dimension) => {
+    // this dimension can either be an own prop of the containing layer or maybe an prop inherited by the layer as well.
+    allShapeInheritedDimensions[dimension] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, property);
+  });
 
-    return acc;
-  }, {});
-
-  return allLayerAttributes;
+  return allShapeInheritedDimensions;
 };
 
-// get specific attribute **property**: value, name or expressionString from a shape by first looking in the shape, then the layer.
-ShapeUtil.getAllShapeAttributesProperty = function(shapeId, layerId, drawing, property) {
-  const attributeList = drawing[shapeId + "$attributeList"];
-  let foundInShape;
+// get all own dimension **property**: value, name or expressionString from a shape.
+ShapeUtil.getAllShapeOwnStylesProperty = function(shapeId, layerId, drawing, property) {
+  let allShapeOwnStyles = {}
 
-  const allShapeAttributes = attributeList.reduce((acc, attribute) => {
-    // look if this shape has this defined
-    if (drawing[shapeId + "$" + attribute + "$" + property]) {
-      // add it to accumulator
-      acc[attribute] = drawing[layerId + "$" + attribute + "$" + property];
-      foundInShape = true;
-    } else {
-      // else check in layer
-      acc[attribute] = drawing[layerId + "$" + attribute + "$" + property];
-      foundInShape = false;
-    }
-    return acc;
-  }, {});
+  const ownStyleList = drawing[shapeId + "$ownStyleList"].slice();
 
-  return [allShapeAttributes, foundInShape];
+  ownStyleList.forEach((style) => {
+    allShapeOwnStyles[style] = drawing[shapeId + "$" + style + "$" + property];
+  });
+
+  return allShapeOwnStyles;
 };
 
-ShapeUtil.getAllShapeAttributesEverything = function(shapeId, layerId, drawing) {
+// get all inherited Style **property**: value, name or expressionString from a shape. Basically call getOwnStyleProperty of 
+ShapeUtil.getAllShapeInheritedStylesProperty = function(shapeId, layerId, drawing, overallAttributes, property) {
+  const self = this;
+  let allShapeInheritedStyles = {}
+
+  const inheritedStyleList = drawing[shapeId + "$inheritedStyleList"].slice();
+
+  inheritedStyleList.forEach((style) => {
+    // this style can either be an own prop of the containing layer or maybe an prop inherited by the layer as well. so call a function to check that and return appropriately.
+    allShapeInheritedStyles[style] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, property);
+  });
+
+  return allShapeInheritedStyles;
+};
+
+// get all properties of all own dimensions of a shape
+ShapeUtil.getAllShapeOwnDimensionsAllProperties = function(shapeId, layerId, drawing, overallAttributes) {
+  const self = this;
+
   if (!shapeId) return;
 
-  const attributeList = drawing[shapeId + "$attributeList"];
-  let foundInShape;
+  let ownDimensionsAllProperties = {};
 
-  const allShapeAttributes = attributeList.reduce((acc, attribute) => {
-    // look if this shape has this defined
-    if (drawing[shapeId + "$" + attribute + "$value"]) {
-      // add it to accumulator
-      acc[shapeId + "$" + attribute + "$value"] = drawing[shapeId + "$" + attribute + "$value"];
-      acc[shapeId + "$" + attribute + "$name"] = drawing[shapeId + "$" + attribute + "$name"];
-      acc[shapeId + "$" + attribute + "$exprString"] = drawing[shapeId + "$" + attribute + "$exprString"];
-    } else {
-      // else check in layer
-      acc[shapeId + "$" + attribute + "$value"] = drawing[layerId + "$" + attribute + "$value"];
-      acc[shapeId + "$" + attribute + "$name"] = drawing[layerId + "$" + attribute + "$name"];
-      acc[shapeId + "$" + attribute + "$exprString"] = drawing[layerId + "$" + attribute + "$exprString"];
-    }
-    return acc;
-  }, {});
+  const ownDimensionList = drawing[shapeId + "$ownDimensionList"].slice();
 
-  return allShapeAttributes;
+  ownDimensionList.forEach((dimension) => {
+    ownDimensionsAllProperties[dimension + "$" + "value"] = self.getShapeDimensionProperty(dimension, shapeId, layerId, drawing, overallAttributes, "value")
+    ownDimensionsAllProperties[dimension + "$" + "name"] = self.getShapeDimensionProperty(dimension, shapeId, layerId, drawing, overallAttributes, "name")
+    ownDimensionsAllProperties[dimension + "$" + "exprString"] = self.getShapeDimensionProperty(dimension, shapeId, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return ownDimensionsAllProperties;
 };
+
+// get all properties of all inherited dimensions of a shape
+ShapeUtil.getAllShapeInheritedDimensionsAllProperties = function(shapeId, layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!shapeId) return;
+
+  let inheritedDimensionsAllProperties = {};
+
+  const inheritedDimensionList = drawing[shapeId + "$inheritedDimensionList"].slice();
+
+  inheritedDimensionList.forEach((dimension) => {
+    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "value")
+    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "name")
+    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return inheritedDimensionsAllProperties;
+};
+
+// get all properties of all own styles of a shape
+ShapeUtil.getAllShapeOwnStylesAllProperties = function(shapeId, layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!shapeId) return;
+
+  let ownStylesAllProperties = {};
+
+  const ownStyleList = drawing[shapeId + "$ownStyleList"].slice();
+
+  ownStyleList.forEach((style) => {
+    ownStylesAllProperties[style + "$" + "value"] = self.getShapeStyleProperty(style, shapeId, layerId, drawing, overallAttributes, "value")
+    ownStylesAllProperties[style + "$" + "name"] = self.getShapeStyleProperty(style, shapeId, layerId, drawing, overallAttributes, "name")
+    ownStylesAllProperties[style + "$" + "exprString"] = self.getShapeStyleProperty(style, shapeId, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return ownStylesAllProperties;
+};
+
+// get all properties of all inherited styles of a shape
+ShapeUtil.getAllShapeInheritedStylesAllProperties = function(shapeId, layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!shapeId) return;
+
+  let inheritedStylesAllProperties = {};
+
+  const inheritedStyleList = drawing[shapeId + "$inheritedStyleList"].slice();
+
+  inheritedStyleList.forEach((style) => {
+    inheritedStylesAllProperties[style + "$" + "value"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "value")
+    inheritedStylesAllProperties[style + "$" + "name"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "name")
+    inheritedStylesAllProperties[style + "$" + "exprString"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return inheritedStylesAllProperties;
+};
+
+
+
+// ################################################
+// Layer functions
+// ################################################
+
+// get a particular dimension property from a layer. returns just the property of the dimension, not an object.
+ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, overallAttributes, property) {
+  // check if this dimension is defined in the layer.
+  if(drawing[layerId + "$" + dimension + "$" + property])
+    return drawing[layerId + "$" + dimension + "$" + property];
+
+  // otherwise return from overallAttributes
+  return overallAttributes[dimension + "$" + property];
+}
+
+// get a particular style property from a layer. returns just the property of the style, not an object.
+ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, overallAttributes, property) {
+  // check if this style is defined in the layer.
+  if(drawing[layerId + "$" + style + "$" + property])
+    return drawing[layerId + "$" + style + "$" + property];
+
+  // otherwise return from overallAttributes
+  return overallAttributes[style + "$" + property];
+}
+
+// get all own dimension **property**: value, name or expressionString from a shape.
+ShapeUtil.getAllLayerOwnDimensionsProperty = function(layerId, drawing, property) {
+  let allLayerOwnDimensions = {}
+
+  const ownDimensionList = drawing[layerId + "$ownDimensionList"].slice();
+
+  ownDimensionList.forEach((dimension) => {
+    allLayerOwnDimensions[dimension] = drawing[layerId + "$" + dimension + "$" + property];
+  });
+
+  return allLayerOwnDimensions;
+};
+
+// get all inherited dimension **property**: value, name or expressionString from a shape. Basically call getOwnDimensionProperty of 
+ShapeUtil.getAllLayerInheritedDimensionsProperty = function(layerId, drawing, overallAttributes, property) {
+  const self = this;
+  let allLayerInheritedDimensions = {}
+
+  const inheritedDimensionList = drawing[layerId + "$inheritedDimensionList"].slice();
+
+  inheritedDimensionList.forEach((dimension) => {
+    // get from overAllAttributes
+    allLayerInheritedDimensions[dimension] = overallAttributes[dimension + "$" + property];
+  });
+
+  return allLayerInheritedDimensions;
+};
+
+// get all own dimension **property**: value, name or expressionString from a shape.
+ShapeUtil.getAllLayerOwnStylesProperty = function(layerId, drawing, property) {
+  let allLayerOwnStyles = {}
+
+  const ownStyleList = drawing[layerId + "$ownStyleList"].slice();
+
+  ownStyleList.forEach((style) => {
+    allLayerOwnStyles[style] = drawing[layerId + "$" + style + "$" + property];
+  });
+
+  return allLayerOwnStyles;
+};
+
+// get all inherited Style **property**: value, name or expressionString from a shape. Basically call getOwnStyleProperty of 
+ShapeUtil.getAllLayerInheritedStylesProperty = function(layerId, drawing, overallAttributes, property) {
+  const self = this;
+  let allLayerInheritedStyles = {}
+
+  const inheritedStyleList = drawing[layerId + "$inheritedStyleList"].slice();
+
+  inheritedStyleList.forEach((style) => {
+    // get from overAllAttributes
+    allLayerInheritedStyles[style] = overallAttributes[style + "$" + property];
+  });
+
+  return allLayerInheritedStyles;
+};
+
+// get all properties of all own dimensions of a layer
+ShapeUtil.getAllLayerOwnDimensionsAllProperties = function(layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!layerId) return;
+
+  let ownDimensionsAllProperties = {};
+
+  const ownDimensionList = drawing[layerId + "$ownDimensionList"].slice();
+
+  ownDimensionList.forEach((dimension) => {
+    ownDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "value")
+    ownDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "name")
+    ownDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return ownDimensionsAllProperties;
+};
+
+// get all properties of all own dimensions of a layer
+ShapeUtil.getAllLayerInheritedDimensionsAllProperties = function(layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!layerId) return;
+
+  let inheritedDimensionsAllProperties = {};
+
+  const inheritedDimensionList = drawing[layerId + "$inheritedDimensionList"].slice();
+
+  inheritedDimensionList.forEach((dimension) => {
+    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "value")
+    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "name")
+    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return inheritedDimensionsAllProperties;
+};
+
+// get all properties of all own styles of a shape
+ShapeUtil.getAllLayerOwnStylesAllProperties = function(layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!layerId) return;
+
+  let ownStylesAllProperties = {};
+
+  const ownStyleList = drawing[layerId + "$ownStyleList"].slice();
+
+  ownStyleList.forEach((style) => {
+    ownStylesAllProperties[style + "$" + "value"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "value")
+    ownStylesAllProperties[style + "$" + "name"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "name")
+    ownStylesAllProperties[style + "$" + "exprString"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return ownStylesAllProperties;
+};
+
+// get all properties of all inherited styles of a shape
+ShapeUtil.getAllLayerInheritedStylesAllProperties = function(layerId, drawing, overallAttributes) {
+  const self = this;
+
+  if (!layerId) return;
+
+  let inheritedStylesAllProperties = {};
+
+  const inheritedStyleList = drawing[layerId + "$inheritedStyleList"].slice();
+
+  inheritedStyleList.forEach((style) => {
+    inheritedStylesAllProperties[style + "$" + "value"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "value")
+    inheritedStylesAllProperties[style + "$" + "name"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "name")
+    inheritedStylesAllProperties[style + "$" + "exprString"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "exprString")
+  });  
+
+  return inheritedStylesAllProperties;
+};
+
+
+
+// ################################################
+// reference attribute functions
+// ################################################
 
 // Object to store when an attribute references other attributes.
 ShapeUtil.referenceAttributes = {};
 
+ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId, droppedAttributeMonitorItem) {
+  const self = this;
+
+  console.log(attributeId, droppedAttributeMonitorItem)
+  // create a new object in ShapeUtil's referenceAttributes object for current attribute if not present already
+  if(!self.referenceAttributes[attributeId])
+  {
+    self.referenceAttributes[attributeId] = {};
+    // javascript set to store unique values.
+    self.referenceAttributes[attributeId]["referredAttributesIdList"] = new Set();
+  }
+
+  self.referenceAttributes[attributeId]["referredAttributesIdList"].add(droppedAttributeMonitorItem["attributeId"]);
+
+  console.log(self.referenceAttributes);
+}
+
 export default ShapeUtil;
+
 

@@ -5,12 +5,42 @@ import ShapeUtil from "../Util/ShapeUtil";
 
 class Circle extends React.Component {
   render() {
-    const [allShapeAttributes, foundInShape] = ShapeUtil.getAllShapeAttributesProperty(
+    // get own dimensions
+    const ownShapeDimensions = ShapeUtil.getAllShapeOwnDimensionsProperty(
       this.props.id,
       this.props.layerId,
       this.props.drawing,
+      this.props.overallAttributes,
       "value"
     );
+
+    // get inherited dimensions
+    const inheritedShapeDimensions = ShapeUtil.getAllShapeInheritedDimensionsProperty(
+      this.props.id,
+      this.props.layerId,
+      this.props.drawing,
+      this.props.overallAttributes,
+      "value"
+    );
+
+    // get own styles
+    const ownShapeStyles = ShapeUtil.getAllShapeOwnStylesProperty(
+      this.props.id,
+      this.props.layerId,
+      this.props.drawing,
+      this.props.overallAttributes,
+      "value"
+    );
+
+    // get inherited styles
+    const inheritedShapeStyles = ShapeUtil.getAllShapeInheritedStylesProperty(
+      this.props.id,
+      this.props.layerId,
+      this.props.drawing,
+      this.props.overallAttributes,
+      "value"
+    );
+
     const shapeId = this.props.id;
     const index = this.props.index;
 
@@ -19,7 +49,8 @@ class Circle extends React.Component {
         id={shapeId}
         index={index}
         name={this.props.drawing[shapeId + "$name"]}
-        {...allShapeAttributes}
+        {...ownShapeDimensions}
+        {...inheritedShapeDimensions}
       />
     );
   }
@@ -27,7 +58,8 @@ class Circle extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    drawing: state.drawing
+    drawing: state.drawing,
+    overallAttributes: state.overallAttributes
   };
 };
 

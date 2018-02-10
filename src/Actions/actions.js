@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import ShapeUtil from "../Util/ShapeUtil"
 export const START_DRAG_DRAW = "start-drag-draw";
 export const UPDATE_DRAG_DRAW = "update-drag-draw";
 export const END_DRAG_DRAW = "end-drag-draw";
@@ -90,19 +91,13 @@ export function changeAttributeExpressionString(attributeId, newExprString) {
   return action;
 }
 
-export function addAttributeReferenceToAttribute(attributeId, droppedAttributeMonitorItem) {
-  console.log(attributeId, droppedAttributeMonitorItem);
-
-  const droppedAttributeId = droppedAttributeMonitorItem.attributeId;
-  const droppedShapeOrLayerId = droppedAttributeMonitorItem.shapeOrLayerId;
-  const droppedShapeOrLayer = droppedAttributeMonitorItem.shapeOrLayer;
+export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {
+  ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
 
   const action = {
     type: ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
     attributeId: attributeId,
-    droppedAttributeId: droppedAttributeId,
-    droppedShapeOrLayerId: droppedShapeOrLayerId,
-    droppedShapeOrLayer: droppedShapeOrLayer
+    droppedAttributeMonitorItem: droppedAttributeMonitorItem
   };
 
   return action;

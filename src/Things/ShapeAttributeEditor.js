@@ -11,30 +11,110 @@ class ShapeAttributeEditor extends React.Component {
   render() {
     const shapeId = this.props.shapeId;
     const layerId = this.props.layerId;
-    const attributeList = this.props.drawing[shapeId + "$attributeList"];
+    const ownDimensionList = this.props.drawing[shapeId + "$ownDimensionList"];
+    const inheritedDimensionList = this.props.drawing[shapeId + "$inheritedDimensionList"];
+    const ownStyleList = this.props.drawing[shapeId + "$ownStyleList"];
+    const inheritedStyleList = this.props.drawing[shapeId + "$inheritedStyleList"];
 
-    const allShapeAttributesEverything = ShapeUtil.getAllShapeAttributesEverything(
+    const ownShapeDimensionsAllProperties = ShapeUtil.getAllShapeOwnDimensionsAllProperties(
       shapeId,
       layerId,
-      this.props.drawing
+      this.props.drawing,
+      this.props.overallAttributes
     );
 
-    if(attributeList)
+    const inheritedShapeDimensionsAllProperties = ShapeUtil.getAllShapeInheritedDimensionsAllProperties(
+      shapeId,
+      layerId,
+      this.props.drawing,
+      this.props.overallAttributes
+    );
+
+    const ownShapeStylesAllProperties = ShapeUtil.getAllShapeOwnStylesAllProperties(
+      shapeId,
+      layerId,
+      this.props.drawing,
+      this.props.overallAttributes
+    );
+
+    const inheritedShapeStylesAllProperties = ShapeUtil.getAllShapeInheritedStylesAllProperties(
+      shapeId,
+      layerId,
+      this.props.drawing,
+      this.props.overallAttributes
+    );
+
+
+    if(shapeId)
     {
       return (
         <div className="AttributeFlexContainer">
-          {attributeList.map((attribute, i) =>
+          {ownDimensionList.map((attribute, i) =>
             {
-              const attributeName = allShapeAttributesEverything[shapeId + "$" + attribute + "$name"];
-              const attributeValue = allShapeAttributesEverything[shapeId + "$" + attribute + "$value"];
-              const attributeExprString = allShapeAttributesEverything[shapeId + "$" + attribute + "$exprString"];
+              const attributeName = ownShapeDimensionsAllProperties[attribute + "$name"];
+              const attributeValue = ownShapeDimensionsAllProperties[attribute + "$value"];
+              const attributeExprString = ownShapeDimensionsAllProperties[attribute + "$exprString"];
+              
               return (<AttributeFlexRow
                   key={i}
                   attributeId={shapeId + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={layerId}
+                  shapeOrLayerId={shapeId}
+                  shapeOrLayer="shape"
+                />)
+            }
+          )}
+          {inheritedDimensionList.map((attribute, i) =>
+            {
+              const attributeName = inheritedShapeDimensionsAllProperties[attribute + "$name"];
+              const attributeValue = inheritedShapeDimensionsAllProperties[attribute + "$value"];
+              const attributeExprString = inheritedShapeDimensionsAllProperties[attribute + "$exprString"];
+
+              console.log(attributeName, attributeValue, attributeExprString)
+              
+              return (<AttributeFlexRow
+                  key={i}
+                  attributeId={shapeId + "$" + attribute}
+                  attributeName={attributeName}
+                  attributeValue={attributeValue}
+                  attributeExprString={attributeExprString}
+                  shapeOrLayerId={shapeId}
+                  shapeOrLayer="shape"
+                />)
+            }
+          )}
+          {ownStyleList.map((attribute, i) =>
+            {
+              const attributeName = ownShapeStylesAllProperties[attribute + "$name"];
+              const attributeValue = ownShapeStylesAllProperties[attribute + "$value"];
+              const attributeExprString = ownShapeStylesAllProperties[attribute + "$exprString"];
+              
+              return (<AttributeFlexRow
+                  key={i}
+                  attributeId={shapeId + "$" + attribute}
+                  attributeName={attributeName}
+                  attributeValue={attributeValue}
+                  attributeExprString={attributeExprString}
+                  shapeOrLayerId={shapeId}
+                  shapeOrLayer="shape"
+                />)
+            }
+          )}
+          {inheritedStyleList.map((attribute, i) =>
+            {
+              const attributeName = inheritedShapeStylesAllProperties[attribute + "$name"];
+              const attributeValue = inheritedShapeStylesAllProperties[attribute + "$value"];
+              const attributeExprString = inheritedShapeStylesAllProperties[attribute + "$exprString"];
+              
+              return (<AttributeFlexRow
+                  key={i}
+                  attributeId={shapeId + "$" + attribute}
+                  attributeName={attributeName}
+                  attributeValue={attributeValue}
+                  attributeExprString={attributeExprString}
+                  shapeOrLayerId={shapeId}
                   shapeOrLayer="shape"
                 />)
             }
@@ -51,7 +131,8 @@ class ShapeAttributeEditor extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    drawing: state.drawing
+    drawing: state.drawing,
+    overallAttributes: state.overallAttributes
   };
 };
 
