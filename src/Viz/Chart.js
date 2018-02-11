@@ -106,6 +106,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(endDragDraw(e));
     },
     onKeyDown: (e) => {
+      // TODO dispatch action only when svg in focus.
       if(ShapeUtil.knownKeys.indexOf(e.key) > -1)
         dispatch(toggleCurrentShape(e.key));
     }
