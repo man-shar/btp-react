@@ -3,6 +3,8 @@ import { render } from 'react-dom';
 import ShapeUtil from "../Util/ShapeUtil";
 import { DragSource } from 'react-dnd';
 import ItemTypesDnd from "./ItemTypesDnd";
+import { connect } from 'react-redux';
+import { updateHoveredAttribute } from '../Actions/actions';
 
 /**
  * Implements the drag source contract.
@@ -32,12 +34,24 @@ function collect(connect, monitor) {
 // render editable attribute name
 class AttributeFlexName extends React.Component {
   render() {
-    const { isDragging, connectDragSource, attributeName, attributeId, shapeOrLayer, shapeOrLayerId } = this.props;
+    const { isDragging, connectDragSource, attributeName, attributeId, shapeOrLayer, shapeOrLayerId, hoveredAttributeId } = this.props;
+
+    const updateHoveredAttribute = this.props.updateHoveredAttribute.bind(this);
 
     // have to wrap span in div to allow for drag events to happen with contenteditable;
 
+    const className = "AttributeFlexName" + ((attributeId === hoveredAttributeId) ? " isHovered" : "");
+
     return connectDragSource(
-      <div className="AttributeFlexName">
+      <div
+        className={className}
+        onMouseOver={(e) => {
+          updateHoveredAttribute(attributeId);
+        }}
+        onMouseOut={(e) => {
+          updateHoveredAttribute("");
+        }}
+        >
         <div className="EditableTextAttributeFlexName" contentEditable="true">
           <span>{attributeName}</span>
         </div>
@@ -46,4 +60,18 @@ class AttributeFlexName extends React.Component {
   }
 }
 
-export default DragSource(ItemTypesDnd.ATTRIBUTE, attributeSource, collect)(AttributeFlexName);
+const mapStateToProps = (state) => {
+  return {
+    hoveredAttributeId: state.drawing.hoveredAttributeId
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateHoveredAttribute: (hoveredAttributeId) => {
+      dispatch(updateHoveredAttribute(hoveredAttributeId));
+    }
+  }
+};
+
+export default DragSource(ItemTypesDnd.ATTRIBUTE, attributeSource, collect)(connect(mapStateToProps, mapDispatchToProps)(AttributeFlexName));

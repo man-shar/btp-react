@@ -72,11 +72,12 @@ class ShapeAttributeEditor extends React.Component {
                 const attributeName = inheritedShapeDimensionsAllProperties[attribute + "$name"];
                 const attributeValue = inheritedShapeDimensionsAllProperties[attribute + "$value"];
                 const attributeExprString = inheritedShapeDimensionsAllProperties[attribute + "$exprString"];
+                const inheritedFrom = inheritedShapeDimensionsAllProperties[attribute + "$inheritedFrom"];
                 
                 return (
                   <AttributeFlexRow
                       key={i}
-                      attributeId={layerId + "$" + attribute}
+                      attributeId={inheritedFrom + "$" + attribute}
                       attributeName={attributeName}
                       attributeValue={attributeValue}
                       attributeExprString={attributeExprString}
@@ -112,11 +113,12 @@ class ShapeAttributeEditor extends React.Component {
                 const attributeName = inheritedShapeStylesAllProperties[attribute + "$name"];
                 const attributeValue = inheritedShapeStylesAllProperties[attribute + "$value"];
                 const attributeExprString = inheritedShapeStylesAllProperties[attribute + "$exprString"];
+                const inheritedFrom = inheritedShapeStylesAllProperties[attribute + "$inheritedFrom"];
                 
                 return (
                   <AttributeFlexRow
                     key={i}
-                    attributeId={layerId + "$" + attribute}
+                    attributeId={inheritedFrom + "$" + attribute}
                     attributeName={attributeName}
                     attributeValue={attributeValue}
                     attributeExprString={attributeExprString}

@@ -4,7 +4,8 @@ import {
   END_DRAG_DRAW,
   TOGGLE_CURRENT_SHAPE,
   CHANGE_ATTRIBUTE_EXPRESSION_STRING,
-  ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE
+  ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
+  UPDATE_HOVERED_ATTRIBUTE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState } from "./init.js";
@@ -68,7 +69,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newLayerId + "$ownDimensionList"] = newLayer.dimensionList.list.slice();
       newObj[newLayerId + "$inheritedDimensionList"] = [];
       newObj[newLayerId + "$ownStyleList"] = [];
-      newObj[newLayerId + "$inheritedStyleList"] = [];
+      newObj[newLayerId + "$inheritedStyleList"] = action.allState.overallAttributes.styleList.slice();
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;
@@ -79,7 +80,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newShapeId + "$inheritedDimensionList"] = newLayer.dimensionList.list.slice();
       newObj[newShapeId + "$ownDimensionList"] = [];
       newObj[newShapeId + "$ownStyleList"] = [];
-      newObj[newShapeId + "$inheritedStyleList"] = [];
+      newObj[newShapeId + "$inheritedStyleList"] = action.allState.overallAttributes.styleList.slice();
 
       newObj[newLayerId + "$ownDimensionList"].forEach(attr => {
         newObj[newLayerId + "$" + attr + "$value"] = newLayer["dimensionList"][attr + "$value"];
@@ -131,6 +132,11 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
       ShapeUtil.updateMarks(action.attributeId, action.newExprString, state);
       return Object.assign({}, state, newObj);
+
+    case UPDATE_HOVERED_ATTRIBUTE:
+      return Object.assign({}, state, {
+        hoveredAttributeId: action.hoveredAttributeId
+      });
 
     default:
       return state;

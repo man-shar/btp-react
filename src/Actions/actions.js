@@ -8,14 +8,23 @@ export const READ_FILE = "read-file";
 export const FILE_LOADED_AND_PARSED = "file-loaded-and-parsed";
 export const CHANGE_ATTRIBUTE_EXPRESSION_STRING = "change-attribute-expression-string";
 export const ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE = "add-attribute-reference-to-attribute";
+export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute"
 
 
-export function startDragDraw(e) {
+export function startDragDraw(e, allState) {
   const action = {
     type: START_DRAG_DRAW,
-    e: e
+    e: e,
+    allState: allState
   };
   return action;
+}
+
+export function startDragDrawThunk(e) {
+  // need to access state in start drag draw.
+  return (dispatch, getState) => {
+    dispatch(startDragDraw(e, getState()));
+  }
 }
 
 export function updateDragDraw(e) {
@@ -66,7 +75,7 @@ export function fileLoaded(fileAsText, fileObj) {
 
 // TODO: Error Handling
 export function readFile(file) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -103,5 +112,13 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
     newExprString: newExprString
   };
 
+  return action;
+}
+
+export function updateHoveredAttribute(hoveredAttributeId) {
+  const action = {
+    type: UPDATE_HOVERED_ATTRIBUTE,
+    hoveredAttributeId: hoveredAttributeId,
+  };
   return action;
 }

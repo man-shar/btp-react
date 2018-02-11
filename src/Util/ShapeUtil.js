@@ -15,6 +15,86 @@ ShapeUtil.keyToShape = {
   "C": "circle"
 };
 
+// #########################################
+// Default SVG styles.
+// #########################################
+
+ShapeUtil.styleDefaults = {
+  "alignmentBaseline$name": "alignment-baseline",
+  "alignmentBaseline$options": ["auto", "baseline", "before-edge", "text-before-edge", "middle", "central", "after-edge", "text-after-edge", "ideographic", "alphabetic", "hanging", "mathematical", "inherit"],
+  "alignmentBaseline$value": "auto",
+  "alignmentBaseline$exprString": "auto",
+  "baselineShift$name": "baseline-shift",
+  "baselineShift$options": ["auto", "baseline", "super", "sub", "<percentage>", "<length>", "inherit"],
+  "baselineShift$value": "auto",
+  "baselineShift$exprString": "auto",
+  "direction$name": "direction",
+  "direction$options": ["ltr", "rtl", "inherit"],
+  "direction$value": "ltr",
+  "direction$exprString": "ltr",
+  "display$name": "display",
+  "display$options": ["inline", "block", "list-item", "run-in", "compact", "marker", "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group", "table-row", "table-column-group", "table-column", "table-cell", "table-caption", "none", "inherit"],
+  "display$value": "inline",
+  "display$exprString": "inline",
+  "dominantBaseline$name": "dominant-baseline",
+  "dominantBaseline$options": ["auto", "use-script", "no-change", "reset-size", "ideographic", "alphabetic", "hanging", "mathematical", "central", "middle", "text-after-edge", "text-before-edge", "inherit"],
+  "dominantBaseline$value": "auto",
+  "dominantBaseline$exprString": "auto",
+  "fill$name": "fill",
+  "fill$options": ["<paint>", "context-fill", "context-stroke"],
+  "fill$value": "#ccc",
+  "fill$exprString": "#ccc",
+  "fillOpacity$name": "fill-opacity",
+  "fillOpacity$options": [  "<opacity-value>", "inherit"],
+  "fillOpacity$value": "1",
+  "fillOpacity$exprString": "1",
+  "fontFamily$name": "font-family",
+  "fontFamily$options": [],
+  "fontFamily$value": "inherit",
+  "fontFamily$exprString": "inherit",
+  "fontSize$name": "font-size",
+  "fontSize$options": ["<absolute-size>", "<relative-size>", "<length>", "<percentage>", "inherit"],
+  "fontSize$value": "inherit",
+  "fontSize$exprString": "inherit",
+  "fontStyle$name": "font-style",
+  "fontStyle$options": ["normal", "italic", "oblique", "inherit"],
+  "fontStyle$value": "normal",
+  "fontStyle$exprString": "normal",
+  "fontWeight$name": "font-weight",
+  "fontWeight$options": ["normal", "bold", "bolder", "lighter", "100", "200", "300", "400", "500", "600", "700", "800", "900", "inherit"],
+  "fontWeight$value": "normal",
+  "fontWeight$exprString": "normal",
+  "opacity$name": "opacity",
+  "opacity$options": ["<opacity-value>", "inherit"],
+  "opacity$value": "1",
+  "opacity$exprString": "1",
+  "stroke$name": "stroke",
+  "stroke$options": ["<paint>", "context-fill", "context-stroke"],
+  "stroke$value": "steelblue",
+  "stroke$exprString": "steelblue",
+  "strokeOpacity$name": "stroke-opacity",
+  "strokeOpacity$options": ["<opacity-value>", "inherit"],
+  "strokeOpacity$value": "1",
+  "strokeOpacity$exprString": "1",
+  "strokeWidth$name": "stroke-width",
+  "strokeWidth$options": ["<length>", "<percentage>", "inherit"],
+  "strokeWidth$value": "1",
+  "strokeWidth$exprString": "1",
+  "textAnchor$name": "text-anchor",
+  "textAnchor$options": ["start", "middle", "end", "inherit"],
+  "textAnchor$value": "inherit",
+  "textAnchor$exprString": "inherit",
+  "textDecoration$name": "text-decoration",
+  "textDecoration$options": ["none", "underline", "overline", "line-through", "blink", "inherit"],
+  "textDecoration$value": "inherit",
+  "textDecoration$exprString": "inherit",
+  "visibility$name": "visibility",
+  "visibility$options": ["visible", "hidden", "collapse", "inherit"],
+  "visibility$value": "visible",
+  "visibility$exprString": "visible",
+}
+
+ShapeUtil.styleList = ["alignmentBaseline", "baselineShift", "direction", "display", "dominantBaseline", "fill", "fillOpacity", "fontFamily", "fontSize", "fontStyle", "fontWeight", "opacity", "stroke", "strokeOpacity", "strokeWidth", "textAnchor", "textDecoration", "visibility"];
 
 // #########################################
 // Drag and drawing related functions. Handle initialisation of shapes and layers.
@@ -87,9 +167,36 @@ ShapeUtil.checkIfShapeIsValid = function (drawing) {
   return null;
 }
 
+
+
+// ################################################
+// Overall Attributes functions
+// ################################################
+
+ShapeUtil.getAllOverallAttributesStylesProperty = function (overallAttributes, property) {
+  const styleList = overallAttributes.styleList.slice();
+
+  let allOverallAttributesProperty = {};
+  styleList.forEach((style) => {
+    allOverallAttributesProperty[style] = overallAttributes[style + "$" + property];
+  });
+
+  return allOverallAttributesProperty;
+}
+
+
 // ################################################
 // Shape functions
 // ################################################
+
+// check if attribute is a shape's own attribute.
+ShapeUtil.isShapeOwn = function (dimensionOrStyle, shapeId, drawing) {
+  // we can check just the name. as name, value and exprstring are defined simultaneously.
+  if(drawing[shapeId + "$" + dimensionOrStyle + "$name"])
+    return true;
+
+  return false;
+}
 
 // get a particular dimension property from a shape. returns just the property of the dimension, not an object.
 ShapeUtil.getShapeDimensionProperty = function(dimension, shapeId, layerId, drawing, overallAttributes, property) {
@@ -160,7 +267,7 @@ ShapeUtil.getAllShapeInheritedStylesProperty = function(shapeId, layerId, drawin
   const inheritedStyleList = drawing[shapeId + "$inheritedStyleList"].slice();
 
   inheritedStyleList.forEach((style) => {
-    // this style can either be an own prop of the containing layer or maybe an prop inherited by the layer as well. so call a function to check that and return appropriately.
+    // this style can either be an own prop of the containing layer or maybe an overall prop. so call a function to check that and return appropriately.
     allShapeInheritedStyles[style] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, property);
   });
 
@@ -200,6 +307,7 @@ ShapeUtil.getAllShapeInheritedDimensionsAllProperties = function(shapeId, layerI
     inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "value")
     inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "name")
     inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, overallAttributes, "exprString")
+    inheritedDimensionsAllProperties[dimension + "$" + "inheritedFrom"] = (self.isLayerOwn(dimension, layerId, drawing) ? layerId : "overallAttributes")
   });  
 
   return inheritedDimensionsAllProperties;
@@ -238,6 +346,7 @@ ShapeUtil.getAllShapeInheritedStylesAllProperties = function(shapeId, layerId, d
     inheritedStylesAllProperties[style + "$" + "value"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "value")
     inheritedStylesAllProperties[style + "$" + "name"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "name")
     inheritedStylesAllProperties[style + "$" + "exprString"] = self.getLayerStyleProperty(style, layerId, drawing, overallAttributes, "exprString")
+    inheritedStylesAllProperties[style + "$" + "inheritedFrom"] = (self.isLayerOwn(style, layerId, drawing) ? layerId : "overallAttributes")
   });  
 
   return inheritedStylesAllProperties;
@@ -267,6 +376,15 @@ ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, overallAttri
 
   // otherwise return from overallAttributes
   return overallAttributes[style + "$" + property];
+}
+
+// check if attribute is a layer's own attribute.
+ShapeUtil.isLayerOwn = function (dimensionOrStyle, layerId, drawing) {
+  // we can check just the name as name, value and exprstring are defined simultaneously.
+  if(drawing[layerId + "$" + dimensionOrStyle + "$name"])
+    return true;
+
+  return false;
 }
 
 // get all own dimension **property**: value, name or expressionString from a shape.

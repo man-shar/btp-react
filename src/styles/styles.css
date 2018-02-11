@@ -1,12 +1,14 @@
+@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+
 body {
   margin: 0;
   padding: 0;
   color: #304352;
   font-size: 12px;
-  font-family: "Lato";
 }
 
 * {
+  font-family: 'PT Sans', sans-serif;
   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
   -moz-box-sizing: border-box; /* Firefox, other Gecko */ 
   box-sizing: border-box; /* Opera/IE 8+ */ 
@@ -103,6 +105,8 @@ body {
   text-align: left;
   padding: 0.2em 0.5em;
   padding: 1em;
+  max-height: 25%;
+  overflow-y: scroll;
 }
 
 .AttributeFlexName {
@@ -152,9 +156,14 @@ body {
 }
 
 [contenteditable]:focus {
-    outline: 0px solid transparent;
+  outline: 0px solid transparent;
 }
 
 .inherited-attributes {
-  opacity: 0.5;
+  opacity: 0.7;
+}
+
+.isHovered {
+  background-color: steelblue;
+  color: #fff;
 }

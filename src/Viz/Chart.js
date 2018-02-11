@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
+import { startDragDrawThunk, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil"
 import Layer from './Layer'
 
@@ -23,8 +23,8 @@ class Chart extends React.Component {
   }
 
   render () {
-    const width = this.props.size[0];
-    const height = this.props.size[1];
+    const width = this.props.overallAttributes["width"];
+    const height = this.props.overallAttributes["height"];
     const onMouseDown = this.props.onMouseDown;
     const onMouseMove = this.props.onMouseMove;
     const onMouseUp = this.props.onMouseUp;
@@ -33,10 +33,9 @@ class Chart extends React.Component {
     const layerIds = drawing.layerIds;
     const beingDrawn = drawing.beingDrawn;
 
-    const backgroundStyles = {
-      "fill": this.props.overallAttributes["background-fill"],
-      "stroke": this.props.overallAttributes.border
-    }
+    const overallStyles = ShapeUtil.getAllOverallAttributesStylesProperty(this.props.overallAttributes, "value");
+
+    console.log(overallStyles);
 
     // SVG doesn't support ondrag events so have to work with mousedown, mousemove and mouseup here.
 
@@ -73,11 +72,13 @@ class Chart extends React.Component {
             this.setState({
               throttle: 0
             }) 
-          }}>
-          <rect width={width} height={height} style={backgroundStyles}></rect>
+          }}
+          style={overallStyles}
+          >
+          <rect width={width} height={height}></rect>
 
           {layerIds.map((layerId, i) =>
-            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]}/>
+            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
           )}
 
         </svg>
@@ -88,7 +89,6 @@ class Chart extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    "size": [state.overallAttributes.width, state.overallAttributes.height],
     "overallAttributes": state.overallAttributes,
     "drawing": state.drawing,
   }
@@ -97,7 +97,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onMouseDown: (e) => {
-      dispatch(startDragDraw(e));
+      dispatch(startDragDrawThunk(e));
     },
     onMouseMove: (e) => {
       dispatch(updateDragDraw(e));
