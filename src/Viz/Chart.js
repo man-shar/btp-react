@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
 import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
+import ShapeUtil from "../Util/ShapeUtil"
 import Layer from './Layer'
 
 // Handles svg mouse events. Drag draw etc. Dispatches actions for user drawing.
@@ -105,7 +106,8 @@ const mapDispatchToProps = dispatch => {
       dispatch(endDragDraw(e));
     },
     onKeyDown: (e) => {
-      dispatch(toggleCurrentShape(e.key));
+      if(ShapeUtil.knownKeys.indexOf(e.key) > -1)
+        dispatch(toggleCurrentShape(e.key));
     }
   }
 }

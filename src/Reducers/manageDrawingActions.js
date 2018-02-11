@@ -7,7 +7,7 @@ import {
   ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
-import { initialState, keyToShape } from "./init.js";
+import { initialState } from "./init.js";
 
 export function manageDrawingActions(state = initialState["drawing"], action) {
   let layerIds = state.layerIds.slice(),
@@ -117,9 +117,9 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
     case TOGGLE_CURRENT_SHAPE:
       return Object.assign({}, state, {
         currentShape:
-          keyToShape[action.newShape] === undefined
+          ShapeUtil.keyToShape[action.newShape] === undefined
             ? state.currentShape
-            : keyToShape[action.newShape]
+            : ShapeUtil.keyToShape[action.newShape]
       });
 
     case CHANGE_ATTRIBUTE_EXPRESSION_STRING:

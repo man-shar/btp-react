@@ -2,6 +2,19 @@ const ShapeUtil = {};
 
 // A lot of these functions are redundant or repetitive. But I like to have them just in case.
 
+// #########################################
+// keymaps to shape to switch the shape that is drawng when dragging.
+// #########################################
+
+ShapeUtil.knownKeys = "rcRC";
+
+ShapeUtil.keyToShape = {
+  "r": "rect",
+  "c": "circle",
+  "R": "rect",
+  "C": "circle"
+};
+
 
 // #########################################
 // Drag and drawing related functions. Handle initialisation of shapes and layers.

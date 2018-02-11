@@ -17,8 +17,3 @@ export const initialState = {
     "isLoaded": false,
   },
 };
-
-export const keyToShape = {
-  "r": "rect",
-  "c": "circle"
-};
