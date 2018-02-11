@@ -1,5 +1,12 @@
 const ShapeUtil = {};
 
+// A lot of these functions are redundant or repetitive. But I like to have them just in case.
+
+
+// #########################################
+// Drag and drawing related functions. Handle initialisation of shapes and layers.
+// #########################################
+
 // initializes layer and a shape.
 ShapeUtil.startDragDrawShape = function(shape, e) {
   let dimensionList;
@@ -63,7 +70,9 @@ ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e)
   return newObj;
 };
 
-// A lot of these functions are redundant or repetitive. But I like to have them just in case.
+ShapeUtil.checkIfShapeIsValid = function (drawing) {
+  return null;
+}
 
 // ################################################
 // Shape functions
@@ -391,19 +400,61 @@ ShapeUtil.referenceAttributes = {};
 ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId, droppedAttributeMonitorItem) {
   const self = this;
 
-  console.log(attributeId, droppedAttributeMonitorItem)
   // create a new object in ShapeUtil's referenceAttributes object for current attribute if not present already
   if(!self.referenceAttributes[attributeId])
   {
     self.referenceAttributes[attributeId] = {};
     // javascript set to store unique values.
-    self.referenceAttributes[attributeId]["referredAttributesIdList"] = new Set();
+    self.referenceAttributes[attributeId]["referredAttributesIdSet"] = new Set();
+    self.referenceAttributes[attributeId]["marks"] = [];
+    self.referenceAttributes[attributeId]["exprString"] = "";
   }
 
-  self.referenceAttributes[attributeId]["referredAttributesIdList"].add(droppedAttributeMonitorItem["attributeId"]);
+  self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeMonitorItem["attributeId"]);
 
-  console.log(self.referenceAttributes);
+  console.log(ShapeUtil.referenceAttributes);
 }
+
+ShapeUtil.removeReferenceAttribute = function (attributeId, referredAttribute) {
+  const self = this;
+
+  self.referenceAttributes[attributeId]["referredAttributesIdSet"].delete(referredAttribute);
+}
+
+ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
+  const self = this;
+
+  const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
+  self.referenceAttributes[attributeId]["marks"] = [];
+
+  referredAttributesIdSet.forEach((referredAttribute) => {
+    // find first index of this referred attribute
+    // in case a reference is deleted completely, we will get no references to it in the string and will then remove it.
+    let c = 0;
+    let start = -1;
+    while ((start = newExprString.indexOf(referredAttribute, start)) > -1)
+    {
+      let end = start + referredAttribute.length;
+
+      let mark = {};
+      mark["from"] = start;
+      mark["to"] = end;
+      mark["render"] = "bleh";
+      mark["text"] = drawing[referredAttribute + "$name"];
+
+      self.referenceAttributes[attributeId]["marks"].push(mark);
+      c++;
+      start = end;
+    }
+
+    if(c === 0) {
+      self.removeReferenceAttribute(attributeId, referredAttribute);
+    }
+  });
+
+  console.log(ShapeUtil.referenceAttributes);
+}
+
 
 export default ShapeUtil;
 

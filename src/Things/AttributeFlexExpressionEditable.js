@@ -94,7 +94,6 @@ const mapDispatchToProps = dispatch => {
   return {
     onAttributeExprStringChange: (attributeId, newExprString) => {
       dispatch(changeAttributeExpressionString(attributeId, newExprString));
-      console.log(attributeId, newExprString)
     },
     onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem) => {
       dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem));

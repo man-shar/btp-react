@@ -93,11 +93,14 @@ export function changeAttributeExpressionString(attributeId, newExprString) {
 
 export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {
   ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
+  const attributeExprString = editor.getValue();
+
+  const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
 
   const action = {
-    type: ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
+    type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
     attributeId: attributeId,
-    droppedAttributeMonitorItem: droppedAttributeMonitorItem
+    newExprString: newExprString
   };
 
   return action;

@@ -17,18 +17,20 @@ class AttributeEditor extends React.Component {
         <div className="things-label" draggable="true">
           Attributes
         </div>
-        <div className="AttributesSection">
+        <div className="AttributesSectionHeading">
           <span>Overall Attributes</span>
         </div>
         <OverallAttributeEditor />
-        <div className="AttributesSection">
+        <div className="AttributesSectionHeading">
           <span>Layer Attributes</span>
         </div>
         <LayerAttributeEditor layerId={activeLayerId} />
-        <div className="AttributesSection">
+        <div className="AttributesSectionHeading">
           <span>Shape Attributes</span>
         </div>
         <ShapeAttributeEditor shapeId={activeShapeId} layerId={activeLayerId}/>
+        
+        <ShapeAttributeEditor />
       </div>
     );
   }

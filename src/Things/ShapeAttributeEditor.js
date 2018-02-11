@@ -45,8 +45,7 @@ class ShapeAttributeEditor extends React.Component {
     );
 
 
-    if(shapeId)
-    {
+    if(shapeId) {
       return (
         <div className="AttributeFlexContainer">
           {ownDimensionList.map((attribute, i) =>
@@ -63,28 +62,32 @@ class ShapeAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={shapeId}
                   shapeOrLayer="shape"
+                  own={true}
                 />)
             }
           )}
-          {inheritedDimensionList.map((attribute, i) =>
-            {
-              const attributeName = inheritedShapeDimensionsAllProperties[attribute + "$name"];
-              const attributeValue = inheritedShapeDimensionsAllProperties[attribute + "$value"];
-              const attributeExprString = inheritedShapeDimensionsAllProperties[attribute + "$exprString"];
-
-              console.log(attributeName, attributeValue, attributeExprString)
-              
-              return (<AttributeFlexRow
-                  key={i}
-                  attributeId={shapeId + "$" + attribute}
-                  attributeName={attributeName}
-                  attributeValue={attributeValue}
-                  attributeExprString={attributeExprString}
-                  shapeOrLayerId={shapeId}
-                  shapeOrLayer="shape"
-                />)
-            }
-          )}
+          <div className="inherited-attributes">
+            {inheritedDimensionList.map((attribute, i) =>
+              {
+                const attributeName = inheritedShapeDimensionsAllProperties[attribute + "$name"];
+                const attributeValue = inheritedShapeDimensionsAllProperties[attribute + "$value"];
+                const attributeExprString = inheritedShapeDimensionsAllProperties[attribute + "$exprString"];
+                
+                return (
+                  <AttributeFlexRow
+                      key={i}
+                      attributeId={layerId + "$" + attribute}
+                      attributeName={attributeName}
+                      attributeValue={attributeValue}
+                      attributeExprString={attributeExprString}
+                      shapeOrLayerId={shapeId}
+                      shapeOrLayer="shape"
+                      own={false}
+                    />
+                  )
+                }
+              )}
+          </div>
           {ownStyleList.map((attribute, i) =>
             {
               const attributeName = ownShapeStylesAllProperties[attribute + "$name"];
@@ -99,26 +102,32 @@ class ShapeAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={shapeId}
                   shapeOrLayer="shape"
+                  own={true}
                 />)
             }
           )}
-          {inheritedStyleList.map((attribute, i) =>
-            {
-              const attributeName = inheritedShapeStylesAllProperties[attribute + "$name"];
-              const attributeValue = inheritedShapeStylesAllProperties[attribute + "$value"];
-              const attributeExprString = inheritedShapeStylesAllProperties[attribute + "$exprString"];
-              
-              return (<AttributeFlexRow
-                  key={i}
-                  attributeId={shapeId + "$" + attribute}
-                  attributeName={attributeName}
-                  attributeValue={attributeValue}
-                  attributeExprString={attributeExprString}
-                  shapeOrLayerId={shapeId}
-                  shapeOrLayer="shape"
-                />)
-            }
-          )}
+          <div className="inherited-attributes">
+            {inheritedStyleList.map((attribute, i) =>
+              {
+                const attributeName = inheritedShapeStylesAllProperties[attribute + "$name"];
+                const attributeValue = inheritedShapeStylesAllProperties[attribute + "$value"];
+                const attributeExprString = inheritedShapeStylesAllProperties[attribute + "$exprString"];
+                
+                return (
+                  <AttributeFlexRow
+                    key={i}
+                    attributeId={layerId + "$" + attribute}
+                    attributeName={attributeName}
+                    attributeValue={attributeValue}
+                    attributeExprString={attributeExprString}
+                    shapeOrLayerId={shapeId}
+                    shapeOrLayer="shape"
+                    own={false}
+                  />
+                )
+              }
+            )}
+          </div>
         </div>
       );
     }

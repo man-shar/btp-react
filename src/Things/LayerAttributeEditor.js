@@ -57,26 +57,32 @@ class LayerAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={layerId}
                   shapeOrLayer="layer"
+                  own={true}
                 />)
             }
           )}
-          {inheritedDimensionList.map((attribute, i) =>
-            {
-              const attributeName = inheritedLayerDimensionsAllProperties[attribute + "$name"];
-              const attributeValue = inheritedLayerDimensionsAllProperties[attribute + "$value"];
-              const attributeExprString = inheritedLayerDimensionsAllProperties[attribute + "$exprString"];
-              
-              return (<AttributeFlexRow
-                  key={i}
-                  attributeId={layerId + "$" + attribute}
-                  attributeName={attributeName}
-                  attributeValue={attributeValue}
-                  attributeExprString={attributeExprString}
-                  shapeOrLayerId={layerId}
-                  shapeOrLayer="layer"
-                />)
-            }
-          )}
+          <div className="inherited-attributes">
+            {inheritedDimensionList.map((attribute, i) =>
+              {
+                const attributeName = inheritedLayerDimensionsAllProperties[attribute + "$name"];
+                const attributeValue = inheritedLayerDimensionsAllProperties[attribute + "$value"];
+                const attributeExprString = inheritedLayerDimensionsAllProperties[attribute + "$exprString"];
+                
+                return (
+                  <AttributeFlexRow
+                    key={i}
+                    attributeId={"overallAttributes$" + attribute}
+                    attributeName={attributeName}
+                    attributeValue={attributeValue}
+                    attributeExprString={attributeExprString}
+                    shapeOrLayerId={layerId}
+                    shapeOrLayer="layer"
+                    own={false}
+                  />
+                )
+              }
+            )}
+          </div>
           {ownStyleList.map((attribute, i) =>
             {
               const attributeName = ownLayerStylesAllProperties[attribute + "$name"];
@@ -91,26 +97,32 @@ class LayerAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={layerId}
                   shapeOrLayer="layer"
+                  own={true}
                 />)
             }
           )}
-          {inheritedStyleList.map((attribute, i) =>
-            {
-              const attributeName = inheritedLayerStylesAllProperties[attribute + "$name"];
-              const attributeValue = inheritedLayerStylesAllProperties[attribute + "$value"];
-              const attributeExprString = inheritedLayerStylesAllProperties[attribute + "$exprString"];
-              
-              return (<AttributeFlexRow
-                  key={i}
-                  attributeId={layerId + "$" + attribute}
-                  attributeName={attributeName}
-                  attributeValue={attributeValue}
-                  attributeExprString={attributeExprString}
-                  shapeOrLayerId={layerId}
-                  shapeOrLayer="layer"
-                />)
-            }
-          )}
+          <div className="inherited-attributes">
+            {inheritedStyleList.map((attribute, i) =>
+              {
+                const attributeName = inheritedLayerStylesAllProperties[attribute + "$name"];
+                const attributeValue = inheritedLayerStylesAllProperties[attribute + "$value"];
+                const attributeExprString = inheritedLayerStylesAllProperties[attribute + "$exprString"];
+                
+                return (
+                  <AttributeFlexRow
+                    key={i}
+                    attributeId={"overallAttributes$" + attribute}
+                    attributeName={attributeName}
+                    attributeValue={attributeValue}
+                    attributeExprString={attributeExprString}
+                    shapeOrLayerId={layerId}
+                    shapeOrLayer="layer"
+                    own={false}
+                  />
+                )
+              }
+            )}
+          </div>
         </div>
       );
     }

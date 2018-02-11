@@ -140,7 +140,7 @@ body {
   height: -webkit-max-content; /* Chrome */
 }
 
- .AttributesSection {
+ .AttributesSectionHeading {
   font-size: 1.2em;
   color: #aaa;
   margin: 0.5em 0.5em;
@@ -153,4 +153,8 @@ body {
 
 [contenteditable]:focus {
     outline: 0px solid transparent;
+}
+
+.inherited-attributes {
+  opacity: 0.5;
 }

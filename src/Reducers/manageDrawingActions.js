@@ -3,26 +3,34 @@ import {
   UPDATE_DRAG_DRAW,
   END_DRAG_DRAW,
   TOGGLE_CURRENT_SHAPE,
-  CHANGE_ATTRIBUTE_EXPRESSION_STRING
+  CHANGE_ATTRIBUTE_EXPRESSION_STRING,
+  ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState, keyToShape } from "./init.js";
 
 export function manageDrawingActions(state = initialState["drawing"], action) {
+  let layerIds = state.layerIds.slice(),
+      layerCount = layerIds.length,
+      currentShape = state.currentShape,
+      newObj = {},
+      newLayerName = "",
+      newLayerId = "",
+      shapeIds = [],
+      shapeCount = 0,
+      newShapeName = "",
+      newShapeId = "",
+      newLayer,
+      updatedLayerAttributes,
+      activeLayerId,
+      activeShapeId,
+      attributeId,
+      attributeExprString,
+      newExprString;
+
+
   switch (action.type) {
     case START_DRAG_DRAW:
-      let layerIds = state.layerIds.slice(),
-          layerCount = layerIds.length,
-          currentShape = state.currentShape,
-          newObj = {},
-          newLayerName = "",
-          newLayerId = "",
-          shapeIds = [],
-          shapeCount = 0,
-          newShapeName = "",
-          newShapeId = "",
-          newLayer;
-
       // startDragDrawShape returns a layer with dimensionList. A shape is not initialised with any attributes: dimensions or styles.
 
       newLayer = ShapeUtil.startDragDrawShape(currentShape, action.e);
@@ -84,9 +92,8 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
     case UPDATE_DRAG_DRAW:
       if (!state.beingDrawn) return state;
 
-      let updatedLayerAttributes;
-      let activeLayerId = state.activeLayerId;
-      let activeShapeId = state.activeShapeId;
+      activeLayerId = state.activeLayerId;
+      activeShapeId = state.activeShapeId;
 
       // Updates *layer* not shape. Remember, we have no initialised the shape with it's own defined attributes yet. It still takes it's attributes from the layer.
       updatedLayerAttributes = ShapeUtil.updateDragDrawShape(
@@ -99,6 +106,10 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       return Object.assign({}, state, updatedLayerAttributes);
 
     case END_DRAG_DRAW:
+      activeLayerId = state.activeLayerId;
+      activeShapeId = state.activeShapeId;
+
+      ShapeUtil.checkIfShapeIsValid(state);
       return Object.assign({}, state, {
         beingDrawn: false
       });
@@ -112,9 +123,14 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
     case CHANGE_ATTRIBUTE_EXPRESSION_STRING:
-      let newObj2 = {};
-      newObj2[action.attributeId + "$exprString"] = action.newExprString;
-      return Object.assign({}, state, newObj2);
+      newObj = {};
+      attributeId = action.attributeId;
+      newExprString = action.newExprString;
+
+      newObj[attributeId + "$exprString"] = newExprString;
+
+      ShapeUtil.updateMarks(action.attributeId, action.newExprString, state);
+      return Object.assign({}, state, newObj);
 
     default:
       return state;
