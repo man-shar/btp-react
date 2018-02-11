@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDrawThunk, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil"
 import Layer from './Layer'
 
@@ -23,17 +23,17 @@ class Chart extends React.Component {
   }
 
   render () {
-    const width = this.props.overallAttributes["width"];
-    const height = this.props.overallAttributes["height"];
+    const drawing = this.props.drawing;
+    const width = drawing["overallAttributes$width$value"];
+    const height = drawing["overallAttributes$height$value"];
     const onMouseDown = this.props.onMouseDown;
     const onMouseMove = this.props.onMouseMove;
     const onMouseUp = this.props.onMouseUp;
-    const drawing = this.props.drawing;
     const currentShape = drawing.currentShape;
     const layerIds = drawing.layerIds;
     const beingDrawn = drawing.beingDrawn;
 
-    const overallStyles = ShapeUtil.getAllOverallAttributesStylesProperty(this.props.overallAttributes, "value");
+    const overallStyles = ShapeUtil.getAllOverallAttributesStylesProperty(drawing, "value");
 
     console.log(overallStyles);
 
@@ -89,7 +89,6 @@ class Chart extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    "overallAttributes": state.overallAttributes,
     "drawing": state.drawing,
   }
 }
@@ -97,7 +96,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onMouseDown: (e) => {
-      dispatch(startDragDrawThunk(e));
+      dispatch(startDragDraw(e));
     },
     onMouseMove: (e) => {
       dispatch(updateDragDraw(e));

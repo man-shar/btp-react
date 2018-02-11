@@ -5,7 +5,6 @@ import { render } from 'react-dom';
 
 class OverallAttributeEditor extends React.Component {
   render() {
-    const overallAttributes = this.props.overallAttributes;
 
     return (
       <div>
@@ -16,7 +15,7 @@ class OverallAttributeEditor extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    overallAttributes: state["overallAttributes"]
+    drawing: state["drawing"]
   }
 }
 

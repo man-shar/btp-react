@@ -20,28 +20,24 @@ class ShapeAttributeEditor extends React.Component {
       shapeId,
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const inheritedShapeDimensionsAllProperties = ShapeUtil.getAllShapeInheritedDimensionsAllProperties(
       shapeId,
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const ownShapeStylesAllProperties = ShapeUtil.getAllShapeOwnStylesAllProperties(
       shapeId,
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const inheritedShapeStylesAllProperties = ShapeUtil.getAllShapeInheritedStylesAllProperties(
       shapeId,
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
 
@@ -143,7 +139,6 @@ class ShapeAttributeEditor extends React.Component {
 const mapStateToProps = state => {
   return {
     drawing: state.drawing,
-    overallAttributes: state.overallAttributes
   };
 };
 

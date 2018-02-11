@@ -14,17 +14,9 @@ export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute"
 export function startDragDraw(e, allState) {
   const action = {
     type: START_DRAG_DRAW,
-    e: e,
-    allState: allState
+    e: e
   };
   return action;
-}
-
-export function startDragDrawThunk(e) {
-  // need to access state in start drag draw.
-  return (dispatch, getState) => {
-    dispatch(startDragDraw(e, getState()));
-  }
 }
 
 export function updateDragDraw(e) {
@@ -100,7 +92,13 @@ export function changeAttributeExpressionString(attributeId, newExprString) {
   return action;
 }
 
+export function addAttributeReferenceToAttributeThunk(editor, event, attributeId, droppedAttributeMonitorItem) {
+  
+}
+
 export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {
+
+  
   ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
   const attributeExprString = editor.getValue();
 

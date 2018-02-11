@@ -18,25 +18,21 @@ class LayerAttributeEditor extends React.Component {
     const ownLayerDimensionsAllProperties = ShapeUtil.getAllLayerOwnDimensionsAllProperties(
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const inheritedLayerDimensionsAllProperties = ShapeUtil.getAllLayerInheritedDimensionsAllProperties(
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const ownLayerStylesAllProperties = ShapeUtil.getAllLayerOwnStylesAllProperties(
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     const inheritedLayerStylesAllProperties = ShapeUtil.getAllLayerInheritedStylesAllProperties(
       layerId,
       this.props.drawing,
-      this.props.overallAttributes
     );
 
     if(layerId)
@@ -136,7 +132,6 @@ class LayerAttributeEditor extends React.Component {
 const mapStateToProps = state => {
   return {
     drawing: state.drawing,
-    overallAttributes: state.overallAttributes
   };
 };
 

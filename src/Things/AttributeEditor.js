@@ -38,7 +38,6 @@ class AttributeEditor extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    overallAttributes: state["overallAttributes"],
     activeLayerId: state["drawing"]["activeLayerId"],
     activeShapeId: state["drawing"]["activeShapeId"]
   };

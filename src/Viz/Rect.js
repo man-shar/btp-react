@@ -10,7 +10,6 @@ class Rect extends React.Component {
       this.props.id,
       this.props.layerId,
       this.props.drawing,
-      this.props.overallAttributes,
       "value"
     );
 
@@ -19,7 +18,6 @@ class Rect extends React.Component {
       this.props.id,
       this.props.layerId,
       this.props.drawing,
-      this.props.overallAttributes,
       "value"
     );
 
@@ -28,7 +26,6 @@ class Rect extends React.Component {
       this.props.id,
       this.props.layerId,
       this.props.drawing,
-      this.props.overallAttributes,
       "value"
     );
 
@@ -37,7 +34,6 @@ class Rect extends React.Component {
       this.props.id,
       this.props.layerId,
       this.props.drawing,
-      this.props.overallAttributes,
       "value"
     );
 

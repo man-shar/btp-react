@@ -69,7 +69,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newLayerId + "$ownDimensionList"] = newLayer.dimensionList.list.slice();
       newObj[newLayerId + "$inheritedDimensionList"] = [];
       newObj[newLayerId + "$ownStyleList"] = [];
-      newObj[newLayerId + "$inheritedStyleList"] = action.allState.overallAttributes.styleList.slice();
+      newObj[newLayerId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;
@@ -80,7 +80,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newShapeId + "$inheritedDimensionList"] = newLayer.dimensionList.list.slice();
       newObj[newShapeId + "$ownDimensionList"] = [];
       newObj[newShapeId + "$ownStyleList"] = [];
-      newObj[newShapeId + "$inheritedStyleList"] = action.allState.overallAttributes.styleList.slice();
+      newObj[newShapeId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
 
       newObj[newLayerId + "$ownDimensionList"].forEach(attr => {
         newObj[newLayerId + "$" + attr + "$value"] = newLayer["dimensionList"][attr + "$value"];
