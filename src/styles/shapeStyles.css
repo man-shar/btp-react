@@ -1,5 +1,4 @@
 rect, circle {
-  fill: transparent;
   stroke: steelblue;
   stroke-width: 1;
 }
@@ -10,9 +9,13 @@ rect, circle {
   stroke: orange;
 }
 
+.shape {
+  pointer-events: all;
+}
+
 
 .shape:hover {
-  fill: #fcfcfc;
+  fill: #fccc66;
   stroke: steelblue;
   stroke-width: 2;
 }

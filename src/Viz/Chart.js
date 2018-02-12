@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid } from '../Actions/actions';
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil"
 import Layer from './Layer'
 
@@ -20,6 +20,18 @@ class Chart extends React.Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.props.onKeyDown, false);
+  }
+
+  onMouseDown(e) {
+    e.preventDefault();
+
+    // yeah so I can't bind a click event on both svg and it's child. yet. so have to fire it from here. fuck.
+    if (e.target.classList.contains("shape")) {
+      this.props.changeActiveLayerAndShape(e.target.id);
+      return;
+    }
+
+    this.props.onMouseDown(e);
   }
 
   render () {
@@ -44,11 +56,7 @@ class Chart extends React.Component {
           id="chart"
           width={width}
           height={height}
-          onMouseDown={(e) => {
-            e.preventDefault();
-
-            onMouseDown(e);
-          }}
+          onMouseDown={this.onMouseDown.bind(this)}
           onMouseMove={(e) => {
             e.preventDefault();
 
@@ -67,9 +75,8 @@ class Chart extends React.Component {
             e.preventDefault();
             if(beingDrawn) {
               checkIfNewLayerIsValid();
+              onMouseUp(e);
             }
-
-            onMouseUp(e);
 
             this.setState({
               throttle: 0
@@ -115,6 +122,9 @@ const mapDispatchToProps = dispatch => {
     },
     checkIfNewLayerIsValid: (e) => {
       dispatch(checkIfNewLayerIsValid());
+    },
+    changeActiveLayerAndShape: (shapeId) => {
+      dispatch(changeActiveLayerAndShape(shapeId));
     }
   }
 }

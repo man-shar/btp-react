@@ -142,10 +142,9 @@ export function deleteActiveLayer() {
   return action;
 }
 
-export function changeActiveLayerAndShape(layerId, shapeId) {
+export function changeActiveLayerAndShape(shapeId) {
   const action = {
     type: CHANGE_ACTIVE_LAYER_AND_SHAPE,
-    layerId: layerId,
     shapeId: shapeId
   }
 

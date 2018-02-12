@@ -174,12 +174,12 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
     case CHANGE_ACTIVE_LAYER_AND_SHAPE:
-      newActiveLayerId = action.layerId;
       newActiveShapeId = action.shapeId;
+      newActiveLayerId = state[newActiveShapeId + "$layerId"];
 
       return Object.assign({}, state, {
         activeLayerId: newActiveLayerId,
-        shapeLayerId: newActiveShapeId
+        activeShapeId: newActiveShapeId
       })
 
 

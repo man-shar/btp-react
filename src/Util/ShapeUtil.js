@@ -382,7 +382,7 @@ ShapeUtil.getAllShapeInheritedStylesAllProperties = function(shapeId, layerId, d
 // get a particular dimension property from a layer. returns just the property of the dimension, not an object.
 ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, property) {
   // check if this dimension is defined in the layer.
-  if(drawing[layerId + "$" + dimension + "$" + property])
+  if(drawing[layerId + "$" + dimension + "$" + property] !== undefined)
     return drawing[layerId + "$" + dimension + "$" + property];
 
   // otherwise return from overallAttributes
@@ -392,7 +392,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
 // get a particular style property from a layer. returns just the property of the style, not an object.
 ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, property) {
   // check if this style is defined in the layer.
-  if(drawing[layerId + "$" + style + "$" + property])
+  if(drawing[layerId + "$" + style + "$" + property] !== undefined)
     return drawing[layerId + "$" + style + "$" + property];
 
   // otherwise return from overallAttributes
@@ -402,7 +402,7 @@ ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, property) {
 // check if attribute is a layer's own attribute.
 ShapeUtil.isLayerOwn = function (dimensionOrStyle, layerId, drawing) {
   // we can check just the name as name, value and exprstring are defined simultaneously.
-  if(drawing[layerId + "$" + dimensionOrStyle + "$name"])
+  if(drawing[layerId + "$" + dimensionOrStyle + "$name"] !== undefined)
     return true;
 
   return false;
