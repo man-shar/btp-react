@@ -3,7 +3,7 @@ My BTP, trying to do it in React and Redux. VanillaJS became too much data to ma
 
 TODO:
 
--> add checkIfValidShape on drag draw end.
+-> change active layer on click.
 -> handle editing of an inherited attribute. transfer it to an own attribute and prevent rerender because I guess that is going to be a problem. editing can be done from a name or an expression string.
 -> handle codemirror marks man.
 -> should we begin anchors first or set up charting first?

@@ -8,7 +8,8 @@ export const READ_FILE = "read-file";
 export const FILE_LOADED_AND_PARSED = "file-loaded-and-parsed";
 export const CHANGE_ATTRIBUTE_EXPRESSION_STRING = "change-attribute-expression-string";
 export const ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE = "add-attribute-reference-to-attribute";
-export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute"
+export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute";
+export const DELETE_ACTIVE_LAYER = "delete-active-layer";
 
 
 export function startDragDraw(e, allState) {
@@ -96,9 +97,7 @@ export function addAttributeReferenceToAttributeThunk(editor, event, attributeId
   
 }
 
-export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {
-
-  
+export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {  
   ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
   const attributeExprString = editor.getValue();
 
@@ -118,5 +117,25 @@ export function updateHoveredAttribute(hoveredAttributeId) {
     type: UPDATE_HOVERED_ATTRIBUTE,
     hoveredAttributeId: hoveredAttributeId,
   };
+
+  return action;
+}
+
+export function checkIfNewLayerIsValid() {
+  return (dispatch, getState) => {
+    const isActiveShapeValid = ShapeUtil.checkIfNewLayerIsValid(getState()["drawing"]);
+
+    if(!isActiveShapeValid)
+    {
+      dispatch(deleteActiveLayer());
+    }
+  }
+}
+
+export function deleteActiveLayer() {
+  const action = {
+    type: DELETE_ACTIVE_LAYER
+  };
+
   return action;
 }

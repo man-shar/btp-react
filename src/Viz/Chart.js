@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape } from '../Actions/actions';
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil"
 import Layer from './Layer'
 
@@ -29,13 +29,12 @@ class Chart extends React.Component {
     const onMouseDown = this.props.onMouseDown;
     const onMouseMove = this.props.onMouseMove;
     const onMouseUp = this.props.onMouseUp;
+    const checkIfNewLayerIsValid = this.props.checkIfNewLayerIsValid;
     const currentShape = drawing.currentShape;
     const layerIds = drawing.layerIds;
     const beingDrawn = drawing.beingDrawn;
 
     const overallStyles = ShapeUtil.getAllOverallAttributesStylesProperty(drawing, "value");
-
-    console.log(overallStyles);
 
     // SVG doesn't support ondrag events so have to work with mousedown, mousemove and mouseup here.
 
@@ -66,6 +65,9 @@ class Chart extends React.Component {
           }}
           onMouseUp={(e) => {
             e.preventDefault();
+            if(beingDrawn) {
+              checkIfNewLayerIsValid();
+            }
 
             onMouseUp(e);
 
@@ -78,7 +80,9 @@ class Chart extends React.Component {
           <rect width={width} height={height}></rect>
 
           {layerIds.map((layerId, i) =>
-            <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
+            <g id={layerId}>
+              <Layer key={i} id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
+            </g>
           )}
 
         </svg>
@@ -108,6 +112,9 @@ const mapDispatchToProps = dispatch => {
       // TODO dispatch action only when svg in focus.
       if(ShapeUtil.knownKeys.indexOf(e.key) > -1)
         dispatch(toggleCurrentShape(e.key));
+    },
+    checkIfNewLayerIsValid: (e) => {
+      dispatch(checkIfNewLayerIsValid());
     }
   }
 }

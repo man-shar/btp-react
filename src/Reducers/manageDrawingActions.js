@@ -5,7 +5,8 @@ import {
   TOGGLE_CURRENT_SHAPE,
   CHANGE_ATTRIBUTE_EXPRESSION_STRING,
   ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
-  UPDATE_HOVERED_ATTRIBUTE
+  UPDATE_HOVERED_ATTRIBUTE,
+  DELETE_ACTIVE_LAYER
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState } from "./init.js";
@@ -27,7 +28,8 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       activeShapeId,
       attributeId,
       attributeExprString,
-      newExprString;
+      newExprString,
+      activeLayerShapes;
 
 
   switch (action.type) {
@@ -59,6 +61,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newLayerId + "$name"] = newLayerName;
       newObj[newLayerId + "$id"] = newLayerId;
       newObj[newLayerId + "$type"] = currentShape;
+      newObj[newLayerId + "$index"] = layerCount;
 
       // every layer and shape has a own attributes and inherited attributes. on editing an inhertides attribute, the attribute gets shifted to own attributes.
       // attributes are both dimensions and styles.
@@ -110,7 +113,6 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       activeLayerId = state.activeLayerId;
       activeShapeId = state.activeShapeId;
 
-      ShapeUtil.checkIfShapeIsValid(state);
       return Object.assign({}, state, {
         beingDrawn: false
       });
@@ -137,6 +139,23 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       return Object.assign({}, state, {
         hoveredAttributeId: action.hoveredAttributeId
       });
+
+    case DELETE_ACTIVE_LAYER:
+      console.log("drawing is invalid/too small");
+
+      // I still don't have a nice immutable way to remove all props of a layer. SO i'll just remove the layer from layerIds so it doesn't get rendered ಠ‿ಠ
+      activeLayerId = state["activeLayerId"];
+      console.log(activeLayerId);
+      console.log(state["activeLayerId"]);
+      const invalidLayerIndex = state[activeLayerId + "$index"];
+      const newLayerIds = layerIds.slice(0, invalidLayerIndex).concat(layerIds.slice(invalidLayerIndex + 1));
+      const newActiveLayerId = newLayerIds[newLayerIds.length - 1]
+
+      return Object.assign({}, state, {
+        layerIds: newLayerIds,
+        activeLayerId: newActiveLayerId
+      });
+
 
     default:
       return state;

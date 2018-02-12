@@ -163,8 +163,18 @@ ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e)
   return newObj;
 };
 
-ShapeUtil.checkIfShapeIsValid = function (drawing) {
-  return null;
+ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
+  const activeLayerId = drawing.activeLayerId;
+
+  const el = document.getElementById(activeLayerId);
+  const size = el.getBoundingClientRect()
+
+  // if diagonal is less than 10 px, return false: shape is not valid.
+  // TODO throw error notification
+  if(Math.hypot(size.width, size.height) <= 30)
+    return false
+
+  return true;
 }
 
 
