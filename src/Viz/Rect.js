@@ -43,6 +43,7 @@ class Rect extends React.Component {
     return (
       <rect
         id={shapeId}
+        className="shape"
         index={index}
         name={this.props.drawing[shapeId + "$name"]}
         {...ownShapeDimensions}
@@ -55,7 +56,6 @@ class Rect extends React.Component {
 const mapStateToProps = state => {
   return {
     drawing: state.drawing,
-    overallAttributes: state.overallAttributes
   };
 };
 

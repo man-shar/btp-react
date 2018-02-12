@@ -43,6 +43,7 @@ class Circle extends React.Component {
     return (
       <circle
         id={shapeId}
+        className="shape"
         index={index}
         name={this.props.drawing[shapeId + "$name"]}
         {...ownShapeDimensions}

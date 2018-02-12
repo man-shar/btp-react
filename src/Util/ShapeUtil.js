@@ -116,8 +116,8 @@ ShapeUtil.startDragDrawShape = function(shape, e) {
       height$name: "Height",
       x$exprString: "" + e.nativeEvent.offsetX,
       y$exprString: "" + e.nativeEvent.offsetY,
-      width$exprString: "" + 0,
-      height$exprString: "" + 0,
+      width$exprString: "0",
+      height$exprString: "0",
       list: ["width", "height", "x", "y"]
     };
   }
@@ -575,6 +575,9 @@ ShapeUtil.removeReferenceAttribute = function (attributeId, referredAttribute) {
 
 ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
   const self = this;
+
+  if(!self.referenceAttributes[attributeId])
+    return
 
   const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
   self.referenceAttributes[attributeId]["marks"] = [];

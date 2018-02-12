@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import ShapeUtil from "../Util/ShapeUtil"
+
 export const START_DRAG_DRAW = "start-drag-draw";
 export const UPDATE_DRAG_DRAW = "update-drag-draw";
 export const END_DRAG_DRAW = "end-drag-draw";
@@ -10,6 +11,7 @@ export const CHANGE_ATTRIBUTE_EXPRESSION_STRING = "change-attribute-expression-s
 export const ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE = "add-attribute-reference-to-attribute";
 export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute";
 export const DELETE_ACTIVE_LAYER = "delete-active-layer";
+export const CHANGE_ACTIVE_LAYER_AND_SHAPE = "change-active-layer-and-shape"
 
 
 export function startDragDraw(e, allState) {
@@ -136,6 +138,16 @@ export function deleteActiveLayer() {
   const action = {
     type: DELETE_ACTIVE_LAYER
   };
+
+  return action;
+}
+
+export function changeActiveLayerAndShape(layerId, shapeId) {
+  const action = {
+    type: CHANGE_ACTIVE_LAYER_AND_SHAPE,
+    layerId: layerId,
+    shapeId: shapeId
+  }
 
   return action;
 }

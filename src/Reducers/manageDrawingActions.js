@@ -6,7 +6,8 @@ import {
   CHANGE_ATTRIBUTE_EXPRESSION_STRING,
   ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
   UPDATE_HOVERED_ATTRIBUTE,
-  DELETE_ACTIVE_LAYER
+  DELETE_ACTIVE_LAYER,
+  CHANGE_ACTIVE_LAYER_AND_SHAPE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState } from "./init.js";
@@ -29,8 +30,11 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       attributeId,
       attributeExprString,
       newExprString,
-      activeLayerShapes;
-
+      activeLayerShapes,
+      invalidLayerIndex,
+      newLayerIds,
+      newActiveLayerId,
+      newActiveShapeId;
 
   switch (action.type) {
     case START_DRAG_DRAW:
@@ -141,20 +145,42 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
     case DELETE_ACTIVE_LAYER:
-      console.log("drawing is invalid/too small");
 
       // I still don't have a nice immutable way to remove all props of a layer. SO i'll just remove the layer from layerIds so it doesn't get rendered ಠ‿ಠ
+
+      // OHH this has a nice side effect. Since I'm changing the layerIds array, the next time a layer is formed, it overwrites the previous layer's everything. So we don't get a gigantic state.
+
+      // I should still clear out the own Attributes from the deleted layers and shapes though.
       activeLayerId = state["activeLayerId"];
-      console.log(activeLayerId);
-      console.log(state["activeLayerId"]);
-      const invalidLayerIndex = state[activeLayerId + "$index"];
-      const newLayerIds = layerIds.slice(0, invalidLayerIndex).concat(layerIds.slice(invalidLayerIndex + 1));
-      const newActiveLayerId = newLayerIds[newLayerIds.length - 1]
+      invalidLayerIndex = state[activeLayerId + "$index"];
+
+      newLayerIds = layerIds.slice(0, invalidLayerIndex).concat(layerIds.slice(invalidLayerIndex + 1));
+      newActiveLayerId = newLayerIds[newLayerIds.length - 1]
+
+      if(newLayerIds.length === 0)
+      {
+        newActiveShapeId = undefined
+      }
+
+      else
+      {
+        newActiveShapeId = state[newActiveLayerId + "$shapeIds"][0];
+      }
 
       return Object.assign({}, state, {
         layerIds: newLayerIds,
-        activeLayerId: newActiveLayerId
+        activeLayerId: newActiveLayerId,
+        activeShapeId: newActiveShapeId
       });
+
+    case CHANGE_ACTIVE_LAYER_AND_SHAPE:
+      newActiveLayerId = action.layerId;
+      newActiveShapeId = action.shapeId;
+
+      return Object.assign({}, state, {
+        activeLayerId: newActiveLayerId,
+        shapeLayerId: newActiveShapeId
+      })
 
 
     default:
