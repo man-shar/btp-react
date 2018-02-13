@@ -1,3 +1,5 @@
+import math from "mathjs-expression-parser";
+
 const ShapeUtil = {};
 
 // A lot of these functions are redundant or repetitive. But I like to have them just in case.
@@ -183,7 +185,20 @@ ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
 // Overall Attributes functions
 // ################################################
 
+// get a particular dimension property from overAllAttributes;
+ShapeUtil.getOverallAttributesDimensionProperty = function(dimension, drawing, property) {
+  const self = this;
+  return drawing["overallAttributes" + "$" + dimension + "$" + property];
+}
+
+ShapeUtil.getOverallAttributesStyleProperty = function(style, drawing, property) {
+  const self = this;
+  return drawing["overallAttributes" + "$" + style + "$" + property];
+}
+
+// particular property: value, exprstring or name of all overall attributes styles
 ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
+  const self = this;
   const styleList = drawing["overallAttributes$ownStyleList"].slice();
 
   let allOverallAttributesStylesProperty = {};
@@ -194,7 +209,9 @@ ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
   return allOverallAttributesStylesProperty;
 }
 
+// particular property: value, exprstring or name of all overall attributes dimensions
 ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, property) {
+  const self = this;
   const dimensionList = drawing["overallAttributes$ownDimensionList"].slice();
 
   let allOverallAttributesDimensionProperty = {};
@@ -203,6 +220,36 @@ ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, propert
   });
 
   return allOverallAttributesDimensionProperty;
+}
+
+// all propertoes: value, exprstring or name of all overall attributes styles
+ShapeUtil.getAllOverallAttributesStylesAllProperties = function (drawing) {
+  const self = this;
+  const styleList = drawing["overallAttributes$ownStyleList"].slice();
+
+    let allOverallAttributesStylesAllProperties = {};
+  styleList.forEach((style) => {
+    allOverallAttributesStylesAllProperties[style + "$value"] = self.getOverallAttributesStyleProperty(style, drawing, "value")
+    allOverallAttributesStylesAllProperties[style + "$name"] = self.getOverallAttributesStyleProperty(style, drawing, "name")
+    allOverallAttributesStylesAllProperties[style + "$exprString"] = self.getOverallAttributesStyleProperty(style, drawing, "exprString")
+  });
+
+  return allOverallAttributesStylesAllProperties;
+}
+
+// all propertoes: value, exprstring or name of all overall attributes dimensions
+ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function (drawing) {
+  const self = this;
+  const dimensionList = drawing["overallAttributes$ownDimensionList"].slice();
+
+    let allOverallAttributesDimensionsAllProperties = {};
+  dimensionList.forEach((dimension) => {
+    allOverallAttributesDimensionsAllProperties[dimension + "$value"] = self.getOverallAttributesDimensionProperty(dimension, drawing, "value")
+    allOverallAttributesDimensionsAllProperties[dimension + "$name"] = self.getOverallAttributesDimensionProperty(dimension, drawing, "name")
+    allOverallAttributesDimensionsAllProperties[dimension + "$exprString"] = self.getOverallAttributesDimensionProperty(dimension, drawing, "exprString")
+  });
+
+  return allOverallAttributesDimensionsAllProperties;
 }
 
 
@@ -552,6 +599,8 @@ ShapeUtil.referenceAttributes = {};
 ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId, droppedAttributeMonitorItem) {
   const self = this;
 
+  const droppedAttributeId = droppedAttributeMonitorItem["attributeId"];
+
   // create a new object in ShapeUtil's referenceAttributes object for current attribute if not present already
   if(!self.referenceAttributes[attributeId])
   {
@@ -560,9 +609,24 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
     self.referenceAttributes[attributeId]["referredAttributesIdSet"] = new Set();
     self.referenceAttributes[attributeId]["marks"] = [];
     self.referenceAttributes[attributeId]["exprString"] = "";
+    self.referenceAttributes[attributeId]["dependentIds"] = new Set();
   }
 
-  self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeMonitorItem["attributeId"]);
+  self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeId);
+
+  // add the attribute on which referredAttribute is dropped to dependents of referredAttribute
+  if(!self.referenceAttributes[droppedAttributeId])
+  {
+    self.referenceAttributes[droppedAttributeId] = {};
+    // javascript set to store unique values.
+    self.referenceAttributes[droppedAttributeId]["referredAttributesIdSet"] = new Set();
+    self.referenceAttributes[droppedAttributeId]["marks"] = [];
+    self.referenceAttributes[droppedAttributeId]["exprString"] = "";
+    self.referenceAttributes[droppedAttributeId]["dependentIds"] = new Set();
+  }
+
+  self.referenceAttributes[droppedAttributeId]["dependentIds"].add(attributeId);
+
 
   console.log(ShapeUtil.referenceAttributes);
 }
@@ -608,6 +672,69 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
   });
 
   console.log(ShapeUtil.referenceAttributes);
+}
+
+ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing) {
+  const self = this;
+
+  let referredAttributesValues = {};
+  let value;
+
+  if (self.referenceAttributes[attributeId] === undefined) {
+    var math2 = math;
+    try {
+      value = math.eval(attributeExprString);
+      return value;
+    }
+
+    catch (e) {
+      return "error";
+    }
+  }
+
+
+  else if (self.referenceAttributes[attributeId] !== undefined)
+  {
+    const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"]
+    if(referredAttributesIdSet.size !== 0)
+    {
+      referredAttributesIdSet.forEach(function(referredAttributeId) {
+        const referredAttributeExprString = drawing[referredAttributeId + "$exprString"];
+        const referredAttributeValue = self.getAttributeValue(referredAttributeId, referredAttributeExprString, drawing)
+
+        if(referredAttributeValue === "error")
+          return "error";
+
+        referredAttributesValues[referredAttributeId] = referredAttributeValue;
+      });
+    }
+  }
+
+  return math.eval(attributeExprString, referredAttributesValues)
+}
+
+ShapeUtil.hasDependents = function (attributeId) {
+  const self = this;
+
+  if((self.referenceAttributes[attributeId]) && (self.referenceAttributes[attributeId]["dependentIds"].size > 0))
+    return true;
+
+  return false;
+}
+
+ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
+  const self = this;
+
+  if(!self.hasDependents(attributeId))
+    return {};
+
+  let newValueObj = {};
+
+  self.referenceAttributes[attributeId]["dependentIds"].forEach((dependentId) => {
+    newValueObj[dependentId + "$value"] = self.getAttributeValue(dependentId, drawing[dependentId + "$exprString"], drawing);
+  })
+
+  return newValueObj;
 }
 
 

@@ -7,7 +7,9 @@ import {
   ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
   UPDATE_HOVERED_ATTRIBUTE,
   DELETE_ACTIVE_LAYER,
-  CHANGE_ACTIVE_LAYER_AND_SHAPE
+  CHANGE_ACTIVE_LAYER_AND_SHAPE,
+  UPDATE_DEPENDENTS_VALUES,
+  ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import { initialState } from "./init.js";
@@ -34,7 +36,11 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       invalidLayerIndex,
       newLayerIds,
       newActiveLayerId,
-      newActiveShapeId;
+      newActiveShapeId,
+      newAttributeValue,
+      newDependentsValues,
+      newOwnAttributes,
+      newInheritedAttributes;
 
   switch (action.type) {
     case START_DRAG_DRAW:
@@ -66,6 +72,8 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newLayerId + "$id"] = newLayerId;
       newObj[newLayerId + "$type"] = currentShape;
       newObj[newLayerId + "$index"] = layerCount;
+      // yeah, i'm not very innovative with names.
+      newObj[newLayerId + "$whatAmI"] = "layer";
 
       // every layer and shape has a own attributes and inherited attributes. on editing an inhertides attribute, the attribute gets shifted to own attributes.
       // attributes are both dimensions and styles.
@@ -80,14 +88,14 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;
-      newObj[newShapeId + "$index"] =
-        newObj[newLayerId + "$shapeIds"].length - 1;
+      newObj[newShapeId + "$index"] = newObj[newLayerId + "$shapeIds"].length - 1;
       newObj[newShapeId + "$type"] = currentShape;
       newObj[newShapeId + "$layerId"] = newLayerId;
       newObj[newShapeId + "$inheritedDimensionList"] = newLayer.dimensionList.list.slice();
       newObj[newShapeId + "$ownDimensionList"] = [];
       newObj[newShapeId + "$ownStyleList"] = [];
       newObj[newShapeId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
+      newObj[newShapeId + "$whatAmI"] = "shape";
 
       newObj[newLayerId + "$ownDimensionList"].forEach(attr => {
         newObj[newLayerId + "$" + attr + "$value"] = newLayer["dimensionList"][attr + "$value"];
@@ -134,15 +142,38 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       attributeId = action.attributeId;
       newExprString = action.newExprString;
 
-      newObj[attributeId + "$exprString"] = newExprString;
-
+      // before updating expr string, we also calculate the value.
+      // TODO: should we do it before or after?
       ShapeUtil.updateMarks(action.attributeId, action.newExprString, state);
+
+      if(action.typeOfAttribute !== "dimension")
+        newAttributeValue = "" + newExprString;
+
+      else
+        newAttributeValue = ShapeUtil.getAttributeValue(action.attributeId, action.newExprString, state);
+
+      newObj[attributeId + "$exprString"] = newExprString;
+      newObj[attributeId + "$value"] = newAttributeValue;
+
       return Object.assign({}, state, newObj);
+
+    case UPDATE_DEPENDENTS_VALUES:
+      // Now also update values of all the other attributes depending on this attribute.
+      newDependentsValues = ShapeUtil.updateDependentsValues(action.attributeId, state)
+
+      return Object.assign({}, state, newDependentsValues);
 
     case UPDATE_HOVERED_ATTRIBUTE:
       return Object.assign({}, state, {
         hoveredAttributeId: action.hoveredAttributeId
       });
+
+    case ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES:
+      attributeId = action.attributeId;
+
+      debugger;
+
+      
 
     case DELETE_ACTIVE_LAYER:
 

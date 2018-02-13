@@ -23,6 +23,7 @@ class Chart extends React.Component {
   }
 
   onMouseDown(e) {
+    document.activeElement.blur();
     e.preventDefault();
 
     // yeah so I can't bind a click event on both svg and it's child. yet. so have to fire it from here. fuck.
@@ -84,7 +85,7 @@ class Chart extends React.Component {
           }}
           style={overallStyles}
           >
-          <rect width={width} height={height}></rect>
+          <rect width={width} height={height} fill="#fff"></rect>
 
           {layerIds.map((layerId, i) =>
             <g key={i} id={layerId}>

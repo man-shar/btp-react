@@ -52,7 +52,7 @@ class AttributeFlexName extends React.Component {
           updateHoveredAttribute("");
         }}
         >
-        <div className="EditableTextAttributeFlexName" contentEditable="true">
+        <div className="EditableTextAttributeFlexName">
           <span>{attributeName}</span>
         </div>
       </div>

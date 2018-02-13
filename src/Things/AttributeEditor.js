@@ -29,8 +29,6 @@ class AttributeEditor extends React.Component {
           <span>Shape Attributes</span>
         </div>
         <ShapeAttributeEditor shapeId={activeShapeId} layerId={activeLayerId}/>
-        
-        <ShapeAttributeEditor />
       </div>
     );
   }

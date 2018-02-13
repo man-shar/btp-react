@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import "codemirror/mode/javascript/javascript"
 import ShapeUtil from "../Util/ShapeUtil";
-import { changeAttributeExpressionString, addAttributeReferenceToAttribute } from "../Actions/actions";
+import { changeAttributeExpressionStringThunk, addAttributeReferenceToAttribute } from "../Actions/actions";
 import { DropTarget } from 'react-dnd';
 import ItemTypesDnd from "./ItemTypesDnd";
 
@@ -30,31 +30,45 @@ class AttributeFlexExpressionEditable extends React.Component {
 
   editorDidMount(editor) {
     editor.setValue(this.props.attributeExprString);
+
+    this.renderCodeMirrorMarks(editor);
+  }
+
+  renderCodeMirrorMarks(editor) {
+    const referenceAttributes = ShapeUtil.referenceAttributes[this.props.attributeId];
+    if(referenceAttributes)
+    {
+      const marks = referenceAttributes["marks"]
+    }
+
   }
 
   onMirrorChange(editor, changeObj) {
     if(this.props.attributeExprString === editor.getValue())
       return;
 
-    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue());
+    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute);
+    this.renderCodeMirrorMarks(editor);
   }
 
   onMirrorDrop(editor, event) {
     const monitor = this.props.monitor;
     const attributeId = this.props.attributeId;
 
-    if(!monitor.getItem().attributeId)
+    if(!monitor.getItem().attributeId || this.props.typeOfAttribute !== "dimension")
     {
       console.log("not dropping reference")
       return;
     }
 
-    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem());
+    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttribute);
+    this.renderCodeMirrorMarks(editor);
   }
 
   render() {
     const attributeExprString = this.props.attributeExprString;
     const attributeId = this.props.attributeId;
+    const typeOfAttribute = this.props.typeOfAttribute;
 
     const connectDropTarget = this.props.connectDropTarget;
 
@@ -92,11 +106,11 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAttributeExprStringChange: (attributeId, newExprString) => {
-      dispatch(changeAttributeExpressionString(attributeId, newExprString));
+    onAttributeExprStringChange: (attributeId, newExprString, typeOfAttribute) => {
+      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute));
     },
-    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem) => {
-      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem));
+    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute) => {
+      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute));
     }
   }
 }

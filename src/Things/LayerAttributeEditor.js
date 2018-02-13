@@ -53,6 +53,7 @@ class LayerAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={layerId}
                   shapeOrLayer="layer"
+                  typeOfAttribute="dimension"
                   own={true}
                 />)
             }
@@ -73,6 +74,7 @@ class LayerAttributeEditor extends React.Component {
                     attributeExprString={attributeExprString}
                     shapeOrLayerId={layerId}
                     shapeOrLayer="layer"
+                    typeOfAttribute="dimension"
                     own={false}
                   />
                 )
@@ -93,6 +95,7 @@ class LayerAttributeEditor extends React.Component {
                   attributeExprString={attributeExprString}
                   shapeOrLayerId={layerId}
                   shapeOrLayer="layer"
+                  typeOfAttribute="style"
                   own={true}
                 />)
             }
@@ -113,6 +116,7 @@ class LayerAttributeEditor extends React.Component {
                     attributeExprString={attributeExprString}
                     shapeOrLayerId={layerId}
                     shapeOrLayer="layer"
+                    typeOfAttribute="style"
                     own={false}
                   />
                 )

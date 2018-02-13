@@ -11,7 +11,9 @@ export const CHANGE_ATTRIBUTE_EXPRESSION_STRING = "change-attribute-expression-s
 export const ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE = "add-attribute-reference-to-attribute";
 export const UPDATE_HOVERED_ATTRIBUTE = "update-hovered-attribute";
 export const DELETE_ACTIVE_LAYER = "delete-active-layer";
-export const CHANGE_ACTIVE_LAYER_AND_SHAPE = "change-active-layer-and-shape"
+export const CHANGE_ACTIVE_LAYER_AND_SHAPE = "change-active-layer-and-shape";
+export const UPDATE_DEPENDENTS_VALUES = "update-dependents-values";
+export const ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES = "add-attribute-to-own-attributes";
 
 
 export function startDragDraw(e, allState) {
@@ -86,32 +88,46 @@ export function readFile(file) {
   }
 }
 
-export function changeAttributeExpressionString(attributeId, newExprString) {
+export function changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute) {
   const action = {
     type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
     attributeId: attributeId,
-    newExprString: newExprString
+    newExprString: newExprString,
+    typeOfAttribute: typeOfAttribute
   };
+
   return action;
 }
 
-export function addAttributeReferenceToAttributeThunk(editor, event, attributeId, droppedAttributeMonitorItem) {
-  
+export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute) {
+  return (dispatch) => {
+    dispatch(changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute));
+    
+    // update values of attributes depending on this attribute.
+    dispatch(updateDependentsValues(attributeId));
+    // dispatch action to add this attribute to own attributes in case it isn't.
+    dispatch(addAttributeToOwnAttributes(attributeId));
+  }
 }
 
-export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem) {  
-  ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
-  const attributeExprString = editor.getValue();
-
-  const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
-
+export function updateDependentsValues(attributeId) {
   const action = {
-    type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
+    type: UPDATE_DEPENDENTS_VALUES,
     attributeId: attributeId,
-    newExprString: newExprString
   };
 
-  return action;
+  return action;  
+}
+
+export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute) {
+
+  return (dispatch) => {
+    ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
+    const attributeExprString = editor.getValue();
+
+    const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
+    dispatch(changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute))
+  }
 }
 
 export function updateHoveredAttribute(hoveredAttributeId) {
@@ -146,6 +162,15 @@ export function changeActiveLayerAndShape(shapeId) {
   const action = {
     type: CHANGE_ACTIVE_LAYER_AND_SHAPE,
     shapeId: shapeId
+  }
+
+  return action;
+}
+
+export function addAttributeToOwnAttributes(attributeId) {
+  return {
+    type: ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
+    attributeId: attributeId
   }
 
   return action;
