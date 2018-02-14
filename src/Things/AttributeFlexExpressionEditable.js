@@ -1,13 +1,15 @@
 import React from 'react';
 import { render } from 'react-dom';
 import ReactDOM from 'react-dom';
-import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { Provider, connect } from 'react-redux';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import "codemirror/mode/javascript/javascript"
 import ShapeUtil from "../Util/ShapeUtil";
 import { changeAttributeExpressionStringThunk, addAttributeReferenceToAttribute } from "../Actions/actions";
 import { DropTarget } from 'react-dnd';
 import ItemTypesDnd from "./ItemTypesDnd";
+import CodeMirrorMark from "./CodeMirrorMark"
 
 // render editable attribute expression as codemirror editor. use references objects to render references to other attributes.
 
@@ -35,13 +37,49 @@ class AttributeFlexExpressionEditable extends React.Component {
     this.instance = null;
     this.state = {};
     this.state.shouldUpdate = true;
+    this.store;
+  }
+
+  componentDidMount() {
+    // have to do this becuse we are using document.createElement to render codemirror marks. which doesn't automatically get Provider's context. so have to explicitly pass it that.
+    this.store = this.context.store;
   }
 
   renderCodeMirrorMarks(editor) {
     const referenceAttributes = ShapeUtil.referenceAttributes[this.props.attributeId];
     if(referenceAttributes)
     {
-      const marks = referenceAttributes["marks"]
+      const marks = referenceAttributes["marks"];
+
+      marks.forEach((mark) => {
+        const el = document.createElement("div");
+        el.style.display = "inline";
+
+        ReactDOM.render(
+            <CodeMirrorMark
+              markText={mark.text}
+              attributeId={mark.attributeId}
+              // here we pass store as prop to component using connect. it doesn't get passed by default as it is not part of the DOM tree yet I guess.
+              store={this.store}
+            >
+            </CodeMirrorMark>
+          , el
+        );
+
+        editor.markText({
+            line: 0,
+            ch: mark.from
+          },
+          {
+            line: 0,
+            ch: mark.to
+          },
+          {
+            replacedWith: el,
+            handleMouseEvents: true
+          }
+        );
+      });
     }
   }
 
@@ -51,28 +89,29 @@ class AttributeFlexExpressionEditable extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const editor = this.instance;
+
+    this.renderCodeMirrorMarks(editor);
+
     if(editor && (nextProps.attributeExprString === editor.getValue())) 
     {
       this.setState({
         shouldUpdate: false,
       })
-      return false;
     }
 
     this.setState({
       shouldUpdate: true,
     })
-
-    return true;
   }
 
   onMirrorChange(editor, changeObj) {
     if(this.props.attributeExprString === editor.getValue())
+    {
+      this.renderCodeMirrorMarks(editor);
       return;
+    }
 
     this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex);
-
-    this.renderCodeMirrorMarks(editor);
   }
 
   onMirrorDrop(editor, event) {
@@ -86,6 +125,7 @@ class AttributeFlexExpressionEditable extends React.Component {
     }
 
     this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex);
+    
     this.renderCodeMirrorMarks(editor);
   }
 
@@ -146,6 +186,10 @@ const mapDispatchToProps = dispatch => {
       dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex));
     }
   }
+}
+
+AttributeFlexExpressionEditable.contextTypes = {
+  store: PropTypes.object
 }
 
 AttributeFlexExpressionEditable = connect(mapStateToProps, mapDispatchToProps)(AttributeFlexExpressionEditable);

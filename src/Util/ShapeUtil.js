@@ -721,7 +721,6 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
 
   self.referenceAttributes[droppedAttributeId]["dependentIds"].add(attributeId);
 
-
   console.log(ShapeUtil.referenceAttributes);
 }
 
@@ -740,20 +739,20 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
   const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
   self.referenceAttributes[attributeId]["marks"] = [];
 
-  referredAttributesIdSet.forEach((referredAttribute) => {
+  referredAttributesIdSet.forEach((referredAttributeId) => {
     // find first index of this referred attribute
     // in case a reference is deleted completely, we will get no references to it in the string and will then remove it.
     let c = 0;
     let start = -1;
-    while ((start = newExprString.indexOf(referredAttribute, start)) > -1)
+    while ((start = newExprString.indexOf(referredAttributeId, start)) > -1)
     {
-      let end = start + referredAttribute.length;
+      let end = start + referredAttributeId.length;
 
       let mark = {};
       mark["from"] = start;
       mark["to"] = end;
-      mark["render"] = "bleh";
-      mark["text"] = drawing[referredAttribute + "$name"];
+      mark["attributeId"] = referredAttributeId;
+      mark["text"] = drawing[referredAttributeId + "$name"];
 
       self.referenceAttributes[attributeId]["marks"].push(mark);
       c++;
@@ -761,7 +760,7 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
     }
 
     if(c === 0) {
-      self.removeReferenceAttribute(attributeId, referredAttribute);
+      self.removeReferenceAttribute(attributeId, referredAttributeId);
     }
   });
 
