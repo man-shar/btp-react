@@ -11,6 +11,8 @@ import ItemTypesDnd from "./ItemTypesDnd";
 
 // render editable attribute expression as codemirror editor. use references objects to render references to other attributes.
 
+// to control whether the codemirror should update, we use a shouldupdate property in the state. so if you let react do it's thing, it updates codemirror everytime there is a change. which causes the cursor on codemirror to jump to the end because the component is re-mounted hence the editor is recreated. but what we can do in shouldcomponenetupdate is that use compoenentWillRecieveProps to decide whether the nextprops are the same as codemirror contents and if true, set the shouldupdate variable to false. else it will be true. and use this value as the return value in shouldComponentUpdate.
+
 const dropMethods = {
   drop: function(props, monitor) {
     // console.log(monitor.getItem());
@@ -27,11 +29,12 @@ function collect(connect, monitor) {
 }
 
 class AttributeFlexExpressionEditable extends React.Component {
+  constructor() {
+    super();
 
-  editorDidMount(editor) {
-    editor.setValue(this.props.attributeExprString);
-
-    this.renderCodeMirrorMarks(editor);
+    this.instance = null;
+    this.state = {};
+    this.state.shouldUpdate = true;
   }
 
   renderCodeMirrorMarks(editor) {
@@ -42,11 +45,33 @@ class AttributeFlexExpressionEditable extends React.Component {
     }
   }
 
+  shouldComponentUpdate() {
+    return (this.state.shouldUpdate);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const editor = this.instance;
+    if(editor && (nextProps.attributeExprString === editor.getValue())) 
+    {
+      this.setState({
+        shouldUpdate: false,
+      })
+      return false;
+    }
+
+    this.setState({
+      shouldUpdate: true,
+    })
+
+    return true;
+  }
+
   onMirrorChange(editor, changeObj) {
     if(this.props.attributeExprString === editor.getValue())
       return;
 
     this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex);
+
     this.renderCodeMirrorMarks(editor);
   }
 
@@ -94,6 +119,12 @@ class AttributeFlexExpressionEditable extends React.Component {
           className="AttributeFlexExpressionEditable"
           onChange={this.onMirrorChange.bind(this)}
           onDrop={this.onMirrorDrop.bind(this)}
+          editorDidMount={(editor) => {
+            editor.setValue(this.props.attributeExprString);
+            
+            this.renderCodeMirrorMarks(editor);
+            this.instance = editor;
+          }}
         />
       </div>
     );

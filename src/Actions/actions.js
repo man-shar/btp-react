@@ -101,10 +101,12 @@ export function changeAttributeExpressionString(attributeId, newExprString, type
 
 export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex) {
   return (dispatch, getState) => {
-    dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
-
+    const state = getState();
     const attributeName = attributeId.split("$")[1];
     const ownAttributeId = actionOccuredAtId + "$" + attributeName;
+
+    if(state["drawing"][actionOccuredAtId + "$" + attributeName + "$name"] === undefined)  
+      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
 
     dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttribute));
     
@@ -126,12 +128,13 @@ export function updateDependentsValues(attributeId) {
 export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex) {
 
   return (dispatch, getState) => {
-
-    // add attribute to own attributes in case this isn't one.
-    dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
-
+    const state = getState();
     const attributeName = attributeId.split("$")[1];
     const ownAttributeId = actionOccuredAtId + "$" + attributeName;
+
+    // add attribute to own attributes in case this isn't one.
+    if(state["drawing"][actionOccuredAtId + "$" + attributeName + "$name"] === undefined)
+      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
 
     ShapeUtil.addAttributeReferenceToAttribute(editor, event, ownAttributeId, droppedAttributeMonitorItem);
     const attributeExprString = editor.getValue();
