@@ -120,7 +120,13 @@ ShapeUtil.startDragDrawShape = function(shape, e) {
       y$exprString: "" + e.nativeEvent.offsetY,
       width$exprString: "0",
       height$exprString: "0",
-      list: ["width", "height", "x", "y"]
+      rx$value: 0,
+      rx$name: "Horizontal Corner Radius",
+      rx$exprString: "0",
+      ry$value: 0,
+      ry$name: "Vertical Corner Radius",
+      ry$exprString: "0",
+      list: ["width", "height", "x", "y", "rx", "ry"],
     };
   }
 
@@ -290,6 +296,46 @@ ShapeUtil.getShapeStyleProperty = function(style, shapeId, layerId, drawing, pro
   return self.getLayerStyleProperty(style, layerId, drawing, property)
 }
 
+// get all properties of a particular dimension from a shape. returns the three properties:name, id and exprString of the dimension in an object.
+ShapeUtil.getShapeDimensionAllProperties = function(dimension, shapeId, layerId, drawing) {
+  const self = this;
+
+  var shapeDimensionAllProperties = {};
+
+  // check if this dimension is defined in the shape.
+  if(drawing[shapeId + "$" + dimension + "$" + "name"] !== undefined)
+  {
+    shapeDimensionAllProperties[dimension + "$" + "name"] = drawing[shapeId + "$" + dimension + "$" + "name"];
+    shapeDimensionAllProperties[dimension + "$" + "value"] = drawing[shapeId + "$" + dimension + "$" + "value"];
+    shapeDimensionAllProperties[dimension + "$" + "exprString"] = drawing[shapeId + "$" + dimension + "$" + "exprString"];
+
+    return shapeDimensionAllProperties;
+  }
+
+  // otherwise return from layer
+  return self.getLayerDimensionAllProperties(dimension, layerId, drawing);
+}
+
+// get all properties of a particular style from a shape. returns the three properties:name, id and exprString of the style in an object.
+ShapeUtil.getShapeStyleAllProperties = function(style, shapeId, layerId, drawing) {
+  const self = this;
+
+  var shapeStyleAllProperties = {};
+
+  // check if this style is defined in the shape.
+  if(drawing[shapeId + "$" + style + "$" + "name"] !== undefined)
+  {
+    shapeStyleAllProperties[style + "$" + "name"] = drawing[shapeId + "$" + style + "$" + "name"];
+    shapeStyleAllProperties[style + "$" + "value"] = drawing[shapeId + "$" + style + "$" + "value"];
+    shapeStyleAllProperties[style + "$" + "exprString"] = drawing[shapeId + "$" + style + "$" + "exprString"];
+
+    return shapeStyleAllProperties;
+  }
+
+  // otherwise return from layer
+  return self.getLayerStyleAllProperties(style, layerId, drawing);
+}
+
 // get all own dimension **property**: value, name or expressionString from a shape.
 ShapeUtil.getAllShapeOwnDimensionsProperty = function(shapeId, layerId, drawing, property) {
   let allShapeOwnDimensions = {}
@@ -450,6 +496,50 @@ ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, property) {
   return drawing["overallAttributes" + "$" + style + "$" + property];
 }
 
+// get all properties of a particular dimension: own or inherited from a layer. returns the three properties:name, id and exprString of the dimension in an object.
+ShapeUtil.getLayerDimensionAllProperties = function(dimension, layerId, drawing) {
+  var layerDimensionAllProperties = {};
+
+  // check if this dimension is defined in the layer.
+  if(drawing[layerId + "$" + dimension + "$" + "name"] !== undefined)
+  {
+    layerDimensionAllProperties[dimension + "$" + "name"] = drawing[layerId + "$" + dimension + "$" + "name"];
+    layerDimensionAllProperties[dimension + "$" + "value"] = drawing[layerId + "$" + dimension + "$" + "value"];
+    layerDimensionAllProperties[dimension + "$" + "exprString"] = drawing[layerId + "$" + dimension + "$" + "exprString"];
+
+    return layerDimensionAllProperties;
+  }
+
+  // otherwise return from overallAttributes
+  layerDimensionAllProperties[dimension + "$" + "name"] = drawing["overallAttributes" + "$" + dimension + "$" + "name"];
+  layerDimensionAllProperties[dimension + "$" + "value"] = drawing["overallAttributes" + "$" + dimension + "$" + "value"];
+  layerDimensionAllProperties[dimension + "$" + "exprString"] = drawing["overallAttributes" + "$" + dimension + "$" + "exprString"];
+  
+  return layerDimensionAllProperties;
+}
+
+// get all properties of a particular style: own or inherited from a layer. returns the three properties:name, id and exprString of the style in an object.
+ShapeUtil.getLayerStyleAllProperties = function(style, layerId, drawing) {
+  var layerStyleAllProperties = {};
+
+  // check if this style is defined in the layer.
+  if(drawing[layerId + "$" + style + "$" + "name"] !== undefined)
+  {
+    layerStyleAllProperties[style + "$" + "name"] = drawing[layerId + "$" + style + "$" + "name"];
+    layerStyleAllProperties[style + "$" + "value"] = drawing[layerId + "$" + style + "$" + "value"];
+    layerStyleAllProperties[style + "$" + "exprString"] = drawing[layerId + "$" + style + "$" + "exprString"];
+
+    return layerStyleAllProperties;
+  }
+
+  // otherwise return from overallAttributes
+  layerStyleAllProperties[style + "$" + "name"] = drawing["overallAttributes" + "$" + style + "$" + "name"];
+  layerStyleAllProperties[style + "$" + "value"] = drawing["overallAttributes" + "$" + style + "$" + "value"];
+  layerStyleAllProperties[style + "$" + "exprString"] = drawing["overallAttributes" + "$" + style + "$" + "exprString"];
+  
+  return layerStyleAllProperties;
+}
+
 // check if attribute is a layer's own attribute.
 ShapeUtil.isLayerOwn = function (dimensionOrStyle, layerId, drawing) {
   // we can check just the name as name, value and exprstring are defined simultaneously.
@@ -534,7 +624,7 @@ ShapeUtil.getAllLayerOwnDimensionsAllProperties = function(layerId, drawing) {
   return ownDimensionsAllProperties;
 };
 
-// get all properties of all own dimensions of a layer
+// get all properties of all inherited dimensions of a layer
 ShapeUtil.getAllLayerInheritedDimensionsAllProperties = function(layerId, drawing) {
   const self = this;
 
@@ -553,7 +643,7 @@ ShapeUtil.getAllLayerInheritedDimensionsAllProperties = function(layerId, drawin
   return inheritedDimensionsAllProperties;
 };
 
-// get all properties of all own styles of a shape
+// get all properties of all own styles of a layer
 ShapeUtil.getAllLayerOwnStylesAllProperties = function(layerId, drawing) {
   const self = this;
 
@@ -572,7 +662,7 @@ ShapeUtil.getAllLayerOwnStylesAllProperties = function(layerId, drawing) {
   return ownStylesAllProperties;
 };
 
-// get all properties of all inherited styles of a shape
+// get all properties of all inherited styles of a layer
 ShapeUtil.getAllLayerInheritedStylesAllProperties = function(layerId, drawing) {
   const self = this;
 

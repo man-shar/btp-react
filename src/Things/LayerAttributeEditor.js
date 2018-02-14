@@ -2,6 +2,7 @@ import React from "react";
 import { render } from "react-dom";
 import { connect } from "react-redux";
 import ShapeUtil from "../Util/ShapeUtil";
+import Util from "../Util/Util";
 import AttributeFlexRow from "./AttributeFlexRow"
 
 // Attributes are both dimensions and styles.
@@ -10,123 +11,62 @@ import AttributeFlexRow from "./AttributeFlexRow"
 class LayerAttributeEditor extends React.Component {
   render() {
     const layerId = this.props.layerId;
-    const ownDimensionList = this.props.drawing[layerId + "$ownDimensionList"];
-    const inheritedDimensionList = this.props.drawing[layerId + "$inheritedDimensionList"];
-    const ownStyleList = this.props.drawing[layerId + "$ownStyleList"];
-    const inheritedStyleList = this.props.drawing[layerId + "$inheritedStyleList"];
-
-    const ownLayerDimensionsAllProperties = ShapeUtil.getAllLayerOwnDimensionsAllProperties(
-      layerId,
-      this.props.drawing,
-    );
-
-    const inheritedLayerDimensionsAllProperties = ShapeUtil.getAllLayerInheritedDimensionsAllProperties(
-      layerId,
-      this.props.drawing,
-    );
-
-    const ownLayerStylesAllProperties = ShapeUtil.getAllLayerOwnStylesAllProperties(
-      layerId,
-      this.props.drawing,
-    );
-
-    const inheritedLayerStylesAllProperties = ShapeUtil.getAllLayerInheritedStylesAllProperties(
-      layerId,
-      this.props.drawing,
-    );
+    const drawing = this.props.drawing;
+    const dimensionList = Util.allDimensions[drawing[layerId + "$type"]];
+    const styleList = Util.allStyles[drawing[layerId + "$type"]];
 
     if(layerId)
     {
       return (
         <div className="AttributeFlexContainer">
-          {ownDimensionList.map((attribute, i) =>
+          {dimensionList.map((attribute, i) =>
             {
-              const attributeName = ownLayerDimensionsAllProperties[attribute + "$name"];
-              const attributeValue = ownLayerDimensionsAllProperties[attribute + "$value"];
-              const attributeExprString = ownLayerDimensionsAllProperties[attribute + "$exprString"];
+              const attributeProperties = ShapeUtil.getLayerDimensionAllProperties(attribute, layerId, drawing)
+              const attributeName = attributeProperties[attribute + "$name"];
+              const attributeValue = attributeProperties[attribute + "$value"];
+              const attributeExprString = attributeProperties[attribute + "$exprString"];
+              const isAttributeOwn = ShapeUtil.isLayerOwn(attribute, layerId, drawing);
+              const inheritedFrom = isAttributeOwn ? layerId : "overallAttributes";
               
               return (<AttributeFlexRow
                   key={i}
                   attributeIndex={i}
-                  attributeId={layerId + "$" + attribute}
+                  attributeId={inheritedFrom + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
                   actionOccuredAtId={layerId}
                   actionOccuredAt="layer"
                   typeOfAttribute="dimension"
-                  own={true}
+                  isAttributeOwn={isAttributeOwn}
                 />)
             }
           )}
-          <div className="inherited-attributes">
-            {inheritedDimensionList.map((attribute, i) =>
-              {
-                const attributeName = inheritedLayerDimensionsAllProperties[attribute + "$name"];
-                const attributeValue = inheritedLayerDimensionsAllProperties[attribute + "$value"];
-                const attributeExprString = inheritedLayerDimensionsAllProperties[attribute + "$exprString"];
-                
-                return (
-                  <AttributeFlexRow
-                    key={i}
-                    attributeIndex={i}
-                    attributeId={"overallAttributes$" + attribute}
-                    attributeName={attributeName}
-                    attributeValue={attributeValue}
-                    attributeExprString={attributeExprString}
-                    actionOccuredAtId={layerId}
-                    actionOccuredAt="layer"
-                    typeOfAttribute="dimension"
-                    own={false}
-                  />
-                )
-              }
-            )}
-          </div>
-          {ownStyleList.map((attribute, i) =>
+          {styleList.map((attribute, i) =>
             {
-              const attributeName = ownLayerStylesAllProperties[attribute + "$name"];
-              const attributeValue = ownLayerStylesAllProperties[attribute + "$value"];
-              const attributeExprString = ownLayerStylesAllProperties[attribute + "$exprString"];
+              const attributeProperties = ShapeUtil.getLayerStyleAllProperties(attribute, layerId, drawing)
+              const attributeName = attributeProperties[attribute + "$name"];
+              const attributeValue = attributeProperties[attribute + "$value"];
+              const attributeExprString = attributeProperties[attribute + "$exprString"];
+              const isAttributeOwn = ShapeUtil.isLayerOwn(attribute, layerId, drawing);
+              const inheritedFrom = isAttributeOwn ? layerId : "overallAttributes";
               
-              return (<AttributeFlexRow
+              return (
+                <AttributeFlexRow
                   key={i}
                   attributeIndex={i}
-                  attributeId={layerId + "$" + attribute}
+                  attributeId={inheritedFrom + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
                   actionOccuredAtId={layerId}
                   actionOccuredAt="layer"
-                  typeOfAttribute="style"
-                  own={true}
-                />)
+                  typeOfAttribute="dimension"
+                  isAttributeOwn={isAttributeOwn}
+                />
+              )
             }
           )}
-          <div className="inherited-attributes">
-            {inheritedStyleList.map((attribute, i) =>
-              {
-                const attributeName = inheritedLayerStylesAllProperties[attribute + "$name"];
-                const attributeValue = inheritedLayerStylesAllProperties[attribute + "$value"];
-                const attributeExprString = inheritedLayerStylesAllProperties[attribute + "$exprString"];
-                
-                return (
-                  <AttributeFlexRow
-                    key={i}
-                    attributeIndex={i}
-                    attributeId={"overallAttributes$" + attribute}
-                    attributeName={attributeName}
-                    attributeValue={attributeValue}
-                    attributeExprString={attributeExprString}
-                    actionOccuredAtId={layerId}
-                    actionOccuredAt="layer"
-                    typeOfAttribute="style"
-                    own={false}
-                  />
-                )
-              }
-            )}
-          </div>
         </div>
       );
     }

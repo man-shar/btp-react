@@ -17,13 +17,14 @@ class AttributeFlexRow extends React.Component {
     const actionOccuredAt = this.props.actionOccuredAt;
     const actionOccuredAtId = this.props.actionOccuredAtId;
     const typeOfAttribute = this.props.typeOfAttribute;
+    const isAttributeOwn = this.props.isAttributeOwn;
 
     // passing this down because I have to edit own attributes and remove elements from own/inherited attributes.
     const attributeIndex = this.props.attributeIndex;
 
     // check if attribute's value is not a pure number.
     return (
-      <div className="AttributeFlexRow" id={attributeId}>
+      <div className={"AttributeFlexRow" + (isAttributeOwn ? "" : " inherited-attribute")} id={attributeId}>
         <AttributeFlexName attributeIndex={attributeIndex} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeName={attributeName} actionOccuredAt={actionOccuredAt}/>
         <div className="AttributeFlexExpression">
           <AttributeFlexExpressionEditable attributeIndex={attributeIndex} typeOfAttribute={typeOfAttribute} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeExprString={attributeExprString} actionOccuredAt={actionOccuredAt}/>

@@ -85,10 +85,10 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       // initially, a shape has neither own dimensions not styles. it takes everything from layer.
       // a layer has both dimensions and styles.
 
-      newObj[newLayerId + "$ownDimensionList"] = newLayer.dimensionList.list.slice();
+      newObj[newLayerId + "$ownDimensionList"] = Util.allDimensions[currentShape];
       newObj[newLayerId + "$inheritedDimensionList"] = [];
       newObj[newLayerId + "$ownStyleList"] = [];
-      newObj[newLayerId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
+      newObj[newLayerId + "$inheritedStyleList"] = Util.allStyles[currentShape];
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;

@@ -43,7 +43,7 @@ class OverallAttributeEditor extends React.Component {
                   actionOccuredAtId={"overallAttributes"}
                   actionOccuredAt="layer"
                   typeOfAttribute="dimension"
-                  own={true}
+                  isAttributeOwn={true}
                 />)
             }
           )}
@@ -63,7 +63,7 @@ class OverallAttributeEditor extends React.Component {
                   actionOccuredAtId={"overallAttributes"}
                   actionOccuredAt="layer"
                   typeOfAttribute="style"
-                  own={true}
+                  isAttributeOwn={true}
                 />)
             }
           )}
