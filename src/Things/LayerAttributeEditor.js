@@ -47,12 +47,13 @@ class LayerAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={layerId + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={layerId}
-                  shapeOrLayer="layer"
+                  actionOccuredAtId={layerId}
+                  actionOccuredAt="layer"
                   typeOfAttribute="dimension"
                   own={true}
                 />)
@@ -68,12 +69,13 @@ class LayerAttributeEditor extends React.Component {
                 return (
                   <AttributeFlexRow
                     key={i}
+                    attributeIndex={i}
                     attributeId={"overallAttributes$" + attribute}
                     attributeName={attributeName}
                     attributeValue={attributeValue}
                     attributeExprString={attributeExprString}
-                    shapeOrLayerId={layerId}
-                    shapeOrLayer="layer"
+                    actionOccuredAtId={layerId}
+                    actionOccuredAt="layer"
                     typeOfAttribute="dimension"
                     own={false}
                   />
@@ -89,12 +91,13 @@ class LayerAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={layerId + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={layerId}
-                  shapeOrLayer="layer"
+                  actionOccuredAtId={layerId}
+                  actionOccuredAt="layer"
                   typeOfAttribute="style"
                   own={true}
                 />)
@@ -110,12 +113,13 @@ class LayerAttributeEditor extends React.Component {
                 return (
                   <AttributeFlexRow
                     key={i}
+                    attributeIndex={i}
                     attributeId={"overallAttributes$" + attribute}
                     attributeName={attributeName}
                     attributeValue={attributeValue}
                     attributeExprString={attributeExprString}
-                    shapeOrLayerId={layerId}
-                    shapeOrLayer="layer"
+                    actionOccuredAtId={layerId}
+                    actionOccuredAt="layer"
                     typeOfAttribute="style"
                     own={false}
                   />

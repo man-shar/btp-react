@@ -93,20 +93,24 @@ export function changeAttributeExpressionString(attributeId, newExprString, type
     type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
     attributeId: attributeId,
     newExprString: newExprString,
-    typeOfAttribute: typeOfAttribute
+    typeOfAttribute: typeOfAttribute,
   };
 
   return action;
 }
 
-export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute) {
-  return (dispatch) => {
-    dispatch(changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute));
+export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex) {
+  return (dispatch, getState) => {
+    dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
+
+    const attributeName = attributeId.split("$")[1];
+    const ownAttributeId = actionOccuredAtId + "$" + attributeName;
+
+    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttribute));
     
     // update values of attributes depending on this attribute.
-    dispatch(updateDependentsValues(attributeId));
+    dispatch(updateDependentsValues(ownAttributeId));
     // dispatch action to add this attribute to own attributes in case it isn't.
-    dispatch(addAttributeToOwnAttributes(attributeId));
   }
 }
 
@@ -119,14 +123,23 @@ export function updateDependentsValues(attributeId) {
   return action;  
 }
 
-export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute) {
+export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex) {
 
-  return (dispatch) => {
-    ShapeUtil.addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem);
+  return (dispatch, getState) => {
+
+    // add attribute to own attributes in case this isn't one.
+    dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
+
+    const attributeName = attributeId.split("$")[1];
+    const ownAttributeId = actionOccuredAtId + "$" + attributeName;
+
+    ShapeUtil.addAttributeReferenceToAttribute(editor, event, ownAttributeId, droppedAttributeMonitorItem);
     const attributeExprString = editor.getValue();
 
     const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
-    dispatch(changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute))
+
+    // now change attribute Expression string of *own* attribute.
+    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttribute))
   }
 }
 
@@ -167,10 +180,13 @@ export function changeActiveLayerAndShape(shapeId) {
   return action;
 }
 
-export function addAttributeToOwnAttributes(attributeId) {
+export function addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex) {
   return {
     type: ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
-    attributeId: attributeId
+    attributeId: attributeId,
+    typeOfAttribute: typeOfAttribute,
+    actionOccuredAtId: actionOccuredAtId,
+    attributeIndex: attributeIndex
   }
 
   return action;

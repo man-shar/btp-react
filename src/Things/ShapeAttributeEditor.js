@@ -52,12 +52,13 @@ class ShapeAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={shapeId + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={shapeId}
-                  shapeOrLayer="shape"
+                  actionOccuredAtId={shapeId}
+                  actionOccuredAt="shape"
                   typeOfAttribute="dimension"
                   own={true}
                 />)
@@ -74,12 +75,13 @@ class ShapeAttributeEditor extends React.Component {
                 return (
                   <AttributeFlexRow
                       key={i}
+                      attributeIndex={i}
                       attributeId={inheritedFrom + "$" + attribute}
                       attributeName={attributeName}
                       attributeValue={attributeValue}
                       attributeExprString={attributeExprString}
-                      shapeOrLayerId={shapeId}
-                      shapeOrLayer="shape"
+                      actionOccuredAtId={shapeId}
+                      actionOccuredAt="shape"
                       typeOfAttribute="dimension"
                       own={false}
                     />
@@ -95,12 +97,13 @@ class ShapeAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={shapeId + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={shapeId}
-                  shapeOrLayer="shape"
+                  actionOccuredAtId={shapeId}
+                  actionOccuredAt="shape"
                   typeOfAttribute="style"
                   own={true}
                 />)
@@ -117,12 +120,13 @@ class ShapeAttributeEditor extends React.Component {
                 return (
                   <AttributeFlexRow
                     key={i}
+                    attributeIndex={i}
                     attributeId={inheritedFrom + "$" + attribute}
                     attributeName={attributeName}
                     attributeValue={attributeValue}
                     attributeExprString={attributeExprString}
-                    shapeOrLayerId={shapeId}
-                    shapeOrLayer="shape"
+                    actionOccuredAtId={shapeId}
+                    actionOccuredAt="shape"
                     typeOfAttribute="style"
                     own={false}
                   />

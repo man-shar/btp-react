@@ -268,22 +268,26 @@ ShapeUtil.isShapeOwn = function (dimensionOrStyle, shapeId, drawing) {
 
 // get a particular dimension property from a shape. returns just the property of the dimension, not an object.
 ShapeUtil.getShapeDimensionProperty = function(dimension, shapeId, layerId, drawing, property) {
+  var self = this;
+
   // check if this dimension is defined in the shape.
-  if(drawing[shapeId + "$" + dimension + "$" + property])
+  if(drawing[shapeId + "$" + dimension + "$" + property] !== undefined)
     return drawing[shapeId + "$" + dimension + "$" + property];
 
   // otherwise check in layer.
-  return getLayerDimensionProperty(dimension, layerId, drawing, property)
+  return self.getLayerDimensionProperty(dimension, layerId, drawing, property)
 }
 
 // get a particular style property from a shape. returns just the property of the style, not an object.
 ShapeUtil.getShapeStyleProperty = function(style, shapeId, layerId, drawing, property) {
+  var self = this;
+
   // check if this style is defined in the shape.
-  if(drawing[shapeId + "$" + style + "$" + property])
+  if(drawing[shapeId + "$" + style + "$" + property] !== undefined)
     return drawing[shapeId + "$" + style + "$" + property];
 
   // otherwise check in layer.
-  return getLayerStyleProperty(style, layerId, drawing, property)
+  return self.getLayerStyleProperty(style, layerId, drawing, property)
 }
 
 // get all own dimension **property**: value, name or expressionString from a shape.

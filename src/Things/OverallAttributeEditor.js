@@ -35,12 +35,13 @@ class OverallAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={"overallAttributes" + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={"overallAttributes"}
-                  shapeOrLayer="layer"
+                  actionOccuredAtId={"overallAttributes"}
+                  actionOccuredAt="layer"
                   typeOfAttribute="dimension"
                   own={true}
                 />)
@@ -54,12 +55,13 @@ class OverallAttributeEditor extends React.Component {
               
               return (<AttributeFlexRow
                   key={i}
+                  attributeIndex={i}
                   attributeId={"overallAttributes" + "$" + attribute}
                   attributeName={attributeName}
                   attributeValue={attributeValue}
                   attributeExprString={attributeExprString}
-                  shapeOrLayerId={"overallAttributes"}
-                  shapeOrLayer="layer"
+                  actionOccuredAtId={"overallAttributes"}
+                  actionOccuredAt="layer"
                   typeOfAttribute="style"
                   own={true}
                 />)

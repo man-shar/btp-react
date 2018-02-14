@@ -40,14 +40,13 @@ class AttributeFlexExpressionEditable extends React.Component {
     {
       const marks = referenceAttributes["marks"]
     }
-
   }
 
   onMirrorChange(editor, changeObj) {
     if(this.props.attributeExprString === editor.getValue())
       return;
 
-    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute);
+    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex);
     this.renderCodeMirrorMarks(editor);
   }
 
@@ -61,7 +60,7 @@ class AttributeFlexExpressionEditable extends React.Component {
       return;
     }
 
-    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttribute);
+    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex);
     this.renderCodeMirrorMarks(editor);
   }
 
@@ -69,8 +68,11 @@ class AttributeFlexExpressionEditable extends React.Component {
     const attributeExprString = this.props.attributeExprString;
     const attributeId = this.props.attributeId;
     const typeOfAttribute = this.props.typeOfAttribute;
+    // can also be overallAttributes.
+    const actionOccuredAtId = this.props.actionOccuredAtId;
 
     const connectDropTarget = this.props.connectDropTarget;
+    const attributeIndex = this.props.attributeIndex;
 
     // have to wrap in div because react dnd only takes native nodes as drop targets
     return connectDropTarget(
@@ -106,11 +108,11 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAttributeExprStringChange: (attributeId, newExprString, typeOfAttribute) => {
-      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute));
+    onAttributeExprStringChange: (attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex) => {
+      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex));
     },
-    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute) => {
-      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute));
+    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex) => {
+      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex));
     }
   }
 }

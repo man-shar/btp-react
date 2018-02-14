@@ -12,6 +12,7 @@ import {
   ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
+import Util from "../Util/Util";
 import { initialState } from "./init.js";
 
 export function manageDrawingActions(state = initialState["drawing"], action) {
@@ -40,7 +41,10 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newAttributeValue,
       newDependentsValues,
       newOwnAttributes,
-      newInheritedAttributes;
+      newInheritedAttributes,
+      attributeName,
+      typeOfAttribute,
+      attributeIndex;
 
   switch (action.type) {
     case START_DRAG_DRAW:
@@ -170,8 +174,26 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
     case ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES:
       attributeId = action.attributeId;
+      newObj = {};
+      attributeName = attributeId.split("$")[1];
+      typeOfAttribute = Util.toSentenceCase(action.typeOfAttribute);
+      attributeIndex = action.attributeIndex;
 
-      debugger;
+      // check if the source of the edit action owns the attribute
+      if(attributeId.split("$")[0] === action.actionOccuredAtId)
+        return state
+
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"] = state[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"].slice();
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"].push(attributeName);
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"] = state[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"].slice();
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"].splice(attributeIndex, 1);
+
+      // copy all current values to own attribute from inherited.
+      newObj[action.actionOccuredAtId + "$" + attributeName + "$name"] = state[attributeId + "$name"];
+      newObj[action.actionOccuredAtId + "$" + attributeName + "$value"] = state[attributeId + "$value"];
+      newObj[action.actionOccuredAtId + "$" + attributeName + "$exprString"] = state[attributeId + "$exprString"];
+
+      return Object.assign({}, state, newObj);
 
       
 
@@ -181,6 +203,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
       // OHH this has a nice side effect. Since I'm changing the layerIds array, the next time a layer is formed, it overwrites the previous layer's everything. So we don't get a gigantic state.
 
+      // TODO
       // I should still clear out the own Attributes from the deleted layers and shapes though.
       activeLayerId = state["activeLayerId"];
       invalidLayerIndex = state[activeLayerId + "$index"];

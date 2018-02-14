@@ -13,8 +13,8 @@ const attributeSource = {
   beginDrag(props) {
     return {
       attributeId: props.attributeId,
-      shapeOrLayer: props.shapeOrLayer,
-      shapeOrLayerId: props.shapeOrLayerId
+      actionOccuredAt: props.actionOccuredAt,
+      actionOccuredAtId: props.actionOccuredAtId
     };
   }
 };
@@ -34,7 +34,7 @@ function collect(connect, monitor) {
 // render editable attribute name
 class AttributeFlexName extends React.Component {
   render() {
-    const { isDragging, connectDragSource, attributeName, attributeId, shapeOrLayer, shapeOrLayerId, hoveredAttributeId } = this.props;
+    const { isDragging, connectDragSource, attributeName, attributeId, actionOccuredAt, actionOccuredAtId, hoveredAttributeId } = this.props;
 
     const updateHoveredAttribute = this.props.updateHoveredAttribute.bind(this);
 
