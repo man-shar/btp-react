@@ -111,7 +111,7 @@ body {
   overflow-y: scroll;
 }
 
-.AttributeFlexName, .codemirror-marker {
+.AttributeFlexName, .codemirror-marker, .DataFlexColumnHeader {
   width: 10em;
   display: flex;
   background-color: #e1e0e0;
@@ -120,6 +120,10 @@ body {
   margin-right: 1em;
   cursor: -webkit-grab;
   cursor:-moz-grab;
+}
+
+.DataFlexColumnHeader {
+  width: 100%;
 }
 
 .codemirror-marker {
@@ -153,7 +157,7 @@ body {
   height: -webkit-max-content; /* Chrome */
 }
 
- .AttributesSectionHeading {
+.AttributesSectionHeading {
   text-align: center;
   font-size: 1.2em;
   color: #aaa;
@@ -175,7 +179,7 @@ body {
   opacity: 0.7;
 }
 
-.isHovered {
+.isHovered,.DataFlexColumnHeader:hover {
   background-color: steelblue;
   color: #fff;
 }

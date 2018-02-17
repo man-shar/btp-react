@@ -13,18 +13,7 @@ var config = {
     publicPath: '/build/'
   },
   devtool: PROD ? 'source-map' : 'eval-source-map',
-  plugins: PROD ? [
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production')
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compressor: {
-        warnings: false
-      }
-    })
-  ] : [],
+  plugins: [],
   module : {
     loaders : [
       {
