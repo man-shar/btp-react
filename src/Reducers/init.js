@@ -1,5 +1,6 @@
 export const initialState = {
   "drawing": {
+    "data":[],
     "overallAttributes$width$name": "Chart Width",
     "overallAttributes$width$value": 900,
     "overallAttributes$width$exprString": "900",
@@ -93,7 +94,6 @@ export const initialState = {
     "activeShapeId" : "",
     "layerIds": [],
   },
-  "data": [],
   "file": {
     "isLoaded": false,
   },

@@ -9,7 +9,9 @@ import {
   DELETE_ACTIVE_LAYER,
   CHANGE_ACTIVE_LAYER_AND_SHAPE,
   UPDATE_DEPENDENTS_VALUES,
-  ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES
+  ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
+  ADD_DATA_COLUMNS_TO_ATTRIBUTES,
+  FILE_LOADED_AND_PARSED
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import Util from "../Util/Util";
@@ -43,8 +45,9 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newOwnAttributes,
       newInheritedAttributes,
       attributeName,
-      typeOfAttribute,
-      attributeIndex;
+      typeOfAttributeRecievingDrop,
+      attributeIndex,
+      data;
 
   switch (action.type) {
     case START_DRAG_DRAW:
@@ -150,7 +153,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       // TODO: should we do it before or after?
       ShapeUtil.updateMarks(action.attributeId, action.newExprString, state);
 
-      if(action.typeOfAttribute !== "dimension")
+      if(action.typeOfAttributeRecievingDrop !== "dimension")
         newAttributeValue = "" + newExprString;
 
       else
@@ -176,17 +179,17 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       attributeId = action.attributeId;
       newObj = {};
       attributeName = attributeId.split("$")[1];
-      typeOfAttribute = Util.toSentenceCase(action.typeOfAttribute);
+      typeOfAttributeRecievingDrop = Util.toSentenceCase(action.typeOfAttributeRecievingDrop);
       attributeIndex = action.attributeIndex;
 
       // check if the source of the edit action owns the attribute
       if(attributeId.split("$")[0] === action.actionOccuredAtId)
         return state
 
-      newObj[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"] = state[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"].slice();
-      newObj[action.actionOccuredAtId + "$own" + typeOfAttribute + "List"].push(attributeName);
-      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"] = state[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"].slice();
-      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttribute + "List"].splice(attributeIndex, 1);
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"] = state[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"].slice();
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"].push(attributeName);
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"] = state[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"].slice();
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"].splice(attributeIndex, 1);
 
       // copy all current values to own attribute from inherited.
       newObj[action.actionOccuredAtId + "$" + attributeName + "$name"] = state[attributeId + "$name"];
@@ -194,7 +197,6 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[action.actionOccuredAtId + "$" + attributeName + "$exprString"] = state[attributeId + "$exprString"];
 
       return Object.assign({}, state, newObj);
-
       
 
     case DELETE_ACTIVE_LAYER:
@@ -235,6 +237,22 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
         activeLayerId: newActiveLayerId,
         activeShapeId: newActiveShapeId
       })
+
+    case FILE_LOADED_AND_PARSED:
+      return Object.assign({}, state, {
+        data: action.parsed
+      })
+
+    case ADD_DATA_COLUMNS_TO_ATTRIBUTES:
+      data = action.data;
+      newObj = {};
+
+      data.columns.forEach((column, i) => {
+        newObj["dataAttribute" + "$" + column + "$" + "name"] = column;
+        newObj["dataAttribute" + "$" + column + "$" + "type"] = Util.columnType(data, column);
+      });
+
+      return Object.assign({}, state, newObj);
 
 
     default:

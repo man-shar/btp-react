@@ -5,7 +5,6 @@ import { manageFileActions } from "./manageFileActions.js"
 
 const manageActions = combineReducers({
   drawing: manageDrawingActions,
-  data: manageDataActions,
   file: manageFileActions
 });
 

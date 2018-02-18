@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import ShapeUtil from "../Util/ShapeUtil"
+import Util from "../Util/Util"
 
 export const START_DRAG_DRAW = "start-drag-draw";
 export const UPDATE_DRAG_DRAW = "update-drag-draw";
@@ -14,6 +15,7 @@ export const DELETE_ACTIVE_LAYER = "delete-active-layer";
 export const CHANGE_ACTIVE_LAYER_AND_SHAPE = "change-active-layer-and-shape";
 export const UPDATE_DEPENDENTS_VALUES = "update-dependents-values";
 export const ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES = "add-attribute-to-own-attributes";
+export const ADD_DATA_COLUMNS_TO_ATTRIBUTES = "add-data-columns-to-attributes";
 
 
 export function startDragDraw(e, allState) {
@@ -58,14 +60,25 @@ export function fileLoadedAndParsed(fileAsText, fileObj, parsed) {
   return action;
 }
 
+export function addDataColumnsToAttributes(parsed) {
+  const action = {
+    type: ADD_DATA_COLUMNS_TO_ATTRIBUTES,
+    data: parsed
+  }
+  return action;
+}
+
 
 // TODO: Error Handling
 export function fileLoaded(fileAsText, fileObj) {
   return (dispatch) => {
     // parse file with d3
-    const parsed = d3.csvParse(fileAsText)
+    let parsed = d3.csvParse(fileAsText)
+    // add index column to parsed file.
+    parsed = Util.addIndexColumnToParsedFile(parsed);
     // dispatch file loaded and parsed event.
     dispatch(fileLoadedAndParsed(fileAsText, fileObj, parsed));
+    dispatch(addDataColumnsToAttributes(parsed));
   }
 }
 
@@ -88,27 +101,29 @@ export function readFile(file) {
   }
 }
 
-export function changeAttributeExpressionString(attributeId, newExprString, typeOfAttribute) {
+export function changeAttributeExpressionString(attributeId, newExprString, typeOfAttributeRecievingDrop) {
   const action = {
     type: CHANGE_ATTRIBUTE_EXPRESSION_STRING,
     attributeId: attributeId,
     newExprString: newExprString,
-    typeOfAttribute: typeOfAttribute,
+    typeOfAttributeRecievingDrop: typeOfAttributeRecievingDrop,
   };
 
   return action;
 }
 
-export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex) {
+export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex) {
   return (dispatch, getState) => {
     const state = getState();
+    // for eg: attributeId: layer0$width, attributeName:"width"
     const attributeName = attributeId.split("$")[1];
+    // now construct an id from the attrbute name and id of the object where the action occured for eg: layer0rect0 + "$width" = "layer0rect0$width"
     const ownAttributeId = actionOccuredAtId + "$" + attributeName;
 
     if(state["drawing"][actionOccuredAtId + "$" + attributeName + "$name"] === undefined)  
-      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
+      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex));
 
-    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttribute));
+    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttributeRecievingDrop));
     
     // update values of attributes depending on this attribute.
     dispatch(updateDependentsValues(ownAttributeId));
@@ -122,10 +137,10 @@ export function updateDependentsValues(attributeId) {
     attributeId: attributeId,
   };
 
-  return action;  
+  return action;
 }
 
-export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex) {
+export function addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex) {
 
   return (dispatch, getState) => {
     const state = getState();
@@ -134,7 +149,7 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
 
     // add attribute to own attributes in case this isn't one.
     if(state["drawing"][actionOccuredAtId + "$" + attributeName + "$name"] === undefined)
-      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex));
+      dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex));
 
     ShapeUtil.addAttributeReferenceToAttribute(editor, event, ownAttributeId, droppedAttributeMonitorItem);
     const attributeExprString = editor.getValue();
@@ -142,7 +157,7 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
     const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
 
     // now change attribute Expression string of *own* attribute.
-    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttribute))
+    dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttributeRecievingDrop))
   }
 }
 
@@ -183,11 +198,11 @@ export function changeActiveLayerAndShape(shapeId) {
   return action;
 }
 
-export function addAttributeToOwnAttributes(attributeId, typeOfAttribute, actionOccuredAtId, attributeIndex) {
+export function addAttributeToOwnAttributes(attributeId, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex) {
   return {
     type: ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
     attributeId: attributeId,
-    typeOfAttribute: typeOfAttribute,
+    typeOfAttributeRecievingDrop: typeOfAttributeRecievingDrop,
     actionOccuredAtId: actionOccuredAtId,
     attributeIndex: attributeIndex
   }

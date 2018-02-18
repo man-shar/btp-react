@@ -690,6 +690,7 @@ ShapeUtil.getAllLayerInheritedStylesAllProperties = function(layerId, drawing) {
 // Object to store when an attribute references other attributes.
 ShapeUtil.referenceAttributes = {};
 
+// attributeId is of the attribute receiving the dropped item.
 ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId, droppedAttributeMonitorItem) {
   const self = this;
 
@@ -708,7 +709,7 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
 
   self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeId);
 
-  // add the attribute on which referredAttribute is dropped to dependents of referredAttribute
+  // add the attribute on which droppedAttribute is dropped to dependents of droppedAttribute
   if(!self.referenceAttributes[droppedAttributeId])
   {
     self.referenceAttributes[droppedAttributeId] = {};
@@ -759,6 +760,8 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
       start = end;
     }
 
+    // if we didn't find this attirbute in the expession string, what is it doing here anyways. remove it.
+
     if(c === 0) {
       self.removeReferenceAttribute(attributeId, referredAttributeId);
     }
@@ -767,7 +770,7 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
   console.log(ShapeUtil.referenceAttributes);
 }
 
-ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing) {
+ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing, shapeIndex) {
   const self = this;
 
   let referredAttributesValues = {};

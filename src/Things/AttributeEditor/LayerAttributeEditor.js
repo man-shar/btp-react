@@ -35,7 +35,7 @@ class LayerAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={layerId}
               actionOccuredAt='layer'
-              typeOfAttribute='dimension'
+              typeOfAttributeRecievingDrop='dimension'
               isAttributeOwn={isAttributeOwn}
                 />)
           }
@@ -58,7 +58,7 @@ class LayerAttributeEditor extends React.Component {
                 attributeExprString={attributeExprString}
                 actionOccuredAtId={layerId}
                 actionOccuredAt='layer'
-                typeOfAttribute='dimension'
+                typeOfAttributeRecievingDrop='dimension'
                 isAttributeOwn={isAttributeOwn}
                 />
             )

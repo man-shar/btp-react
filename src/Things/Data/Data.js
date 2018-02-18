@@ -42,7 +42,7 @@ class Data extends React.Component {
         return {
           Header: () => {
             return (
-              <DataFlexColumnHeader columnName={column} />
+              <DataFlexColumnHeader attributeId={"dataAttribute" + "$" + column} />
             );
           },
           accessor: column,
@@ -80,7 +80,7 @@ class Data extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    data: state.data,
+    data: state.drawing.data,
     file: state.file
   }
 }

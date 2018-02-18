@@ -10,6 +10,8 @@ import { connect } from 'react-redux'
 const attributeSource = {
   beginDrag (props) {
     return {
+      attributeId: props.attributeId,
+      type: "data"
     }
   }
 }
@@ -30,14 +32,16 @@ function collect (connect, monitor) {
 // render editable attribute name
 class DataFlexColumnHeader extends React.Component {
   render () {
-    const { isDragging, connectDragSource, columnName } = this.props
-    const className = 'DataFlexColumnHeader'
+    const { isDragging, connectDragSource, attributeId, drawing } = this.props
+    const hoveredAttributeId = drawing.hoveredAttributeId;
+
+    const className = 'DataFlexColumnHeader' + ((attributeId === hoveredAttributeId) ? ' isHovered' : '')
 
     return connectDragSource(
       <div
         className={className}
         >
-        <span>{columnName}</span>
+        <span>{drawing[attributeId + "$name"]}</span>
       </div>
     )
   }
@@ -46,7 +50,6 @@ class DataFlexColumnHeader extends React.Component {
 const mapStateToProps = (state) => {
   return {
     drawing: state.drawing,
-    data: state.data
   }
 }
 

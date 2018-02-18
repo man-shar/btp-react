@@ -36,7 +36,7 @@ class ShapeAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={shapeId}
               actionOccuredAt='shape'
-              typeOfAttribute='dimension'
+              typeOfAttributeRecievingDrop='dimension'
               isAttributeOwn={isAttributeOwn}
                 />)
           }
@@ -60,7 +60,7 @@ class ShapeAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={shapeId}
               actionOccuredAt='shape'
-              typeOfAttribute='style'
+              typeOfAttributeRecievingDrop='style'
               isAttributeOwn={isAttributeOwn}
                 />)
           }

@@ -106,20 +106,22 @@ class AttributeFlexExpressionEditable extends React.Component {
       this.renderCodeMirrorMarks(editor)
       return
     }
+    // i need actionOccuredAtId because I need to check whether the attribute is an own attribute or not.
 
-    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex)
+    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex)
   }
 
   onMirrorDrop (editor, event) {
     const monitor = this.props.monitor
     const attributeId = this.props.attributeId
+    const item = monitor.getItem();
 
-    if (!monitor.getItem().attributeId || this.props.typeOfAttribute !== 'dimension') {
+    if (!item.attributeId || this.props.typeOfAttributeRecievingDrop !== 'dimension') {
       console.log('not dropping reference')
       return
     }
 
-    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttribute, this.props.actionOccuredAtId, this.props.attributeIndex)
+    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex)
 
     this.renderCodeMirrorMarks(editor)
   }
@@ -127,7 +129,7 @@ class AttributeFlexExpressionEditable extends React.Component {
   render () {
     const attributeExprString = this.props.attributeExprString
     const attributeId = this.props.attributeId
-    const typeOfAttribute = this.props.typeOfAttribute
+    const typeOfAttributeRecievingDrop = this.props.typeOfAttributeRecievingDrop
     // can also be overallAttributes.
     const actionOccuredAtId = this.props.actionOccuredAtId
 
@@ -174,11 +176,11 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAttributeExprStringChange: (attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex) => {
-      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttribute, actionOccuredAtId, attributeIndex))
+    onAttributeExprStringChange: (attributeId, newExprString, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex) => {
+      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex))
     },
-    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex) => {
-      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttribute, actionOccuredAtId, attributeIndex))
+    onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex) => {
+      dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttributeRecievingDrop, actionOccuredAtId, attributeIndex))
     }
   }
 }
@@ -189,4 +191,4 @@ AttributeFlexExpressionEditable.contextTypes = {
 
 AttributeFlexExpressionEditable = connect(mapStateToProps, mapDispatchToProps)(AttributeFlexExpressionEditable)
 
-export default DropTarget(ItemTypesDnd.ATTRIBUTE, dropMethods, collect)(AttributeFlexExpressionEditable)
+export default DropTarget([ItemTypesDnd.ATTRIBUTE, ], dropMethods, collect)(AttributeFlexExpressionEditable)
