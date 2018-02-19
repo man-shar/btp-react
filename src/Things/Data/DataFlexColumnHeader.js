@@ -3,6 +3,7 @@ import { render } from 'react-dom'
 import { DragSource } from 'react-dnd'
 import ItemTypesDnd from '../ItemTypesDnd'
 import { connect } from 'react-redux'
+import { updateHoveredAttribute } from '../../Actions/actions'
 
 /**
  * What data do we want the drop target to recieve.
@@ -34,12 +35,19 @@ class DataFlexColumnHeader extends React.Component {
   render () {
     const { isDragging, connectDragSource, attributeId, drawing } = this.props
     const hoveredAttributeId = drawing.hoveredAttributeId;
+    const updateHoveredAttribute = this.props.updateHoveredAttribute.bind(this)
 
     const className = 'DataFlexColumnHeader' + ((attributeId === hoveredAttributeId) ? ' isHovered' : '')
 
     return connectDragSource(
       <div
         className={className}
+        onMouseOver={(e) => {
+          updateHoveredAttribute(attributeId)
+        }}
+        onMouseOut={(e) => {
+          updateHoveredAttribute('')
+        }}
         >
         <span>{drawing[attributeId + "$name"]}</span>
       </div>
@@ -53,4 +61,13 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default DragSource(ItemTypesDnd.DATA, attributeSource, collect)(connect(mapStateToProps)(DataFlexColumnHeader))
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateHoveredAttribute: (hoveredAttributeId) => {
+      dispatch(updateHoveredAttribute(hoveredAttributeId))
+    }
+  }
+}
+
+export default DragSource(ItemTypesDnd.DATA, attributeSource, collect)(connect(mapStateToProps, mapDispatchToProps)(DataFlexColumnHeader))

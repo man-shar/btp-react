@@ -12,8 +12,8 @@ class LayerAttributeEditor extends React.Component {
   render () {
     const layerId = this.props.layerId
     const drawing = this.props.drawing
-    const dimensionList = Util.allDimensions[drawing[layerId + '$type']]
-    const styleList = Util.allStyles[drawing[layerId + '$type']]
+    const dimensionList = ShapeUtil.allDimensions[drawing[layerId + '$type']]
+    const styleList = ShapeUtil.allStyles[drawing[layerId + '$type']]
 
     if (layerId) {
       return (

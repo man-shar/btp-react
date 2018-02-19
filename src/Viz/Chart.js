@@ -37,8 +37,8 @@ class Chart extends React.Component {
 
   render () {
     const drawing = this.props.drawing;
-    const width = drawing["overallAttributes$width$value"];
-    const height = drawing["overallAttributes$height$value"];
+    const chartWidth = drawing["overallAttributes$chartWidth$value"];
+    const chartHeight = drawing["overallAttributes$chartHeight$value"];
     const onMouseDown = this.props.onMouseDown;
     const onMouseMove = this.props.onMouseMove;
     const onMouseUp = this.props.onMouseUp;
@@ -55,8 +55,8 @@ class Chart extends React.Component {
       <div id="chart-container">
         <svg 
           id="chart"
-          width={width}
-          height={height}
+          width={chartWidth}
+          height={chartHeight}
           onMouseDown={this.onMouseDown.bind(this)}
           onMouseMove={(e) => {
             e.preventDefault();
@@ -85,7 +85,7 @@ class Chart extends React.Component {
           }}
           style={overallStyles}
           >
-          <rect width={width} height={height} fill="#fff"></rect>
+          <rect width={chartWidth} height={chartHeight} fill="#fff"></rect>
 
           {layerIds.map((layerId, i) =>
             <g key={i} id={layerId}>

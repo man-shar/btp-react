@@ -22,7 +22,7 @@ class AttributeEditor extends React.Component {
         </div>
         <OverallAttributeEditor />
         <div className="AttributesSectionHeading">
-          <span>Layer Attributes</span>
+          <span>Shared Attributes</span>
         </div>
         <LayerAttributeEditor layerId={activeLayerId} />
         <div className="AttributesSectionHeading">

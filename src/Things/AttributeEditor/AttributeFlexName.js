@@ -13,8 +13,6 @@ const attributeSource = {
   beginDrag (props) {
     return {
       attributeId: props.attributeId,
-      actionOccuredAt: props.actionOccuredAt,
-      actionOccuredAtId: props.actionOccuredAtId
     }
   }
 }

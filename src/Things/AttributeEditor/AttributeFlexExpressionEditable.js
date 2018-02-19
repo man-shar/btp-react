@@ -17,7 +17,6 @@ import CodeMirrorMark from './CodeMirrorMark'
 
 const dropMethods = {
   drop: function (props, monitor) {
-    // console.log(monitor.getItem());
   }
 }
 
@@ -88,27 +87,27 @@ class AttributeFlexExpressionEditable extends React.Component {
   componentWillReceiveProps (nextProps) {
     const editor = this.instance
 
-    this.renderCodeMirrorMarks(editor)
-
     if (editor && (nextProps.attributeExprString === editor.getValue())) {
       this.setState({
         shouldUpdate: false
-      })
+      });
     }
 
-    this.setState({
-      shouldUpdate: true
-    })
+    else {
+      this.setState({
+        shouldUpdate: true
+      })
+    }
   }
 
   onMirrorChange (editor, changeObj) {
     if (this.props.attributeExprString === editor.getValue()) {
-      this.renderCodeMirrorMarks(editor)
+      this.renderCodeMirrorMarks(editor);
       return
     }
-    // i need actionOccuredAtId because I need to check whether the attribute is an own attribute or not.
 
-    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex)
+    // i need actionOccuredAtId because I need to check whether the attribute is an own attribute or not.
+    this.props.onAttributeExprStringChange(this.props.attributeId, editor.getValue(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex);
   }
 
   onMirrorDrop (editor, event) {
@@ -116,14 +115,14 @@ class AttributeFlexExpressionEditable extends React.Component {
     const attributeId = this.props.attributeId
     const item = monitor.getItem();
 
-    if (!item.attributeId || this.props.typeOfAttributeRecievingDrop !== 'dimension') {
-      console.log('not dropping reference')
+    if (!item.attributeId) {
+      console.log('not defined')
       return
     }
 
-    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex)
+    this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttributeRecievingDrop, this.props.actionOccuredAtId, this.props.attributeIndex);
 
-    this.renderCodeMirrorMarks(editor)
+    this.renderCodeMirrorMarks(editor);
   }
 
   render () {
@@ -157,9 +156,9 @@ class AttributeFlexExpressionEditable extends React.Component {
           onChange={this.onMirrorChange.bind(this)}
           onDrop={this.onMirrorDrop.bind(this)}
           editorDidMount={(editor) => {
-            editor.setValue(this.props.attributeExprString)
+            editor.setValue(this.props.attributeExprString);
 
-            this.renderCodeMirrorMarks(editor)
+            this.renderCodeMirrorMarks(editor);
             this.instance = editor
           }}
         />

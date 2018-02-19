@@ -13,6 +13,7 @@ class OverallAttributeEditor extends React.Component {
     }
     const ownDimensionList = this.props.drawing['overallAttributes' + '$ownDimensionList']
     const ownStyleList = this.props.drawing['overallAttributes' + '$ownStyleList']
+    const axisList = this.props.drawing['overallAttributes' + '$axisList']
 
     const overallAttributesDimensionsAllProperties = ShapeUtil.getAllOverallAttributesDimensionsAllProperties(
       this.props.drawing
@@ -25,6 +26,25 @@ class OverallAttributeEditor extends React.Component {
     if (this.props.drawing['overallAttributes$ownDimensionList']) {
       return (
         <div className='AttributeFlexContainer'>
+        {axisList.map((attribute, i) => {
+            const attributeName = this.props.drawing["overallAttributes$" + attribute + '$name']
+            const attributeValue = this.props.drawing["overallAttributes$" + attribute + '$value']
+            const attributeExprString = this.props.drawing["overallAttributes$" + attribute + '$exprString']
+
+            return (<AttributeFlexRow
+              key={i}
+              attributeIndex={i}
+              attributeId={'overallAttributes' + '$' + attribute}
+              attributeName={attributeName}
+              attributeValue={attributeValue}
+              attributeExprString={attributeExprString}
+              actionOccuredAtId={'overallAttributes'}
+              actionOccuredAt='overallAttributes'
+              typeOfAttributeRecievingDrop='axis'
+              isAttributeOwn
+                />)
+          }
+          )}
           {ownDimensionList.map((attribute, i) => {
             const attributeName = overallAttributesDimensionsAllProperties[attribute + '$name']
             const attributeValue = overallAttributesDimensionsAllProperties[attribute + '$value']
@@ -38,7 +58,7 @@ class OverallAttributeEditor extends React.Component {
               attributeValue={attributeValue}
               attributeExprString={attributeExprString}
               actionOccuredAtId={'overallAttributes'}
-              actionOccuredAt='layer'
+              actionOccuredAt='overallAttributes'
               typeOfAttributeRecievingDrop='dimension'
               isAttributeOwn
                 />)
@@ -57,7 +77,7 @@ class OverallAttributeEditor extends React.Component {
               attributeValue={attributeValue}
               attributeExprString={attributeExprString}
               actionOccuredAtId={'overallAttributes'}
-              actionOccuredAt='layer'
+              actionOccuredAt='overallAttributes'
               typeOfAttributeRecievingDrop='style'
               isAttributeOwn
                 />)

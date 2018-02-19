@@ -1,4 +1,5 @@
 import math from "mathjs-expression-parser";
+import * as d3 from "d3";
 
 const ShapeUtil = {};
 
@@ -94,9 +95,95 @@ ShapeUtil.styleDefaults = {
   "visibility$options": ["visible", "hidden", "collapse", "inherit"],
   "visibility$value": "visible",
   "visibility$exprString": "visible",
-}
+};
 
 ShapeUtil.styleList = ["alignmentBaseline", "baselineShift", "direction", "display", "dominantBaseline", "fill", "fillOpacity", "fontFamily", "fontSize", "fontStyle", "fontWeight", "opacity", "stroke", "strokeOpacity", "strokeWidth", "textAnchor", "textDecoration", "visibility"];
+
+// defining basic dimensions and styles. because if I don't render the list similarly everytime, then my approach of saving inherited and own attributes separately results in the div jumping to the own list and codemirror cursor also jumping to the end after every change.
+ShapeUtil.allDimensions = {
+  "rect": ["width", "height", "x", "y", "rx", "ry"],
+  "circle": ["cx","cy", "r"]
+}
+
+// same for styles. so now that i am defining separate stuff for these, I can actually have specific styles for each type of shape. nice. Less rendering and no useless non-applicable attribtues. yay!
+
+ShapeUtil.allStyles = {
+  "rect": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"],
+  "circle": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"]
+}
+
+
+// #########################################
+// Axes functions.
+// #########################################
+
+ShapeUtil.axes = {
+  "xAxis": null,
+  "yAxis": null
+};
+
+ShapeUtil.axisTypes = {
+  "linear": d3.scaleLinear,
+};
+
+ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
+  const self = this;
+  const data = drawing.data;
+  // yAxis or xAxis
+  const axis = axisId.split("$")[1];
+
+  // pass math.eval object containing referredAttributeValues
+  let referredAttributeValues = {};
+  // also keep a record of data attributes to construct silimar object for dataattributevalues when we loop in findRange.
+  let referredDataAttributes = [];
+
+  self.referenceAttributes[axisId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
+    if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
+      referredAttributeValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
+    else
+      referredDataAttributes.push(referredAttributeId);
+  });
+
+  const range = self.findRange(data, newExprString, drawing, referredAttributeValues, referredDataAttributes);
+  const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
+  const domain = [0, ((axis === "xAxis") ?
+                      (drawing["overallAttributes$chartWidth$value"])
+                      : drawing["overallAttributes$chartHeight$value"])];
+
+  self.axes[axis] = currentAxisType()
+                    .domain(domain)
+                    .range(range);
+
+  console.log(self.axes);
+  return self.axes[axis];
+}
+
+ShapeUtil.findRange = function(data, exprString, drawing, referredAttributeValues, referredDataAttributes) {
+  let max = - Infinity;
+  let min = 0;
+
+  data.forEach((row, i) => {
+    // construct an object for math.eval for current row with values of referredDataAttributes
+    let referredDataAttributesValues = {};
+
+    referredDataAttributes.forEach((referredAttributeId) => {
+      const columnName = drawing[referredAttributeId + "$name"];
+
+      referredDataAttributesValues[referredAttributeId] = +row[columnName];
+    });
+
+    const allValues = Object.assign(referredAttributeValues, referredDataAttributesValues);
+
+    const value = math.eval(exprString, allValues);
+    if(value <= min)
+      min = value;
+    if(value >= max)
+      max = value;
+  });
+
+  return [min, max];
+}
+
 
 // #########################################
 // Drag and drawing related functions. Handle initialisation of shapes and layers.
@@ -183,9 +270,7 @@ ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
     return false
 
   return true;
-}
-
-
+};
 
 // ################################################
 // Overall Attributes functions
@@ -195,12 +280,12 @@ ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
 ShapeUtil.getOverallAttributesDimensionProperty = function(dimension, drawing, property) {
   const self = this;
   return drawing["overallAttributes" + "$" + dimension + "$" + property];
-}
+};
 
 ShapeUtil.getOverallAttributesStyleProperty = function(style, drawing, property) {
   const self = this;
   return drawing["overallAttributes" + "$" + style + "$" + property];
-}
+};
 
 // particular property: value, exprstring or name of all overall attributes styles
 ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
@@ -213,7 +298,7 @@ ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
   });
 
   return allOverallAttributesStylesProperty;
-}
+};
 
 // particular property: value, exprstring or name of all overall attributes dimensions
 ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, property) {
@@ -226,7 +311,7 @@ ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, propert
   });
 
   return allOverallAttributesDimensionProperty;
-}
+};
 
 // all propertoes: value, exprstring or name of all overall attributes styles
 ShapeUtil.getAllOverallAttributesStylesAllProperties = function (drawing) {
@@ -241,7 +326,7 @@ ShapeUtil.getAllOverallAttributesStylesAllProperties = function (drawing) {
   });
 
   return allOverallAttributesStylesAllProperties;
-}
+};
 
 // all propertoes: value, exprstring or name of all overall attributes dimensions
 ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function (drawing) {
@@ -704,7 +789,7 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
     self.referenceAttributes[attributeId]["referredAttributesIdSet"] = new Set();
     self.referenceAttributes[attributeId]["marks"] = [];
     self.referenceAttributes[attributeId]["exprString"] = "";
-    self.referenceAttributes[attributeId]["dependentIds"] = new Set();
+    self.referenceAttributes[attributeId]["dependentAttributesIdSet"] = new Set();
   }
 
   self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeId);
@@ -717,18 +802,25 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
     self.referenceAttributes[droppedAttributeId]["referredAttributesIdSet"] = new Set();
     self.referenceAttributes[droppedAttributeId]["marks"] = [];
     self.referenceAttributes[droppedAttributeId]["exprString"] = "";
-    self.referenceAttributes[droppedAttributeId]["dependentIds"] = new Set();
+    self.referenceAttributes[droppedAttributeId]["dependentAttributesIdSet"] = new Set();
   }
 
-  self.referenceAttributes[droppedAttributeId]["dependentIds"].add(attributeId);
+  self.referenceAttributes[droppedAttributeId]["dependentAttributesIdSet"].add(attributeId);
 
-  console.log(ShapeUtil.referenceAttributes);
 }
 
+// remove reference attribute from an attribute's referred attribute Set.
 ShapeUtil.removeReferenceAttribute = function (attributeId, referredAttribute) {
   const self = this;
 
   self.referenceAttributes[attributeId]["referredAttributesIdSet"].delete(referredAttribute);
+}
+
+// remove dependent attribute from an attribute's referred attribute Set.
+ShapeUtil.removeDependent = function(referredAttributeId, dependentAttributeId) {
+  const self = this;
+
+  self.referenceAttributes[referredAttributeId]["dependentAttributesIdSet"].delete(dependentAttributeId);
 }
 
 ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
@@ -760,18 +852,50 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
       start = end;
     }
 
-    // if we didn't find this attirbute in the expession string, what is it doing here anyways. remove it.
-
+    // if we didn't find the referredAttribute in the expession string, remove it. ALso remove this attribute from the dependents of the referredAttribute.
     if(c === 0) {
       self.removeReferenceAttribute(attributeId, referredAttributeId);
+      self.removeDependent(referredAttributeId, attributeId);
     }
   });
-
-  console.log(ShapeUtil.referenceAttributes);
 }
 
-ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing, shapeIndex) {
+// recursive function to check if an attribute is dependent on data.
+ShapeUtil.isDependentOnData = function(attributeId, drawing) {
   const self = this;
+  const referredAttributeIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
+  let isDependentOnData = false;
+
+  referredAttributeIdSet.forEach((referredAttributeId) => {
+    if(self.isDependentOnData(referredAttributeId, drawing) || drawing[referredAttributeId + "$whatAmI"] === "dataAttribute")
+      isDependentOnData = true;
+  });
+
+  return isDependentOnData;
+}
+
+// recursively get value of an attribute.
+// returns an array: [error, value]
+// return value if no error is [null, value]
+// return value if error is [error string, null]
+// TODO: check for cyclic reference.
+ShapeUtil.getAttributeValue = function(attributeId, drawing) {
+  const self = this;
+  const attributeExprString = drawing[attributeId + "$exprString"];
+  const attributeOwnerId = attributeId.split("$")[0];
+
+  // if this is an axis, return text showing the domain and range of the axis.
+  if(drawing[attributeId + "$type"] === "axis")
+  {
+    const axis = attributeId.split("$")[1];
+    return  [null, "Domain: " + JSON.stringify((ShapeUtil.axes[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.axes[axis]).range())];
+  }
+  debugger;
+
+  // now check if this is a layer attribute and has a data attributes. if so, return "Dependent on data."
+  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing))) {
+    return [null, "Dependent on data."];
+  }
 
   let referredAttributesValues = {};
   let value;
@@ -780,11 +904,11 @@ ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing
     var math2 = math;
     try {
       value = math.eval(attributeExprString);
-      return value;
+      return [null, value];
     }
 
     catch (e) {
-      return "error";
+      return [e.toString(), null];
     }
   }
 
@@ -796,23 +920,24 @@ ShapeUtil.getAttributeValue = function(attributeId, attributeExprString, drawing
     {
       referredAttributesIdSet.forEach(function(referredAttributeId) {
         const referredAttributeExprString = drawing[referredAttributeId + "$exprString"];
-        const referredAttributeValue = self.getAttributeValue(referredAttributeId, referredAttributeExprString, drawing)
+        const referredAttributeValue = self.getAttributeValue(referredAttributeId, drawing)
 
-        if(referredAttributeValue === "error")
-          return "error";
+        if(referredAttributeValue[0] !== null)
+          return [referredAttributeValue[0], null];
 
         referredAttributesValues[referredAttributeId] = referredAttributeValue;
       });
     }
   }
 
-  return math.eval(attributeExprString, referredAttributesValues)
+  return [null, math.eval(attributeExprString, referredAttributesValues)]
 }
 
+// check if an attribute has dependents.
 ShapeUtil.hasDependents = function (attributeId) {
   const self = this;
 
-  if((self.referenceAttributes[attributeId]) && (self.referenceAttributes[attributeId]["dependentIds"].size > 0))
+  if((self.referenceAttributes[attributeId]) && (self.referenceAttributes[attributeId]["dependentAttributesIdSet"].size > 0))
     return true;
 
   return false;
@@ -826,8 +951,8 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
 
   let newValueObj = {};
 
-  self.referenceAttributes[attributeId]["dependentIds"].forEach((dependentId) => {
-    newValueObj[dependentId + "$value"] = self.getAttributeValue(dependentId, drawing[dependentId + "$exprString"], drawing);
+  self.referenceAttributes[attributeId]["dependentAttributesIdSet"].forEach((dependentId) => {
+    newValueObj[dependentId + "$value"] = self.getAttributeValue(dependentId, drawing);
   })
 
   return newValueObj;

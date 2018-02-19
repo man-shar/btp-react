@@ -13,8 +13,8 @@ class ShapeAttributeEditor extends React.Component {
     const shapeId = this.props.shapeId
     const layerId = this.props.layerId
     const drawing = this.props.drawing
-    const dimensionList = Util.allDimensions[drawing[shapeId + '$type']]
-    const styleList = Util.allStyles[drawing[shapeId + '$type']]
+    const dimensionList = ShapeUtil.allDimensions[drawing[shapeId + '$type']]
+    const styleList = ShapeUtil.allStyles[drawing[shapeId + '$type']]
 
     if (shapeId) {
       return (

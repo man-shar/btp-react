@@ -11,7 +11,8 @@ import {
   UPDATE_DEPENDENTS_VALUES,
   ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
   ADD_DATA_COLUMNS_TO_ATTRIBUTES,
-  FILE_LOADED_AND_PARSED
+  FILE_LOADED_AND_PARSED,
+  UPDATE_ATTRIBUTE_VALUE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import Util from "../Util/Util";
@@ -88,10 +89,10 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       // initially, a shape has neither own dimensions not styles. it takes everything from layer.
       // a layer has both dimensions and styles.
 
-      newObj[newLayerId + "$ownDimensionList"] = Util.allDimensions[currentShape];
+      newObj[newLayerId + "$ownDimensionList"] = ShapeUtil.allDimensions[currentShape];
       newObj[newLayerId + "$inheritedDimensionList"] = [];
       newObj[newLayerId + "$ownStyleList"] = [];
-      newObj[newLayerId + "$inheritedStyleList"] = Util.allStyles[currentShape];
+      newObj[newLayerId + "$inheritedStyleList"] = ShapeUtil.allStyles[currentShape];
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;
@@ -149,20 +150,21 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       attributeId = action.attributeId;
       newExprString = action.newExprString;
 
-      // before updating expr string, we also calculate the value.
       // TODO: should we do it before or after?
       ShapeUtil.updateMarks(action.attributeId, action.newExprString, state);
-
-      if(action.typeOfAttributeRecievingDrop !== "dimension")
-        newAttributeValue = "" + newExprString;
-
-      else
-        newAttributeValue = ShapeUtil.getAttributeValue(action.attributeId, action.newExprString, state);
-
       newObj[attributeId + "$exprString"] = newExprString;
-      newObj[attributeId + "$value"] = newAttributeValue;
 
       return Object.assign({}, state, newObj);
+
+    case UPDATE_ATTRIBUTE_VALUE:
+      newObj = {};
+      attributeId = action.attributeId;
+      newAttributeValue = ShapeUtil.getAttributeValue(action.attributeId, state);
+
+      newObj[attributeId + "$value"] = (newAttributeValue[0] !== null) ? newAttributeValue[0] : newAttributeValue[1];
+
+      return Object.assign({}, state, newObj);
+
 
     case UPDATE_DEPENDENTS_VALUES:
       // Now also update values of all the other attributes depending on this attribute.
@@ -250,6 +252,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       data.columns.forEach((column, i) => {
         newObj["dataAttribute" + "$" + column + "$" + "name"] = column;
         newObj["dataAttribute" + "$" + column + "$" + "type"] = Util.columnType(data, column);
+        newObj["dataAttribute" + "$" + column + "$" + "whatAmI"] = "dataAttribute";
       });
 
       return Object.assign({}, state, newObj);
