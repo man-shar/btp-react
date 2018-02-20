@@ -16,7 +16,7 @@
       const attributeExprString = this.props.attributeExprString
       const actionOccuredAt = this.props.actionOccuredAt
       const actionOccuredAtId = this.props.actionOccuredAtId
-      const typeOfAttributeRecievingDrop = this.props.typeOfAttributeRecievingDrop
+      const typeOfAttributeReceivingDrop = this.props.typeOfAttributeReceivingDrop
       const isAttributeOwn = this.props.isAttributeOwn
 
     // passing this down because I have to edit own attributes and remove elements from own/inherited attributes.
@@ -27,7 +27,7 @@
         <div className={'AttributeFlexRow' + (isAttributeOwn ? '' : ' inherited-attribute')} id={attributeId}>
           <AttributeFlexName attributeIndex={attributeIndex} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeName={attributeName} actionOccuredAt={actionOccuredAt} />
           <div className='AttributeFlexExpression'>
-            <AttributeFlexExpressionEditable attributeIndex={attributeIndex} typeOfAttributeRecievingDrop={typeOfAttributeRecievingDrop} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeExprString={attributeExprString} actionOccuredAt={actionOccuredAt} />
+            <AttributeFlexExpressionEditable attributeIndex={attributeIndex} typeOfAttributeReceivingDrop={typeOfAttributeReceivingDrop} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeExprString={attributeExprString} actionOccuredAt={actionOccuredAt} />
             <AttributeFlexValue attributeIndex={attributeIndex} actionOccuredAtId={actionOccuredAtId} attributeId={attributeId} attributeValue={attributeValue} actionOccuredAt={actionOccuredAt} />
           </div>
         </div>

@@ -46,7 +46,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newOwnAttributes,
       newInheritedAttributes,
       attributeName,
-      typeOfAttributeRecievingDrop,
+      typeOfAttributeReceivingDrop,
       attributeIndex,
       data;
 
@@ -159,9 +159,16 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
     case UPDATE_ATTRIBUTE_VALUE:
       newObj = {};
       attributeId = action.attributeId;
-      newAttributeValue = ShapeUtil.getAttributeValue(action.attributeId, state);
+      if(action.typeOfAttributeReceivingDrop === "style")
+      {
+        newAttributeValue = state[attributeId + "$exprString"];
+        newObj[attributeId + "$value"] = newAttributeValue;
+      }
 
-      newObj[attributeId + "$value"] = (newAttributeValue[0] !== null) ? newAttributeValue[0] : newAttributeValue[1];
+      else {
+        newAttributeValue = ShapeUtil.getAttributeValue(action.attributeId, state);
+        newObj[attributeId + "$value"] = (newAttributeValue[0] !== null) ? newAttributeValue[0] : newAttributeValue[1];
+      }
 
       return Object.assign({}, state, newObj);
 
@@ -178,25 +185,26 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
     case ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES:
+      // id of attribute from where this currently inherits.
       attributeId = action.attributeId;
       newObj = {};
       attributeName = attributeId.split("$")[1];
-      typeOfAttributeRecievingDrop = Util.toSentenceCase(action.typeOfAttributeRecievingDrop);
+      typeOfAttributeReceivingDrop = Util.toSentenceCase(action.typeOfAttributeReceivingDrop);
       attributeIndex = action.attributeIndex;
 
       // check if the source of the edit action owns the attribute
       if(attributeId.split("$")[0] === action.actionOccuredAtId)
         return state
 
-      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"] = state[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"].slice();
-      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeRecievingDrop + "List"].push(attributeName);
-      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"] = state[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"].slice();
-      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeRecievingDrop + "List"].splice(attributeIndex, 1);
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeReceivingDrop + "List"] = state[action.actionOccuredAtId + "$own" + typeOfAttributeReceivingDrop + "List"].slice();
+      newObj[action.actionOccuredAtId + "$own" + typeOfAttributeReceivingDrop + "List"].push(attributeName);
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeReceivingDrop + "List"] = state[action.actionOccuredAtId + "$inherited" + typeOfAttributeReceivingDrop + "List"].slice();
+      newObj[action.actionOccuredAtId + "$inherited" + typeOfAttributeReceivingDrop + "List"].splice(attributeIndex, 1);
 
       // copy all current values to own attribute from inherited.
       newObj[action.actionOccuredAtId + "$" + attributeName + "$name"] = state[attributeId + "$name"];
-      newObj[action.actionOccuredAtId + "$" + attributeName + "$value"] = state[attributeId + "$value"];
-      newObj[action.actionOccuredAtId + "$" + attributeName + "$exprString"] = state[attributeId + "$exprString"];
+      // newObj[action.actionOccuredAtId + "$" + attributeName + "$value"] = state[attributeId + "$value"];
+      // newObj[action.actionOccuredAtId + "$" + attributeName + "$exprString"] = state[attributeId + "$exprString"];
 
       return Object.assign({}, state, newObj);
       

@@ -9,7 +9,7 @@ const ShapeUtil = {};
 // keymaps to shape to switch the shape that is drawng when dragging.
 // #########################################
 
-ShapeUtil.knownKeys = "rcRC";
+ShapeUtil.keysToShapes = ["r", "c", "R", "C"];
 
 ShapeUtil.keyToShape = {
   "r": "rect",
@@ -17,6 +17,8 @@ ShapeUtil.keyToShape = {
   "R": "rect",
   "C": "circle"
 };
+
+ShapeUtil.loopKeyCombinations = ["ctrl+l", "ctrl+shift+l"];
 
 // #########################################
 // Default SVG styles.
@@ -132,21 +134,21 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
   // yAxis or xAxis
   const axis = axisId.split("$")[1];
 
-  // pass math.eval object containing referredAttributeValues
-  let referredAttributeValues = {};
-  // also keep a record of data attributes to construct silimar object for dataattributevalues when we loop in findRange.
+  // pass math.eval object containing referredAttributesValues
+  let referredAttributesValues = {};
+  // also keep a record of data attributes to construct silimar object for dataattributevalues when we loop in findDomain.
   let referredDataAttributes = [];
 
   self.referenceAttributes[axisId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
     if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-      referredAttributeValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
+      referredAttributesValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
     else
       referredDataAttributes.push(referredAttributeId);
   });
 
-  const range = self.findRange(data, newExprString, drawing, referredAttributeValues, referredDataAttributes);
+  const domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
   const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
-  const domain = [0, ((axis === "xAxis") ?
+  const range = [0, ((axis === "xAxis") ?
                       (drawing["overallAttributes$chartWidth$value"])
                       : drawing["overallAttributes$chartHeight$value"])];
 
@@ -158,7 +160,7 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
   return self.axes[axis];
 }
 
-ShapeUtil.findRange = function(data, exprString, drawing, referredAttributeValues, referredDataAttributes) {
+ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesValues, referredDataAttributes) {
   let max = - Infinity;
   let min = 0;
 
@@ -172,7 +174,7 @@ ShapeUtil.findRange = function(data, exprString, drawing, referredAttributeValue
       referredDataAttributesValues[referredAttributeId] = +row[columnName];
     });
 
-    const allValues = Object.assign(referredAttributeValues, referredDataAttributesValues);
+    const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
 
     const value = math.eval(exprString, allValues);
     if(value <= min)
@@ -350,8 +352,8 @@ ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function (drawing) {
 
 // check if attribute is a shape's own attribute.
 ShapeUtil.isShapeOwn = function (dimensionOrStyle, shapeId, drawing) {
-  // we can check just the name. as name, value and exprstring are defined simultaneously.
-  if(drawing[shapeId + "$" + dimensionOrStyle + "$name"])
+  // we can check just the value. as name is defined first and then value and exprstring are defined.
+  if(drawing[shapeId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
     return true;
 
   return false;
@@ -627,8 +629,8 @@ ShapeUtil.getLayerStyleAllProperties = function(style, layerId, drawing) {
 
 // check if attribute is a layer's own attribute.
 ShapeUtil.isLayerOwn = function (dimensionOrStyle, layerId, drawing) {
-  // we can check just the name as name, value and exprstring are defined simultaneously.
-  if(drawing[layerId + "$" + dimensionOrStyle + "$name"] !== undefined)
+  // we can check just the value. as name is defined first and then value and exprstring are defined.
+  if(drawing[layerId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
     return true;
 
   return false;
@@ -807,6 +809,7 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
 
   self.referenceAttributes[droppedAttributeId]["dependentAttributesIdSet"].add(attributeId);
 
+  console.log(self.referenceAttributes);
 }
 
 // remove reference attribute from an attribute's referred attribute Set.
@@ -863,10 +866,18 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
 // recursive function to check if an attribute is dependent on data.
 ShapeUtil.isDependentOnData = function(attributeId, drawing) {
   const self = this;
-  const referredAttributeIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
+  let referenceAttributes = self.referenceAttributes[attributeId];
+  if(!referenceAttributes)
+    return false
+
+  let referredAttributesIdSet = referenceAttributes["referredAttributesIdSet"]
+
+  if(!referredAttributesIdSet)
+    return false
+
   let isDependentOnData = false;
 
-  referredAttributeIdSet.forEach((referredAttributeId) => {
+  referredAttributesIdSet.forEach((referredAttributeId) => {
     if(self.isDependentOnData(referredAttributeId, drawing) || drawing[referredAttributeId + "$whatAmI"] === "dataAttribute")
       isDependentOnData = true;
   });
@@ -890,11 +901,29 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
     const axis = attributeId.split("$")[1];
     return  [null, "Domain: " + JSON.stringify((ShapeUtil.axes[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.axes[axis]).range())];
   }
-  debugger;
 
   // now check if this is a layer attribute and has a data attributes. if so, return "Dependent on data."
   if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing))) {
-    return [null, "Dependent on data."];
+    return [null, "Dependent on data. Each shape in this layer will have a different value based on the index."];
+  }
+
+  // now check if this is a shape attribute and is dependent on data attributes. if so, return value by calculating data attributes based on the shape's index.
+  if((drawing[attributeOwnerId + "$whatAmI"] === "shape") && (self.isDependentOnData(attributeId, drawing))) {
+    // find what non data attributes and data attributes this attribute depends on.
+    let referredAttributesValues = {};
+    // this is a list because I don't know the value yet. I'll construct an object later with the values.
+    let referredDataAttributesValues = {};
+    const shapeIndex = drawing[attributeOwnerId + "$index"];
+
+    self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
+      if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
+        referredAttributesValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
+
+      else
+        referredDataAttributesValues[referredAttributeId] = drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]];
+    });
+
+    return [null, math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues))];
   }
 
   let referredAttributesValues = {};

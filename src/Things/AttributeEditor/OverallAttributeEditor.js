@@ -40,7 +40,7 @@ class OverallAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={'overallAttributes'}
               actionOccuredAt='overallAttributes'
-              typeOfAttributeRecievingDrop='axis'
+              typeOfAttributeReceivingDrop='axis'
               isAttributeOwn
                 />)
           }
@@ -59,7 +59,7 @@ class OverallAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={'overallAttributes'}
               actionOccuredAt='overallAttributes'
-              typeOfAttributeRecievingDrop='dimension'
+              typeOfAttributeReceivingDrop='dimension'
               isAttributeOwn
                 />)
           }
@@ -78,7 +78,7 @@ class OverallAttributeEditor extends React.Component {
               attributeExprString={attributeExprString}
               actionOccuredAtId={'overallAttributes'}
               actionOccuredAt='overallAttributes'
-              typeOfAttributeRecievingDrop='style'
+              typeOfAttributeReceivingDrop='style'
               isAttributeOwn
                 />)
           }

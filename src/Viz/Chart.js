@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape } from '../Actions/actions';
-import ShapeUtil from "../Util/ShapeUtil"
-import Layer from './Layer'
-
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape, loopAll, loopActiveLayer } from '../Actions/actions';
+import ShapeUtil from "../Util/ShapeUtil";
+import Layer from './Layer';
+import keydown from 'react-keydown';
 // Handles svg mouse events. Drag draw etc. Dispatches actions for user drawing.
 
 class Chart extends React.Component {
@@ -18,9 +18,19 @@ class Chart extends React.Component {
     }
   }
 
-  componentDidMount() {
-    window.addEventListener("keydown", this.props.onKeyDown, false);
+  @keydown(ShapeUtil.keysToShapes)
+  toggleCurrentShape(event) {
+    this.props.toggleCurrentShape(event)
   }
+
+  @keydown(ShapeUtil.loopKeyCombinations)
+  loopKeyCombination(event) {
+    this.props.loopKeyCombination(event)
+  }
+
+  // componentDidMount() {
+  //   window.addEventListener("keydown", , false);
+  // }
 
   onMouseDown(e) {
     document.activeElement.blur();
@@ -105,7 +115,7 @@ const mapStateToProps = state => {
   }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onMouseDown: (e) => {
       dispatch(startDragDraw(e));
@@ -116,10 +126,14 @@ const mapDispatchToProps = dispatch => {
     onMouseUp: (e) => {
       dispatch(endDragDraw(e));
     },
-    onKeyDown: (e) => {
-      // TODO dispatch action only when svg in focus.
-      if(ShapeUtil.knownKeys.indexOf(e.key) > -1)
-        dispatch(toggleCurrentShape(e.key));
+    toggleCurrentShape: (e) => {
+      dispatch(toggleCurrentShape(e.key));
+    },
+    loopKeyCombination: (e) => {
+      if(e.shiftKey)
+        dispatch(loopAll());
+      else
+        dispatch(loopActiveLayer());
     },
     checkIfNewLayerIsValid: (e) => {
       dispatch(checkIfNewLayerIsValid());

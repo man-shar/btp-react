@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 var path = require('path');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 var BUILD_DIR = path.resolve(__dirname, 'build');
 var APP_DIR = path.resolve(__dirname, 'src');
@@ -13,7 +14,14 @@ var config = {
     publicPath: '/build/'
   },
   devtool: PROD ? 'source-map' : 'eval-source-map',
-  plugins: [],
+  plugins: [
+    new UglifyJSPlugin({
+        sourceMap: true
+      }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    })
+  ],
   module : {
     loaders : [
       {

@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { updateHoveredAttribute } from '../../Actions/actions'
 
 /**
- * What data do we want the drop target to recieve.
+ * What data do we want the drop target to receive.
  */
 const attributeSource = {
   beginDrag (props) {

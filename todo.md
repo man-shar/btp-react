@@ -11,3 +11,5 @@
 * initialise chart width and height as referred attributes of x, y axis domain. add domains as attributes in the axes.
 
 * check for cyclic reference in reference attributes.
+* colorbrewer palletes
+* also check if an attribute expression change is in a layer whose attribute depends on data. if so, change it for all child shapes.
