@@ -8,13 +8,16 @@ import manageActions from "./Reducers/reducer";
 import { startDrag } from "./Actions/actions";
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import { reduxBatch }  from '@manaflair/redux-batch';
 import 'codemirror/lib/codemirror.css'
 import "./styles/styles.css";
 import "./styles/shapeStyles.css";
 
 let store = createStore(
   manageActions,
-  applyMiddleware(thunkMiddleware, logger)
+  reduxBatch,
+  applyMiddleware(thunkMiddleware, logger),
+  reduxBatch
 );
 
 import Things from "./Things/Things";

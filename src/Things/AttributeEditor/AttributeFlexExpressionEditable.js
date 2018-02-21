@@ -67,9 +67,9 @@ class AttributeFlexExpressionEditable extends React.Component {
         )
 
         editor.markText({
-          line: 0,
-          ch: mark.from
-        },
+            line: 0,
+            ch: mark.from
+          },
           {
             line: 0,
             ch: mark.to

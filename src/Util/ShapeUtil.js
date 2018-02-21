@@ -142,7 +142,15 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
 
   self.referenceAttributes[axisId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
     if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-      referredAttributesValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
+    {
+      referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing);
+      // TODO: better error handling.
+      if(referredAttributesValue[0] !== null)
+        return "error";
+
+      else
+        referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
+    }
     else
       referredDataAttributes.push(referredAttributeId);
   });
@@ -918,7 +926,16 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
 
     self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
       if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-        referredAttributesValues[referredAttributeId] = self.getAttributeValue(referredAttributeId, drawing);
+      {
+        // TODO better error handling here.
+        referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing);
+
+        if(referredAttributesValue[1] !== null)
+          return "error";
+
+        else
+          referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
+      }
 
       else
         referredDataAttributesValues[referredAttributeId] = drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]];
@@ -930,8 +947,7 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
   let referredAttributesValues = {};
   let value;
 
-  if (self.referenceAttributes[attributeId] === undefined) {
-    var math2 = math;
+  if (self.referenceAttributes[attributeId] === undefined || self.referenceAttributes[attributeId]["referredAttributesIdSet"].size === 0) {
     try {
       value = math.eval(attributeExprString);
       return [null, value];
@@ -943,7 +959,7 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
   }
 
 
-  else if (self.referenceAttributes[attributeId] !== undefined)
+  else if (self.referenceAttributes[attributeId] !== undefined && self.referenceAttributes[attributeId]["referredAttributesIdSet"].size !== 0)
   {
     const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"]
     if(referredAttributesIdSet.size !== 0)
@@ -952,10 +968,12 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
         const referredAttributeExprString = drawing[referredAttributeId + "$exprString"];
         const referredAttributeValue = self.getAttributeValue(referredAttributeId, drawing)
 
+        // check if this referred attrbute has an error in it's value. if so,return error.
         if(referredAttributeValue[0] !== null)
           return [referredAttributeValue[0], null];
 
-        referredAttributesValues[referredAttributeId] = referredAttributeValue;
+        // otherwise add it's value to object
+        referredAttributesValues[referredAttributeId] = referredAttributeValue[1];
       });
     }
   }
@@ -982,7 +1000,14 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
   let newValueObj = {};
 
   self.referenceAttributes[attributeId]["dependentAttributesIdSet"].forEach((dependentId) => {
-    newValueObj[dependentId + "$value"] = self.getAttributeValue(dependentId, drawing);
+    // TODO error handing here.
+    // check if this referred attrbute has an error in it's value. if so,return error.
+    const dependentValue = self.getAttributeValue(dependentId, drawing);
+    if(dependentValue[0] !== null)
+      newValueObj[dependentId + "$value"] = dependentValue[0];
+
+    else
+      newValueObj[dependentId + "$value"] = dependentValue[1];
   })
 
   return newValueObj;

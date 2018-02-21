@@ -252,6 +252,8 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
     // get latest state
     state = getState();
 
+    let batchedActions = [];
+
     // now check if this was a layer. if it was, change this attribute for all the child shapes.
     if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
     {
@@ -264,14 +266,14 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
         // if it isn't an own attribute, add it first
         if(state["drawing"][ownAttributeIdForShape + "$name"] === undefined)
         {
-          dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
+          batchedActions.push(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
         }
 
         // make shape attribute also dependent on whatever layer is dependent on.
         // we aren't using editor and event in addAttributeReferenceToAttribute so just pass null.
         ShapeUtil.addAttributeReferenceToAttribute(null, null, ownAttributeIdForShape, droppedAttributeMonitorItem);
 
-        dispatch(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
+        batchedActions.push(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
 
         // to get latest state.
         state = getState();
@@ -279,7 +281,10 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
         // // update codemirror marks.
         // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
 
-        dispatch(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
+        batchedActions.push(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
+        dispatch(batchedActions);
+
+        batchedActions = [];
       });
     }
   }
@@ -363,9 +368,14 @@ export function loopLayer(layerId) {
       return
     }
 
+    let batchedActions = [];
+
     // otherwise, initialise layer with as many shapes as rows in data.
-    data.forEach((row) => {
-      dispatch(createNewShape(layerId));
+    data.forEach((row, i) => {
+      console.log(i);
+      batchedActions.push(createNewShape(layerId));
     });
+
+    dispatch(batchedActions);
   }
 }
