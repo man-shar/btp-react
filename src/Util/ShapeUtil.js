@@ -191,8 +191,8 @@ ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesVal
 // Drag and drawing related functions. Handle initialisation of shapes and layers.
 // #########################################
 
-// initializes layer and a shape.
-ShapeUtil.startDragDrawShape = function(shape, e) {
+// initializes layer or a particular shape type.
+ShapeUtil.newLayerFromDrag = function(shape, e) {
   let dimensionList;
 
   if (shape === "rect") {

@@ -1,7 +1,8 @@
 import {
-  START_DRAG_DRAW,
+  INITIALISE_LAYER_FROM_DRAG,
   UPDATE_DRAG_DRAW,
   END_DRAG_DRAW,
+  CREATE_NEW_SHAPE,
   TOGGLE_CURRENT_SHAPE,
   CHANGE_ATTRIBUTE_EXPRESSION_STRING,
   ADD_ATTRIBUTE_REFERENCE_TO_ATTRIBUTE,
@@ -12,7 +13,8 @@ import {
   ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
   ADD_DATA_COLUMNS_TO_ATTRIBUTES,
   FILE_LOADED_AND_PARSED,
-  UPDATE_ATTRIBUTE_VALUE
+  UPDATE_ATTRIBUTE_VALUE,
+  LOOP_LAYER
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import Util from "../Util/Util";
@@ -48,24 +50,23 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       attributeName,
       typeOfAttributeReceivingDrop,
       attributeIndex,
-      data;
+      data,
+      layerToLoop,
+      layerId,
+      shapeType,
+      newShapeIds;
 
   switch (action.type) {
-    case START_DRAG_DRAW:
-      // startDragDrawShape returns a layer with dimensionList. A shape is not initialised with any attributes: dimensions or styles.
+    case INITIALISE_LAYER_FROM_DRAG:
+      // newLayerFromDrag returns a layer with dimensionList. A shape is not initialised with any attributes: dimensions or styles.
 
-      newLayer = ShapeUtil.startDragDrawShape(currentShape, action.e);
+      newLayer = ShapeUtil.newLayerFromDrag(currentShape, action.e);
 
       newLayerName = "Layer " + layerCount;
       newLayerId = "layer" + layerCount;
       layerIds.push(newLayerId);
 
       shapeIds = [];
-      shapeCount = shapeIds.length;
-      newShapeName = currentShape + " " + shapeCount;
-      newShapeId = newLayerId + currentShape + shapeCount;
-
-      shapeIds.push(newShapeId);
 
       newObj = {
         beingDrawn: true,
@@ -75,7 +76,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
         layerIds: layerIds
       };
 
-      newObj[newLayerId + "$shapeIds"] = shapeIds;
+      newObj[newLayerId + "$shapeIds"] = [];
       newObj[newLayerId + "$name"] = newLayerName;
       newObj[newLayerId + "$id"] = newLayerId;
       newObj[newLayerId + "$type"] = currentShape;
@@ -94,16 +95,16 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj[newLayerId + "$ownStyleList"] = [];
       newObj[newLayerId + "$inheritedStyleList"] = ShapeUtil.allStyles[currentShape];
 
-      newObj[newShapeId + "$name"] = newShapeName;
-      newObj[newShapeId + "$id"] = newShapeId;
-      newObj[newShapeId + "$index"] = newObj[newLayerId + "$shapeIds"].length - 1;
-      newObj[newShapeId + "$type"] = currentShape;
-      newObj[newShapeId + "$layerId"] = newLayerId;
-      newObj[newShapeId + "$inheritedDimensionList"] = newLayer.dimensionList.list.slice();
-      newObj[newShapeId + "$ownDimensionList"] = [];
-      newObj[newShapeId + "$ownStyleList"] = [];
-      newObj[newShapeId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
-      newObj[newShapeId + "$whatAmI"] = "shape";
+      // newObj[newShapeId + "$name"] = newShapeName;
+      // newObj[newShapeId + "$id"] = newShapeId;
+      // newObj[newShapeId + "$index"] = newObj[newLayerId + "$shapeIds"].length - 1;
+      // newObj[newShapeId + "$type"] = currentShape;
+      // newObj[newShapeId + "$layerId"] = newLayerId;
+      // newObj[newShapeId + "$inheritedDimensionList"] = newLayer.dimensionList.list.slice();
+      // newObj[newShapeId + "$ownDimensionList"] = [];
+      // newObj[newShapeId + "$ownStyleList"] = [];
+      // newObj[newShapeId + "$inheritedStyleList"] = state["overallAttributes$ownStyleList"].slice();
+      // newObj[newShapeId + "$whatAmI"] = "shape";
 
       newObj[newLayerId + "$ownDimensionList"].forEach(attr => {
         newObj[newLayerId + "$" + attr + "$value"] = newLayer["dimensionList"][attr + "$value"];
@@ -128,6 +129,32 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       );
 
       return Object.assign({}, state, updatedLayerAttributes);
+
+    case CREATE_NEW_SHAPE:
+      newObj = {};
+      layerId = action.layerId;
+      newShapeIds = state[layerId + "$shapeIds"].slice();
+      shapeCount = shapeIds.length;
+      shapeType = state[layerId + "$type"];
+      newShapeName = shapeType + " " + shapeCount;
+      newShapeId = layerId + shapeType + shapeCount;
+
+      newShapeIds.push(newShapeId);
+
+      newObj[newShapeId + "$name"] = newShapeName;
+      newObj[newShapeId + "$id"] = newShapeId;
+      newObj[newShapeId + "$index"] = newShapeIds.length - 1;
+      newObj[newShapeId + "$type"] = shapeType;
+      newObj[newShapeId + "$layerId"] = layerId;
+      newObj[newShapeId + "$inheritedDimensionList"] = ShapeUtil.allDimensions[shapeType].slice();
+      newObj[newShapeId + "$ownDimensionList"] = [];
+      newObj[newShapeId + "$ownStyleList"] = [];
+      newObj[newShapeId + "$inheritedStyleList"] = ShapeUtil.allStyles[shapeType].slice();
+      newObj[newShapeId + "$whatAmI"] = "shape";
+      newObj[layerId + "$shapeIds"] = newShapeIds;
+      newObj["activeShapeId"] = newShapeId;
+
+      return Object.assign({}, state, newObj);
 
     case END_DRAG_DRAW:
       activeLayerId = state.activeLayerId;
@@ -264,6 +291,11 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
       return Object.assign({}, state, newObj);
+
+    case LOOP_LAYER:
+      layerToLoop = action.layerId;
+      
+      // to loop a layer, we create a new shape 
 
 
     default:

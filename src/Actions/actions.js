@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import ShapeUtil from "../Util/ShapeUtil"
 import Util from "../Util/Util"
 
-export const START_DRAG_DRAW = "start-drag-draw";
+export const INITIALISE_LAYER_FROM_DRAG = "initialise-layer-from-drag";
 export const UPDATE_DRAG_DRAW = "update-drag-draw";
 export const END_DRAG_DRAW = "end-drag-draw";
 export const TOGGLE_CURRENT_SHAPE = "toggle-current-shape"
@@ -17,16 +17,27 @@ export const UPDATE_DEPENDENTS_VALUES = "update-dependents-values";
 export const ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES = "add-attribute-to-own-attributes";
 export const ADD_DATA_COLUMNS_TO_ATTRIBUTES = "add-data-columns-to-attributes";
 export const UPDATE_ATTRIBUTE_VALUE = "update-attribute-value";
-export const LOOP_ALL = "loop-all";
-export const LOOP_ACTIVE_LAYER = "loop-active-layer";
+export const LOOP_LAYER = "loop-layer";
+export const CREATE_NEW_SHAPE = "create-new-shape"
 
 
-export function startDragDraw(e, allState) {
+export function initialiseLayerFromDrag(e) {
   const action = {
-    type: START_DRAG_DRAW,
+    type: INITIALISE_LAYER_FROM_DRAG,
     e: e
   };
   return action;
+}
+
+export function startDragDraw(e) {
+  return (dispatch, getState) => {
+    dispatch(initialiseLayerFromDrag(e));
+
+    // get latest state;
+    const state = getState();
+
+    dispatch(createNewShape(state["drawing"]["activeLayerId"]));
+  }
 }
 
 export function updateDragDraw(e) {
@@ -42,6 +53,15 @@ export function endDragDraw(e) {
     type: END_DRAG_DRAW,
     e: e
   };
+  return action;
+}
+
+export function createNewShape(layerId) {
+  const action = {
+    type: CREATE_NEW_SHAPE,
+    layerId: layerId
+  };
+
   return action;
 }
 
@@ -315,15 +335,25 @@ export function addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivin
 }
 
 export function loopAll() {
-  const action = {
-    type: LOOP_ALL
-  }
-  return action;
+  return (dispatch, getState) => {
+    const state = getState();
+    const layerIds = state["drawing"]["layerIds"];
+
+    layerIds.forEach((layerId) => {
+      // check if this layer has the same number of shapes as rows in the data. if so, we don't need to do anything as any data attribute from the layer would automatically be updated in the shapes.
+      if(state["drawing"][layerId + "$shapeIds"].length === state["drawing"]["data"].length)
+        return;
+
+      // otherwise loop this layer.
+      dispatch(loopLayer(layerId));
+    });
+  };
 }
 
-export function loopActiveLayer() {
+export function loopLayer(layerId) {
   const action = {
-    type: LOOP_ACTIVE_LAYER
+    type: LOOP_LAYER,
+    layerId: layerId
   }
   return action;
 }

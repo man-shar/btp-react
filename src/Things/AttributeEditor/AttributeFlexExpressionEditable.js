@@ -15,7 +15,9 @@ import 'codemirror-colorpicker'
 
 // render editable attribute expression as codemirror editor. use references objects to render references to other attributes.
 
-// to control whether the codemirror should update, we use a shouldupdate property in the state. if you let react do it's thing, it updates codemirror everytime there is a change. which causes the cursor on codemirror to jump to the end because the component is re-mounted hence the editor is recreated. but what we can do is that use compoenentWillReceiveProps to decide whether the nextprops are the same as codemirror contents and if true, set the shouldupdate property in local state to false. else it will be true. and use this value as the return value in shouldComponentUpdate.
+// to control whether the codemirror should update, we use a shouldupdate property. if you let react do it's thing, it updates codemirror everytime there is a change. which causes the cursor on codemirror to jump to the end because the component is re-mounted hence the editor is recreated. but what we can do is that use compoenentWillReceiveProps to decide whether the nextprops are the same as codemirror contents and if true, set the shouldupdate property to false. else it will be true. and use this value as the return value in shouldComponentUpdate.
+
+// initially i had set the shouldUpdate property on the state, but because setState if async, it was not updating in time for componentshouldupdate, so i set it directlt on the class instance instead.
 
 const dropMethods = {
   drop: function (props, monitor) {
@@ -35,10 +37,9 @@ class AttributeFlexExpressionEditable extends React.Component {
   constructor () {
     super()
 
-    this.instance = null
-    this.state = {}
-    this.state.shouldUpdate = true
-    this.store
+    this.instance = null;
+    this.shouldUpdate = true;
+    this.store;
   }
 
   componentDidMount () {
@@ -83,22 +84,19 @@ class AttributeFlexExpressionEditable extends React.Component {
   }
 
   shouldComponentUpdate () {
-    return (this.state.shouldUpdate)
+    debugger;
+    return (this.shouldUpdate)
   }
 
   componentWillReceiveProps (nextProps) {
-    const editor = this.instance
+    const editor = this.instance;
 
     if (editor && (nextProps.attributeExprString === editor.getValue())) {
-      this.setState({
-        shouldUpdate: false
-      });
+      this.shouldUpdate = false;
     }
 
     else {
-      this.setState({
-        shouldUpdate: true
-      })
+      this.shouldUpdate = true;
     }
   }
 

@@ -13,3 +13,4 @@
 * check for cyclic reference in reference attributes.
 * colorbrewer palletes
 * also check if an attribute expression change is in a layer whose attribute depends on data. if so, change it for all child shapes.
+* add padding in chart width/height. make them as reference attributes of padding.

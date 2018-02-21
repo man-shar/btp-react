@@ -20,12 +20,12 @@ class Chart extends React.Component {
 
   @keydown(ShapeUtil.keysToShapes)
   toggleCurrentShape(event) {
-    this.props.toggleCurrentShape(event)
+    this.props.toggleCurrentShape(event);
   }
 
   @keydown(ShapeUtil.loopKeyCombinations)
   loopKeyCombination(event) {
-    this.props.loopKeyCombination(event)
+    this.props.loopKeyCombination(event, this.props.drawing["activeLayerId"]);
   }
 
   // componentDidMount() {
@@ -129,11 +129,11 @@ const mapDispatchToProps = (dispatch) => {
     toggleCurrentShape: (e) => {
       dispatch(toggleCurrentShape(e.key));
     },
-    loopKeyCombination: (e) => {
+    loopKeyCombination: (e, layerId) => {
       if(e.shiftKey)
         dispatch(loopAll());
       else
-        dispatch(loopActiveLayer());
+        dispatch(loopActiveLayer(layerId));
     },
     checkIfNewLayerIsValid: (e) => {
       dispatch(checkIfNewLayerIsValid());
