@@ -18,7 +18,7 @@ ShapeUtil.keyToShape = {
   "C": "circle"
 };
 
-ShapeUtil.loopKeyCombinations = ["ctrl+l", "ctrl+shift+l"];
+ShapeUtil.loopKeyCombinations = ["ctrl+m", "ctrl+shift+m"];
 
 // #########################################
 // Default SVG styles.
@@ -126,6 +126,7 @@ ShapeUtil.axes = {
 
 ShapeUtil.axisTypes = {
   "linear": d3.scaleLinear,
+  "band": d3.scaleBand
 };
 
 ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
@@ -148,9 +149,9 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
 
   const domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
   const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
-  const range = [0, ((axis === "xAxis") ?
+  const range = d3.range(0, ((axis === "xAxis") ?
                       (drawing["overallAttributes$chartWidth$value"])
-                      : drawing["overallAttributes$chartHeight$value"])];
+                      : drawing["overallAttributes$chartHeight$value"]));
 
   self.axes[axis] = currentAxisType()
                     .domain(domain)

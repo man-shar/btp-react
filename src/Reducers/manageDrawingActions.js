@@ -13,8 +13,7 @@ import {
   ADD_ATTRIBUTE_TO_OWN_ATTRIBUTES,
   ADD_DATA_COLUMNS_TO_ATTRIBUTES,
   FILE_LOADED_AND_PARSED,
-  UPDATE_ATTRIBUTE_VALUE,
-  LOOP_LAYER
+  UPDATE_ATTRIBUTE_VALUE
 } from "../Actions/actions";
 import ShapeUtil from "../Util/ShapeUtil";
 import Util from "../Util/Util";
@@ -134,7 +133,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newObj = {};
       layerId = action.layerId;
       newShapeIds = state[layerId + "$shapeIds"].slice();
-      shapeCount = shapeIds.length;
+      shapeCount = newShapeIds.length;
       shapeType = state[layerId + "$type"];
       newShapeName = shapeType + " " + shapeCount;
       newShapeId = layerId + shapeType + shapeCount;
@@ -143,7 +142,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
       newObj[newShapeId + "$name"] = newShapeName;
       newObj[newShapeId + "$id"] = newShapeId;
-      newObj[newShapeId + "$index"] = newShapeIds.length - 1;
+      newObj[newShapeId + "$index"] = shapeCount;
       newObj[newShapeId + "$type"] = shapeType;
       newObj[newShapeId + "$layerId"] = layerId;
       newObj[newShapeId + "$inheritedDimensionList"] = ShapeUtil.allDimensions[shapeType].slice();
@@ -291,12 +290,6 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       });
 
       return Object.assign({}, state, newObj);
-
-    case LOOP_LAYER:
-      layerToLoop = action.layerId;
-      
-      // to loop a layer, we create a new shape 
-
 
     default:
       return state;

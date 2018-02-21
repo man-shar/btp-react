@@ -280,7 +280,7 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
         // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
 
         dispatch(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
-      })
+      });
     }
   }
 }
@@ -344,16 +344,28 @@ export function loopAll() {
       if(state["drawing"][layerId + "$shapeIds"].length === state["drawing"]["data"].length)
         return;
 
-      // otherwise loop this layer.
+      // otherwise loop over this layer.
       dispatch(loopLayer(layerId));
     });
   };
 }
 
 export function loopLayer(layerId) {
-  const action = {
-    type: LOOP_LAYER,
-    layerId: layerId
+  return (dispatch, getState) => {
+    // to loop a layer, we first initialise the layer with as many shapes as there are rows in the data.
+
+    const state = getState();
+    const data = state.drawing.data;
+    // if data is empty, do nothing.
+    if(data.length === 0)
+    {
+      // do nothing
+      return
+    }
+
+    // otherwise, initialise layer with as many shapes as rows in data.
+    data.forEach((row) => {
+      dispatch(createNewShape(layerId));
+    });
   }
-  return action;
 }

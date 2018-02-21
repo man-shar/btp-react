@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { connect } from 'react-redux';
-import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape, loopAll, loopActiveLayer } from '../Actions/actions';
+import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape, loopAll, loopLayer } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil";
 import Layer from './Layer';
 import keydown from 'react-keydown';
@@ -133,7 +133,7 @@ const mapDispatchToProps = (dispatch) => {
       if(e.shiftKey)
         dispatch(loopAll());
       else
-        dispatch(loopActiveLayer(layerId));
+        dispatch(loopLayer(layerId));
     },
     checkIfNewLayerIsValid: (e) => {
       dispatch(checkIfNewLayerIsValid());

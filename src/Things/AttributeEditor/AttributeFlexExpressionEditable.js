@@ -84,7 +84,6 @@ class AttributeFlexExpressionEditable extends React.Component {
   }
 
   shouldComponentUpdate () {
-    debugger;
     return (this.shouldUpdate)
   }
 
