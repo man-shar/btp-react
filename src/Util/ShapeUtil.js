@@ -211,7 +211,6 @@ ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesVal
     const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
 
     try {
-      var math2 = math;
       const value = math.eval(exprString, allValues);
       if(value <= min)
         min = value;
@@ -597,6 +596,28 @@ ShapeUtil.getAllShapeInheritedStylesAllProperties = function(shapeId, layerId, d
   return inheritedStylesAllProperties;
 };
 
+ShapeUtil.nodeContainsDataAttribute = function (node, attributeId) {
+  let nodeContainsDataAttribute = false;
+  const self = this;
+
+  if(node.name === attributeId)
+    return true;
+
+  node.forEach((childNode) => {
+    if(childNode.name === attributeId)
+      nodeContainsDataAttribute = true;
+
+    else
+    {
+      childNodeContainsDataAttribute = self.nodeContainsDataAttribute(childNode, attributeId)
+      if(childNodeContainsDataAttribute)
+        nodeContainsDataAttribute = true;
+    }
+  });
+
+  return nodeContainsDataAttribute;
+}
+
 
 // ################################################
 // Layer functions
@@ -608,6 +629,14 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
 
   const attributeId = layerId + "$" + dimension;
   const attributeExprString = drawing[attributeId + "$exprString"]
+  let constructedAttributeExprString = attributeExprString;
+  let nodes;
+  try {
+    nodes = math.parse(attributeExprString);
+  }
+  catch(e) {
+    return e.toString()
+  }
 
   // check if this dimension is defined in the layer.
   if(drawing[attributeId + "$" + property] !== undefined)
@@ -637,11 +666,36 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
 
         else {
           // so earlier I was using isPurelyDependentOnData function, but I think we can just use the axis to calculate data attributes and the other can remain as such. so far seems fine.
+          // so now, for example, we have (sin(index)), then instead of replacing index inside bracket with value from axis, we need to replace sin(index) with the value from axis. i feel like this would be a better use case. i mean why else would someone wrap a data in some function, not like they know the value that's going to come out of the axis.
+          // we use mathjs.parse function, and whenever we encounter a FunctionNode containing a SymbolNode with name as referredAttributeId, we calculate it's value and *then* transform it with the axis.
+
+          var filtered = nodes.filter(function (node) {
+            // if this is a function node that contains a data attribute
+            if(node.isFunctionNode && self.nodeContainsDataAttribute(node, referredAttributeId))
+            {
+              let valueObj = {}
+              valueObj[referredAttributeId] = (+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
+              let value;
+
+              try {
+                value = math.eval(node.toString(), valueObj);
+              }
+              catch(e) {
+                return e.toString()
+              }
+
+              // now pass *this* value through axis function.
+              value = self.axes[axisThisAttributeWillNeed](value);
+
+              // now replace this string in attributeExprString with the calculates value.
+              const re = new RegExp(Util.escapeRegExp(node.toString()), "g");
+              constructedAttributeExprString = constructedAttributeExprString.replace(re, value);
+            }
+          });
+
           referredDataAttributesValues[referredAttributeId] = self.axes[axisThisAttributeWillNeed](+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
         }
       });
-
-      var math2 = math;
 
       /** NOT USING THIS FOR NOW
       // now, if this attribtue is "purely" dependent on dataAttributes. i.e. it has no reference to any other attributes not dependent on data, then we can use it's axis.
@@ -674,10 +728,15 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
       //   }
       // }
       **/
+
+
       
       try {
-        let value = (math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
-        var math2 = math;
+        let value = (math.eval(constructedAttributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
+        // var math2 = math;
+
+        // if(attributeId === "layer0$height")
+        //   debugger;
         return value;
       }
       catch(e) {

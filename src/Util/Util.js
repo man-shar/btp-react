@@ -42,4 +42,8 @@ Util.shortenString =  function (fullStr, separator) {
          fullStr.substr(fullStr.length - backChars);
 };
 
+Util.escapeRegExp= function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 export default Util;

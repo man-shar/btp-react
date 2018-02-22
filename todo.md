@@ -1,7 +1,7 @@
 **TODO**
-EVERYTHING IS BROKEN. codemirror doesn't render marks, layer loop gets one more shape than it should. wtf.
+* codemirror doesn't render same mark consecutively on delete, drag drop.
 
-* unmount codemirror mark when component updates.
+* um, things don't update when other things update. plis. do something.
 
 * initialise rectangle's x and y as reference attribtues:
 ---* x = index from shape's index and a function of width of the bar
@@ -16,5 +16,6 @@ EVERYTHING IS BROKEN. codemirror doesn't render marks, layer loop gets one more 
 
 * check for cyclic reference in reference attributes.
 * colorbrewer palletes
-* also check if an attribute expression change is in a layer whose attribute depends on data. if so, change it for all child shapes.
 * add padding in chart width/height. make them as reference attributes of padding.
+
+* um, have to figure out something about the y axis inversion.
