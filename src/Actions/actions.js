@@ -176,31 +176,31 @@ export function changeAttributeExpressionStringThunk(attributeId, newExprString,
     state = getState();
 
     // now check if this was a layer. if it was, change this attribute for all the child shapes.
-    if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
-    {
-      // for all child shapes in this layer, create an own attribute for this attribute where a data attribute is dropped and calculate value.
-      const shapeIds = state["drawing"][actionOccuredAtId + "$shapeIds"].slice();
+    // if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
+    // {
+    //   // for all child shapes in this layer, create an own attribute for this attribute where a data attribute is dropped and calculate value.
+    //   const shapeIds = state["drawing"][actionOccuredAtId + "$shapeIds"].slice();
 
-      shapeIds.forEach((shapeId) => {
-        const ownAttributeIdForShape = shapeId + "$" + attributeAccessorName;
+    //   shapeIds.forEach((shapeId) => {
+    //     const ownAttributeIdForShape = shapeId + "$" + attributeAccessorName;
 
-        // if it isn't an own attribute, add it first
-        if(state["drawing"][ownAttributeIdForShape + "$name"] === undefined)
-        {
-          dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
-        }
+    //     // if it isn't an own attribute, add it first
+    //     if(state["drawing"][ownAttributeIdForShape + "$name"] === undefined)
+    //     {
+    //       dispatch(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
+    //     }
 
-        dispatch(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
+    //     dispatch(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
 
-        // to get latest state.
-        state = getState();
+    //     // to get latest state.
+    //     state = getState();
 
-        // // update codemirror marks.
-        // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
+    //     // // update codemirror marks.
+    //     // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
 
-        dispatch(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
-      })
-    }
+    //     dispatch(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
+    //   })
+    // }
     
     // update values of attributes depending on this attribute.
     dispatch(updateDependentsValues(ownAttributeId, typeOfAttributeReceivingDrop));
@@ -252,41 +252,41 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
     // get latest state
     state = getState();
 
-    let batchedActions = [];
+    // let batchedActions = [];
 
     // now check if this was a layer. if it was, change this attribute for all the child shapes.
-    if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
-    {
-      // for all child shapes in this layer, create an own attribute for this attribute where a data attribute is dropped and calculate value.
-      const shapeIds = state["drawing"][actionOccuredAtId + "$shapeIds"].slice();
+    // if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
+    // {
+    //   // for all child shapes in this layer, create an own attribute for this attribute where a data attribute is dropped and calculate value.
+    //   const shapeIds = state["drawing"][actionOccuredAtId + "$shapeIds"].slice();
 
-      shapeIds.forEach((shapeId) => {
-        const ownAttributeIdForShape = shapeId + "$" + attributeAccessorName;
+    //   shapeIds.forEach((shapeId) => {
+    //     const ownAttributeIdForShape = shapeId + "$" + attributeAccessorName;
 
-        // if it isn't an own attribute, add it first
-        if(state["drawing"][ownAttributeIdForShape + "$name"] === undefined)
-        {
-          batchedActions.push(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
-        }
+    //     // if it isn't an own attribute, add it first
+    //     if(state["drawing"][ownAttributeIdForShape + "$name"] === undefined)
+    //     {
+    //       batchedActions.push(addAttributeToOwnAttributes(attributeId, typeOfAttributeReceivingDrop, shapeId, attributeIndex));
+    //     }
 
-        // make shape attribute also dependent on whatever layer is dependent on.
-        // we aren't using editor and event in addAttributeReferenceToAttribute so just pass null.
-        ShapeUtil.addAttributeReferenceToAttribute(null, null, ownAttributeIdForShape, droppedAttributeMonitorItem);
+    //     // make shape attribute also dependent on whatever layer is dependent on.
+    //     // we aren't using editor and event in addAttributeReferenceToAttribute so just pass null.
+    //     ShapeUtil.addAttributeReferenceToAttribute(null, null, ownAttributeIdForShape, droppedAttributeMonitorItem);
 
-        batchedActions.push(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
+    //     batchedActions.push(changeAttributeExpressionString(ownAttributeIdForShape, state["drawing"][attributeId + "$exprString"], typeOfAttributeReceivingDrop));
 
-        // to get latest state.
-        state = getState();
+    //     // to get latest state.
+    //     state = getState();
 
-        // // update codemirror marks.
-        // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
+    //     // // update codemirror marks.
+    //     // ShapeUtil.updateMarks(ownAttributeIdForShape, state["drawing"][ownAttributeIdForShape + "$exprString"], state["drawing"]);
 
-        batchedActions.push(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
-        dispatch(batchedActions);
+    //     batchedActions.push(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
+    //     dispatch(batchedActions);
 
-        batchedActions = [];
-      });
-    }
+    //     batchedActions = [];
+    //   });
+    // }
   }
 }
 
@@ -368,11 +368,18 @@ export function loopLayer(layerId) {
       return
     }
 
+    if(data.length === state["drawing"][layerId + "$shapeIds"].length)
+    {
+      // do nothing
+      return
+    }
+
     let batchedActions = [];
 
-    // otherwise, initialise layer with as many shapes as rows in data.
+    // otherwise, initialise layer with as many shapes as unmatched rows in data.
     data.forEach((row, i) => {
-      console.log(i);
+      if(i < state["drawing"][layerId + "$shapeIds"].length)
+        return;
       batchedActions.push(createNewShape(layerId));
     });
 

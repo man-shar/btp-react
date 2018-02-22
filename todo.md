@@ -1,6 +1,8 @@
 **TODO**
 EVERYTHING IS BROKEN. codemirror doesn't render marks, layer loop gets one more shape than it should. wtf.
 
+* unmount codemirror mark when component updates.
+
 * initialise rectangle's x and y as reference attribtues:
 ---* x = index from shape's index and a function of width of the bar
 ---* y = chart height - height of the rect

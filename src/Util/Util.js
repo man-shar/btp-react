@@ -24,4 +24,22 @@ Util.columnType = function(data, column) {
   return (isNaN(data[0][column]) ? "string" : "number");
 };
 
+Util.strLen = 10;
+
+Util.shortenString =  function (fullStr, separator) {
+  const self = this;
+  if (fullStr.length <= self.strLen) return fullStr;
+
+  separator = separator || '...';
+
+  var sepLen = separator.length,
+      charsToShow = self.strLen - sepLen,
+      frontChars = Math.ceil(charsToShow/2),
+      backChars = Math.floor(charsToShow/2);
+
+  return fullStr.substr(0, frontChars) + 
+         separator + 
+         fullStr.substr(fullStr.length - backChars);
+};
+
 export default Util;

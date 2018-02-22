@@ -1,5 +1,6 @@
 import math from "mathjs-expression-parser";
 import * as d3 from "d3";
+import Util from "./Util"
 
 const ShapeUtil = {};
 
@@ -10,6 +11,8 @@ const ShapeUtil = {};
 // #########################################
 
 ShapeUtil.keysToShapes = ["r", "c", "R", "C"];
+
+ShapeUtil.knownShapes = ["rect", "circle"];
 
 ShapeUtil.keyToShape = {
   "r": "rect",
@@ -114,6 +117,15 @@ ShapeUtil.allStyles = {
   "circle": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"]
 }
 
+ShapeUtil.axisThisAttributeWillNeed = {
+  "height": "yAxis",
+  "y": "yAxis",
+  "cy": "yAxis",
+  "width": "xAxis",
+  "x": "xAxis",
+  "cx": "xAxis",
+}
+
 
 // #########################################
 // Axes functions.
@@ -128,6 +140,11 @@ ShapeUtil.axisTypes = {
   "linear": d3.scaleLinear,
   "band": d3.scaleBand
 };
+
+ShapeUtil.axisToAxisType = {
+  "xAxis": "linear",
+  "yAxis": "linear"
+}
 
 ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
   const self = this;
@@ -155,17 +172,25 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
       referredDataAttributes.push(referredAttributeId);
   });
 
-  const domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
-  const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
-  const range = d3.range(0, ((axis === "xAxis") ?
-                      (drawing["overallAttributes$chartWidth$value"])
-                      : drawing["overallAttributes$chartHeight$value"]));
+  // const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
+  const currentAxisType = self.axisToAxisType[axis];
 
-  self.axes[axis] = currentAxisType()
+  const currentAxisFunction = self.axisTypes[currentAxisType];
+
+  let domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
+
+  // if this is band scale, change domain to dicrete.
+  if(currentAxisType === "band")
+    domain = d3.range(domain[0], domain[1]);
+
+  const range = [0, ((axis === "xAxis") ?
+                      (drawing["overallAttributes$chartWidth$value"])
+                      : drawing["overallAttributes$chartHeight$value"])];
+
+  self.axes[axis] = currentAxisFunction()
                     .domain(domain)
                     .range(range);
 
-  console.log(self.axes);
   return self.axes[axis];
 }
 
@@ -185,14 +210,20 @@ ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesVal
 
     const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
 
-    const value = math.eval(exprString, allValues);
-    if(value <= min)
-      min = value;
-    if(value >= max)
-      max = value;
-  });
+    try {
+      var math2 = math;
+      const value = math.eval(exprString, allValues);
+      if(value <= min)
+        min = value;
+      if(value >= max)
+        max = value;
+    }
+    catch(e) {
+      return [e.toString(), e.toString()];
+    }
+    });
 
-  return [min, max];
+    return [min, max];
 }
 
 
@@ -376,8 +407,8 @@ ShapeUtil.getShapeDimensionProperty = function(dimension, shapeId, layerId, draw
   if(drawing[shapeId + "$" + dimension + "$" + property] !== undefined)
     return drawing[shapeId + "$" + dimension + "$" + property];
 
-  // otherwise check in layer.
-  return self.getLayerDimensionProperty(dimension, layerId, drawing, property)
+  // otherwise check in layer. we pass shapeId because if this layer attribute is dependent on data, we should be able to calculate dimension for this shape from index.
+  return self.getLayerDimensionProperty(dimension, layerId, drawing, property, shapeId);
 }
 
 // get a particular style property from a shape. returns just the property of the style, not an object.
@@ -454,7 +485,7 @@ ShapeUtil.getAllShapeInheritedDimensionsProperty = function(shapeId, layerId, dr
 
   inheritedDimensionList.forEach((dimension) => {
     // this dimension can either be an own prop of the containing layer or maybe an prop inherited by the layer as well.
-    allShapeInheritedDimensions[dimension] = self.getLayerDimensionProperty(dimension, layerId, drawing, property);
+    allShapeInheritedDimensions[dimension] = self.getLayerDimensionProperty(dimension, layerId, drawing, property, null);
   });
 
   return allShapeInheritedDimensions;
@@ -518,9 +549,9 @@ ShapeUtil.getAllShapeInheritedDimensionsAllProperties = function(shapeId, layerI
   const inheritedDimensionList = drawing[shapeId + "$inheritedDimensionList"].slice();
 
   inheritedDimensionList.forEach((dimension) => {
-    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value")
-    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name")
-    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString")
+    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value", null)
+    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name", null)
+    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString", null)
     inheritedDimensionsAllProperties[dimension + "$" + "inheritedFrom"] = (self.isLayerOwn(dimension, layerId, drawing) ? layerId : "overallAttributes")
   });  
 
@@ -567,16 +598,95 @@ ShapeUtil.getAllShapeInheritedStylesAllProperties = function(shapeId, layerId, d
 };
 
 
-
 // ################################################
 // Layer functions
 // ################################################
 
 // get a particular dimension property from a layer. returns just the property of the dimension, not an object.
-ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, property) {
+ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, property , shapeId) {
+  const self = this;
+
+  const attributeId = layerId + "$" + dimension;
+  const attributeExprString = drawing[attributeId + "$exprString"]
+
   // check if this dimension is defined in the layer.
-  if(drawing[layerId + "$" + dimension + "$" + property] !== undefined)
+  if(drawing[attributeId + "$" + property] !== undefined)
+  {
+    // check if a shape is asking for this dimension and this layer dimension is dependent on data. if so, use shape index to calculate data reference attribute values for this.
+    if(shapeId !== null && self.isDependentOnData(attributeId, drawing))
+    {
+      // find what non data attributes and data attributes this attribute depends on.
+      let referredAttributesValues = {};
+      // this is a list because I don't know the value yet. I'll construct an object later with the values.
+      let referredDataAttributesValues = {};
+      const shapeIndex = drawing[shapeId + "$index"];
+      const axisThisAttributeWillNeed = self.axisThisAttributeWillNeed[dimension];
+
+      self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
+        if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
+        {
+          // TODO better error handling here.
+          let referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing, shapeId);
+
+          if(referredAttributesValue[0] !== null)
+            return "error";
+
+          else
+            referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
+        }
+
+        else {
+          // so earlier I was using isPurelyDependentOnData function, but I think we can just use the axis to calculate data attributes and the other can remain as such. so far seems fine.
+          referredDataAttributesValues[referredAttributeId] = self.axes[axisThisAttributeWillNeed](+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
+        }
+      });
+
+      var math2 = math;
+
+      /** NOT USING THIS FOR NOW
+      // now, if this attribtue is "purely" dependent on dataAttributes. i.e. it has no reference to any other attributes not dependent on data, then we can use it's axis.
+      // if(self.isPurelyDependentOnData(attributeId, drawing))
+      // {
+      //   // if(attributeId === "layer0$cy")
+      //   //   debugger;
+      //   try {
+      //     let value = self.axes[axisThisAttributeWillNeed](math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
+      //     var math2 = math;
+      //     return value;
+      //   }
+      //   catch(e) {
+      //     return e.toString();
+      //   }
+      // }
+
+      // // else, we should return value without using axis.
+      // if(!self.isPurelyDependentOnData(attributeId, drawing))
+      // {
+      //   // if(attributeId === "layer0$cy")
+      //   //   debugger;
+      //   try {
+      //     let value = (math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
+      //     var math2 = math;
+      //     return value;
+      //   }
+      //   catch(e) {
+      //     return e.toString();
+      //   }
+      // }
+      **/
+      
+      try {
+        let value = (math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
+        var math2 = math;
+        return value;
+      }
+      catch(e) {
+        return e.toString();
+      }
+    }
+
     return drawing[layerId + "$" + dimension + "$" + property];
+  }
 
   // otherwise return from overallAttributes
   return drawing["overallAttributes" + "$" + dimension + "$" + property];
@@ -712,9 +822,9 @@ ShapeUtil.getAllLayerOwnDimensionsAllProperties = function(layerId, drawing) {
   const ownDimensionList = drawing[layerId + "$ownDimensionList"].slice();
 
   ownDimensionList.forEach((dimension) => {
-    ownDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value")
-    ownDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name")
-    ownDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString")
+    ownDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value", null)
+    ownDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name", null)
+    ownDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString", null)
   });  
 
   return ownDimensionsAllProperties;
@@ -731,9 +841,9 @@ ShapeUtil.getAllLayerInheritedDimensionsAllProperties = function(layerId, drawin
   const inheritedDimensionList = drawing[layerId + "$inheritedDimensionList"].slice();
 
   inheritedDimensionList.forEach((dimension) => {
-    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value")
-    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name")
-    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString")
+    inheritedDimensionsAllProperties[dimension + "$" + "value"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "value", null)
+    inheritedDimensionsAllProperties[dimension + "$" + "name"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "name", null)
+    inheritedDimensionsAllProperties[dimension + "$" + "exprString"] = self.getLayerDimensionProperty(dimension, layerId, drawing, "exprString", null)
   });  
 
   return inheritedDimensionsAllProperties;
@@ -870,6 +980,7 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
       self.removeDependent(referredAttributeId, attributeId);
     }
   });
+  console.log(self.referenceAttributes)
 }
 
 // recursive function to check if an attribute is dependent on data.
@@ -894,55 +1005,62 @@ ShapeUtil.isDependentOnData = function(attributeId, drawing) {
   return isDependentOnData;
 }
 
+// recursive function to check if an attribute is PURELY dependent on data. i.e if it contains reference to only dataAttributes. using this to figure out if i should use axis to calculate a shape's attribute value.
+ShapeUtil.isPurelyDependentOnData = function(attributeId, drawing) {
+  const self = this;
+  let referenceAttributes = self.referenceAttributes[attributeId];
+  if(!referenceAttributes)
+    return false
+
+  let referredAttributesIdSet = referenceAttributes["referredAttributesIdSet"]
+
+  if(!referredAttributesIdSet || referredAttributesIdSet.size === 0)
+    return false
+
+  let isPurelyDependentOnData = true;
+
+  referredAttributesIdSet.forEach((referredAttributeId) => {
+    // if this is not a data attribute, check if this is purely dependent on data.
+    if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
+      isPurelyDependentOnData = false;
+  });
+
+  return isPurelyDependentOnData;
+}
+
 // recursively get value of an attribute.
 // returns an array: [error, value]
 // return value if no error is [null, value]
 // return value if error is [error string, null]
 // TODO: check for cyclic reference.
-ShapeUtil.getAttributeValue = function(attributeId, drawing) {
+ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
   const self = this;
   const attributeExprString = drawing[attributeId + "$exprString"];
   const attributeOwnerId = attributeId.split("$")[0];
+
+  if(attributeOwnerId === "overallAttributes" && drawing[attributeId + "$type"] !== "axis")
+  {
+    return [null, drawing[attributeId + "$value"]];
+  }
 
   // if this is an axis, return text showing the domain and range of the axis.
   if(drawing[attributeId + "$type"] === "axis")
   {
     const axis = attributeId.split("$")[1];
+    // return  [null, "Domain: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).domain())) + "\n" + "Range: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).range()))];
     return  [null, "Domain: " + JSON.stringify((ShapeUtil.axes[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.axes[axis]).range())];
   }
 
   // now check if this is a layer attribute and has a data attributes. if so, return "Dependent on data."
-  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing))) {
-    return [null, "Dependent on data. Each shape in this layer will have a different value based on the index."];
+  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId === null) {
+    return [null, "Dependent on data."];
   }
 
-  // now check if this is a shape attribute and is dependent on data attributes. if so, return value by calculating data attributes based on the shape's index.
-  if((drawing[attributeOwnerId + "$whatAmI"] === "shape") && (self.isDependentOnData(attributeId, drawing))) {
-    // find what non data attributes and data attributes this attribute depends on.
-    let referredAttributesValues = {};
-    // this is a list because I don't know the value yet. I'll construct an object later with the values.
-    let referredDataAttributesValues = {};
-    const shapeIndex = drawing[attributeOwnerId + "$index"];
-
-    self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
-      if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-      {
-        // TODO better error handling here.
-        referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing);
-
-        if(referredAttributesValue[1] !== null)
-          return "error";
-
-        else
-          referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
-      }
-
-      else
-        referredDataAttributesValues[referredAttributeId] = drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]];
-    });
-
-    return [null, math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues))];
+  // check if a shape is asking for a layer attribute dependent on data.
+  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId !== null) {
+    return [null, self.getLayerDimensionProperty(attributeId.split("$")[1], attributeOwnerId, drawing, "value", shapeId)];
   }
+
 
   let referredAttributesValues = {};
   let value;
@@ -978,7 +1096,14 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing) {
     }
   }
 
-  return [null, math.eval(attributeExprString, referredAttributesValues)]
+  try {
+    value = [null, math.eval(attributeExprString, referredAttributesValues)]
+    return value;
+  }
+
+  catch (e) {
+    return [e.toString(), null];
+  }
 }
 
 // check if an attribute has dependents.
@@ -1015,5 +1140,3 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
 
 
 export default ShapeUtil;
-
-

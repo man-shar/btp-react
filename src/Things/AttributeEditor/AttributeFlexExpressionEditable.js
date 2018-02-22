@@ -49,11 +49,12 @@ class AttributeFlexExpressionEditable extends React.Component {
 
   renderCodeMirrorMarks (editor) {
     const referenceAttributes = ShapeUtil.referenceAttributes[this.props.attributeId]
-    if (referenceAttributes) {
+    if (referenceAttributes) {      
       const marks = referenceAttributes['marks']
+      // console.log(marks);
 
       marks.forEach((mark) => {
-        const el = document.createElement('div')
+        const el = document.createElement('span')
         el.style.display = 'inline'
 
         ReactDOM.render(
@@ -121,7 +122,7 @@ class AttributeFlexExpressionEditable extends React.Component {
 
     this.props.onAttributeReferenceDrop(editor, event, attributeId, monitor.getItem(), this.props.typeOfAttributeReceivingDrop, this.props.actionOccuredAtId, this.props.attributeIndex);
 
-    this.renderCodeMirrorMarks(editor);
+    // this.renderCodeMirrorMarks(editor);
   }
 
   render () {
@@ -160,7 +161,8 @@ class AttributeFlexExpressionEditable extends React.Component {
           editorDidMount={(editor) => {
             editor.setValue(this.props.attributeExprString);
 
-            this.renderCodeMirrorMarks(editor);
+            // this.renderCodeMirrorMarks(editor);
+            // console.log("rendered marks from editordidmount")
             this.instance = editor
           }}
         />

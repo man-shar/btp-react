@@ -9,8 +9,7 @@ import ShapeAttributeEditor from "./ShapeAttributeEditor";
 
 class AttributeEditor extends React.Component {
   render() {
-    const activeLayerId = this.props.activeLayerId;
-    const activeShapeId = this.props.activeShapeId;
+    const { activeLayerId, activeShapeId, drawing } = this.props;
 
     return (
       <div id="attribute-container">
@@ -18,16 +17,10 @@ class AttributeEditor extends React.Component {
           Attributes
         </div>
         <div className="AttributesSectionHeading">
-          <span>Overall Attributes</span>
+          <span>Default Attributes</span>
         </div>
         <OverallAttributeEditor />
-        <div className="AttributesSectionHeading">
-          <span>Shared Attributes</span>
-        </div>
         <LayerAttributeEditor layerId={activeLayerId} />
-        <div className="AttributesSectionHeading">
-          <span>Shape Attributes</span>
-        </div>
         <ShapeAttributeEditor shapeId={activeShapeId} layerId={activeLayerId}/>
       </div>
     );
@@ -37,7 +30,8 @@ class AttributeEditor extends React.Component {
 const mapStateToProps = state => {
   return {
     activeLayerId: state["drawing"]["activeLayerId"],
-    activeShapeId: state["drawing"]["activeShapeId"]
+    activeShapeId: state["drawing"]["activeShapeId"],
+    drawing: state["drawing"]
   };
 };
 

@@ -135,7 +135,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
       newShapeIds = state[layerId + "$shapeIds"].slice();
       shapeCount = newShapeIds.length;
       shapeType = state[layerId + "$type"];
-      newShapeName = shapeType + " " + shapeCount;
+      newShapeName = Util.toSentenceCase(shapeType) + " " + shapeCount;
       newShapeId = layerId + shapeType + shapeCount;
 
       newShapeIds.push(newShapeId);

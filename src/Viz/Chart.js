@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape, loopAll, loopLayer } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil";
 import Layer from './Layer';
-import keydown from 'react-keydown';
 // Handles svg mouse events. Drag draw etc. Dispatches actions for user drawing.
 
 class Chart extends React.Component {
@@ -16,16 +15,6 @@ class Chart extends React.Component {
     this.state = {
       throttle: 0,
     }
-  }
-
-  @keydown(ShapeUtil.keysToShapes)
-  toggleCurrentShape(event) {
-    this.props.toggleCurrentShape(event);
-  }
-
-  @keydown(ShapeUtil.loopKeyCombinations)
-  loopKeyCombination(event) {
-    this.props.loopKeyCombination(event, this.props.drawing["activeLayerId"]);
   }
 
   // componentDidMount() {
@@ -125,15 +114,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     onMouseUp: (e) => {
       dispatch(endDragDraw(e));
-    },
-    toggleCurrentShape: (e) => {
-      dispatch(toggleCurrentShape(e.key));
-    },
-    loopKeyCombination: (e, layerId) => {
-      if(e.shiftKey)
-        dispatch(loopAll());
-      else
-        dispatch(loopLayer(layerId));
     },
     checkIfNewLayerIsValid: (e) => {
       dispatch(checkIfNewLayerIsValid());
