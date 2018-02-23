@@ -282,14 +282,7 @@ a{
   font-weight: bold;
 }
 
-.rect-toolbar:before {
-  content: "r";
+.toolbar-key {
   display: inline-block;
-  margin-right: 0.4em;
-}
-
-.circle-toolbar:before {
-  content: "c";
-  display: inline-block;
-  margin-right: 0.4em;
+  margin-right: 0.6em;
 }

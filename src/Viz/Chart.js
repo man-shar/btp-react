@@ -87,7 +87,8 @@ class Chart extends React.Component {
           <rect width={chartWidth} height={chartHeight} fill="#fff"></rect>
 
           {layerIds.map((layerId, i) =>
-            <g key={i} id={layerId} transform={"scale(1, -1) translate(0," + (-chartHeight) + ")"}>
+            // <g key={i} id={layerId} transform={"scale(1, -1) translate(0," + (-chartHeight) + ")"}>
+            <g key={i} id={layerId}>
               <Layer className="layer" id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
             </g>
           )}

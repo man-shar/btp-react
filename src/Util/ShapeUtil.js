@@ -23,6 +23,11 @@ ShapeUtil.keyToShape = {
 
 ShapeUtil.loopKeyCombinations = ["ctrl+m", "ctrl+shift+m"];
 
+ShapeUtil.loopKeyCombinationsFunctions = {
+  "ctrl+m": "Loop current layer",
+  "ctrl+shift+m": "Loop all layers"
+}
+
 // #########################################
 // Default SVG styles.
 // #########################################
