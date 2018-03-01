@@ -21,7 +21,7 @@ ShapeUtil.keyToShape = {
   "C": "circle"
 };
 
-ShapeUtil.loopKeyCombinations = ["ctrl+m", "ctrl+shift+m"];
+ShapeUtil.loopKeyCombinations = ["ctrl+l", "ctrl+shift+l"];
 
 ShapeUtil.loopKeyCombinationsFunctions = {
   "ctrl+m": "Loop current layer",
@@ -201,7 +201,7 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
 
 ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesValues, referredDataAttributes) {
   let max = - Infinity;
-  let min = 0;
+  let min = Infinity;
 
   data.forEach((row, i) => {
     // construct an object for math.eval for current row with values of referredDataAttributes
@@ -227,6 +227,11 @@ ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesVal
     }
     });
 
+  // fukin' edge cases!
+
+  if(min === max)
+    min = 0;
+
     return [min, max];
 }
 
@@ -245,8 +250,8 @@ ShapeUtil.newLayerFromDrag = function(shape, e) {
       y$value: e.nativeEvent.offsetY,
       width$value: 0,
       height$value: 0,
-      x$name: "Top Left X",
-      y$name: "Top Left Y",
+      x$name: "Base X",
+      y$name: "Base Y",
       width$name: "Width",
       height$name: "Height",
       x$exprString: "" + e.nativeEvent.offsetX,
@@ -1104,7 +1109,7 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
 
   if(attributeOwnerId === "overallAttributes" && drawing[attributeId + "$type"] !== "axis")
   {
-    return [null, drawing[attributeId + "$value"]];
+    return [null, math.eval(drawing[attributeId + "$exprString"])];
   }
 
   // if this is an axis, return text showing the domain and range of the axis.

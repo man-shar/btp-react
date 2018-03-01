@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import logger from "redux-logger";
 import thunkMiddleware from "redux-thunk";
 import manageActions from "./Reducers/reducer";
-import { toggleCurrentShape, loopLayer } from "./Actions/actions";
+import { toggleCurrentShape, loopLayer, loopAll } from "./Actions/actions";
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { reduxBatch }  from '@manaflair/redux-batch';
@@ -34,7 +34,7 @@ class App extends React.Component {
 
   @keydown(ShapeUtil.loopKeyCombinations)
   loopKeyCombination(event) {
-    debugger;
+    event.preventDefault();
     this.props.loopKeyCombination(event, this.props.drawing["activeLayerId"]);
   }
 
@@ -61,7 +61,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     loopKeyCombination: (e, layerId) => {
       if(e.shiftKey)
+      {
         dispatch(loopAll());
+      }
       else
         dispatch(loopLayer(layerId));
     }

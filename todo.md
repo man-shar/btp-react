@@ -19,3 +19,9 @@
 * add padding in chart width/height. make them as reference attributes of padding.
 
 * um, have to figure out something about the y axis inversion.
+
+
+FEEDBACK
+* initialise each layer with different colour
+* add context when rollover
+* user scaffolding

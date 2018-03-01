@@ -45,6 +45,10 @@ class Chart extends React.Component {
     const currentShape = drawing.currentShape;
     const layerIds = drawing.layerIds;
     const beingDrawn = drawing.beingDrawn;
+    const marginLeft = (drawing["overallAttributes$marginLeft$value"] !== undefined) ? drawing["overallAttributes$marginLeft$value"] : 0;
+    const marginTop = (drawing["overallAttributes$marginTop$value"] !== undefined) ? drawing["overallAttributes$marginTop$value"] : 0;
+    const marginRight = (drawing["overallAttributes$marginRight$value"] !== undefined) ? drawing["overallAttributes$marginRight$value"] : 0;
+    const marginBottom = (drawing["overallAttributes$marginBottom$value"] !== undefined) ? drawing["overallAttributes$marginBottom$value"] : 0;
 
     const overallStyles = ShapeUtil.getAllOverallAttributesStylesProperty(drawing, "value");
 
@@ -54,8 +58,8 @@ class Chart extends React.Component {
       <div id="chart-container">
         <svg 
           id="chart"
-          width={chartWidth}
-          height={chartHeight}
+          width={chartWidth + marginRight + marginLeft}
+          height={chartHeight + marginBottom + marginTop}
           onMouseDown={this.onMouseDown.bind(this)}
           onMouseMove={(e) => {
             e.preventDefault();
@@ -84,11 +88,10 @@ class Chart extends React.Component {
           }}
           style={overallStyles}
           >
-          <rect width={chartWidth} height={chartHeight} fill="#fff"></rect>
+          <rect width={chartWidth + marginLeft + marginRight} height={chartHeight + marginTop + marginBottom} fill="#fff"></rect>
 
           {layerIds.map((layerId, i) =>
-            // <g key={i} id={layerId} transform={"scale(1, -1) translate(0," + (-chartHeight) + ")"}>
-            <g key={i} id={layerId}>
+            <g key={i} id={layerId} transform={"scale(1, -1) translate("+ marginLeft +"," + (-chartHeight - marginTop) + ")"}>
               <Layer className="layer" id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
             </g>
           )}
