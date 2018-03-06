@@ -1,5 +1,4 @@
 import React from 'react'
-import { render } from 'react-dom'
 import ShapeUtil from '../../Util/ShapeUtil'
 import { DragSource } from 'react-dnd'
 import ItemTypesDnd from '../ItemTypesDnd'

@@ -1,6 +1,5 @@
   import React from 'react'
-  import { render } from 'react-dom'
-  import ShapeUtil from '../../Util/ShapeUtil'
+    import ShapeUtil from '../../Util/ShapeUtil'
   import AttributeFlexName from './AttributeFlexName'
   import AttributeFlexExpressionEditable from './AttributeFlexExpressionEditable'
   import AttributeFlexValue from './AttributeFlexValue'

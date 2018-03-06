@@ -1,5 +1,4 @@
 import React from 'react'
-import { render } from 'react-dom'
 import Data from './Data/Data'
 import AttributeEditor from './AttributeEditor/AttributeEditor'
 import Toolbar from './Toolbar/Toolbar'

@@ -1,5 +1,4 @@
 import React from 'react';
-import { render } from 'react-dom';
 import { AttributeFlexRow } from './AttributeFlexRow'
 
 class AttributeFlexContainer extends React.Component {

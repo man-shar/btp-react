@@ -1,6 +1,5 @@
 import React from 'react'
 import { render } from 'react-dom'
-import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import { Provider, connect } from 'react-redux'
 import { UnControlled as CodeMirror } from 'react-codemirror2'
@@ -57,7 +56,7 @@ class AttributeFlexExpressionEditable extends React.Component {
         const el = document.createElement('span')
         el.style.display = 'inline'
 
-        ReactDOM.render(
+        render(
           <CodeMirrorMark
             markText={mark.text}
             attributeId={mark.attributeId}

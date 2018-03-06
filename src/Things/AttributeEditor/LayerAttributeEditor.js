@@ -1,5 +1,4 @@
 import React from 'react'
-import { render } from 'react-dom'
 import { connect } from 'react-redux'
 import ShapeUtil from '../../Util/ShapeUtil'
 import Util from '../../Util/Util'

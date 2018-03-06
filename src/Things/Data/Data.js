@@ -1,5 +1,4 @@
 import React from 'react'
-import { render } from 'react-dom'
 import Dropzone from 'react-dropzone'
 import ReactTable from 'react-table'
 import 'react-table/react-table.css'
