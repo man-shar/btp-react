@@ -9,18 +9,18 @@ class Line extends React.Component {
     const index = this.props.index;
     const drawing = this.props.drawing;
 
-    // const dimensionList = ShapeUtil.allDimensions[drawing[shapeId + '$type']];
-    // const styleList = ShapeUtil.allStyles[drawing[shapeId + '$type']];
+    const dimensionList = ShapeUtil.allDimensions[drawing[shapeId + '$type']];
+    const styleList = ShapeUtil.allStyles[drawing[shapeId + '$type']];
 
-    // const shapeStyleObject = styleList.reduce((acc, style) => {
-    //   acc[style] = ShapeUtil.getShapeStyleProperty(style, shapeId, layerId, drawing, "value");
-    //   return acc;
-    // }, {});
+    const shapeStyleObject = styleList.reduce((acc, style) => {
+      acc[style] = ShapeUtil.getShapeStyleProperty(style, shapeId, layerId, drawing, "value");
+      return acc;
+    }, {});
 
-    // const shapeDimensionObject = dimensionList.reduce((acc, dimension) => {
-    //   acc[dimension] = ShapeUtil.getShapeDimensionProperty(dimension, shapeId, layerId, drawing, "value");
-    //   return acc;
-    // }, {});
+    const shapeDimensionObject = dimensionList.reduce((acc, dimension) => {
+      acc[dimension] = ShapeUtil.getShapeDimensionProperty(dimension, shapeId, layerId, drawing, "value");
+      return acc;
+    }, {});
 
     return (
       <path

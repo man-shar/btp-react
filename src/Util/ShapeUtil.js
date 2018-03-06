@@ -112,14 +112,16 @@ ShapeUtil.styleList = ["alignmentBaseline", "baselineShift", "direction", "displ
 // defining basic dimensions and styles. because if I don't render the list similarly everytime, then my approach of saving inherited and own attributes separately results in the div jumping to the own list and codemirror cursor also jumping to the end after every change.
 ShapeUtil.allDimensions = {
   "rect": ["width", "height", "x", "y", "rx", "ry"],
-  "circle": ["cx","cy", "r"]
+  "circle": ["cx","cy", "r"],
+  "line": ["x", "y"]
 }
 
 // same for styles. so now that i am defining separate stuff for these, I can actually have specific styles for each type of shape. nice. Less rendering and no useless non-applicable attribtues. yay!
 
 ShapeUtil.allStyles = {
   "rect": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"],
-  "circle": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"]
+  "circle": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"],
+  "line": ["fill", "fillOpacity", "opacity", "stroke", "strokeOpacity", "strokeWidth", "visibility"]
 }
 
 ShapeUtil.axisThisAttributeWillNeed = {
@@ -149,9 +151,9 @@ ShapeUtil.axisTypes = {
 ShapeUtil.axisToAxisType = {
   "xAxis": "linear",
   "yAxis": "linear"
-}
+};
 
-ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
+ShapeUtil.updateAxisDomain = function(newExprString, axisId, drawing) {
   const self = this;
   const data = drawing.data;
   // yAxis or xAxis
@@ -179,22 +181,43 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
 
   // const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
   const currentAxisType = self.axisToAxisType[axis];
-
   const currentAxisFunction = self.axisTypes[currentAxisType];
 
   let domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
 
-  // if this is band scale, change domain to dicrete.
+  // if this is band scale, change domain to discrete.
   if(currentAxisType === "band")
     domain = d3.range(domain[0], domain[1]);
+
+  console.log(domain);
+
+  self.axes[axis].domain(domain);
+}
+
+ShapeUtil.updateAxisRange = function(axisId, drawing) {
+  const self = this;
+  // yAxis or xAxis
+  const axis = axisId.split("$")[1];
+  const currentAxisType = self.axisToAxisType[axis];
+  const currentAxisFunction = self.axisTypes[currentAxisType];
 
   const range = [0, ((axis === "xAxis") ?
                       (drawing["overallAttributes$chartWidth$value"])
                       : drawing["overallAttributes$chartHeight$value"])];
 
-  self.axes[axis] = currentAxisFunction()
-                    .domain(domain)
-                    .range(range);
+  self.axes[axis].range(range);
+}
+
+ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
+  const self = this;
+  const axis = axisId.split("$")[1];
+  const currentAxisType = self.axisToAxisType[axis];
+  const currentAxisFunction = self.axisTypes[currentAxisType];
+
+  self.axes[axis] = currentAxisFunction();
+
+  self.updateAxisDomain(newExprString, axisId, drawing);
+  self.updateAxisRange(axisId, drawing);
 
   return self.axes[axis];
 }
@@ -232,7 +255,7 @@ ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesVal
   if(min === max)
     min = 0;
 
-    return [min, max];
+  return [min, max];
 }
 
 
@@ -263,8 +286,7 @@ ShapeUtil.newLayerFromDrag = function(shape, e) {
       rx$exprString: "0",
       ry$value: 0,
       ry$name: "Vertical Corner Radius",
-      ry$exprString: "0",
-      list: ["width", "height", "x", "y", "rx", "ry"],
+      ry$exprString: "0"
     };
   }
 
@@ -278,8 +300,24 @@ ShapeUtil.newLayerFromDrag = function(shape, e) {
       r$name: "Radius",
       cx$exprString: "" + e.nativeEvent.offsetX,
       cy$exprString: "" + e.nativeEvent.offsetY,
-      r$exprString: "" + 0,
-      list: ["cx", "cy", "r"]
+      r$exprString: "" + 0
+    };
+  }
+
+  if (shape === "line") {
+    dimensionList = {
+      x1$value: e.nativeEvent.offsetX,
+      x2$value: e.nativeEvent.offsetX,
+      y1$value: e.nativeEvent.offsetY,
+      y2$value: e.nativeEvent.offsetY,
+      x1$name: "starting x",
+      x2$name: "end X",
+      y1$name: "starting Y",
+      y2$name: "end Y",
+      x1$exprString: "" + e.nativeEvent.offsetX,
+      x2$exprString: "" + e.nativeEvent.offsetX,
+      y1$exprString: "" + e.nativeEvent.offsetY,
+      y2$exprString: "" + e.nativeEvent.offsetY
     };
   }
 
@@ -304,6 +342,12 @@ ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e)
   if (type === "circle") {
     newObj[activeLayerId + "$r$value"] = e.nativeEvent.offsetX - state[activeLayerId + "$cx$value"];
     newObj[activeLayerId + "$r$exprString"] = "" + newObj[activeLayerId + "$r$value"];
+  }
+  
+
+  if (type === "line") {
+    newObj[activeLayerId + "$x2$value"] = e.nativeEvent.offsetX;
+    newObj[activeLayerId + "$y2$exprString"] = "" + e.nativeEvent.offsetY;
   }
 
   return newObj;
@@ -850,6 +894,7 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
   if(drawing[attributeId + "$type"] === "axis")
   {
     const axis = attributeId.split("$")[1];
+    self.updateAxisRange(attributeId, drawing);
     // return  [null, "Domain: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).domain())) + "\n" + "Range: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).range()))];
     return  [null, "Domain: " + JSON.stringify((ShapeUtil.axes[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.axes[axis]).range())];
   }
@@ -921,6 +966,7 @@ ShapeUtil.hasDependents = function (attributeId) {
 
 ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
   const self = this;
+  debugger;
 
   if(!self.hasDependents(attributeId))
     return {};
@@ -941,5 +987,34 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
   return newValueObj;
 }
 
+
+/*=======================================================
+=            Initialise reference attributes            =
+=======================================================*/
+
+/**
+
+  Things it initialises:
+  - x, y axis as dependents of chart width and height .
+
+ */
+
+ShapeUtil.initialiseReferenceAttributes = function() {
+  const self = this;
+
+  self.referenceAttributes["overallAttributes$chartWidth"] = {
+    dependentAttributesIdSet:new Set(["overallAttributes$xAxis"]),
+    marks:[],
+    referredAttributesIdSet:new Set()
+  };
+
+  self.referenceAttributes["overallAttributes$chartHeight"] = {
+    dependentAttributesIdSet:new Set(["overallAttributes$yAxis"]),
+    marks:[],
+    referredAttributesIdSet:new Set()
+  };
+};
+
+ShapeUtil.initialiseReferenceAttributes();
 
 export default ShapeUtil;
