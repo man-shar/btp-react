@@ -19,7 +19,7 @@ import "./styles/shapeStyles.css";
 let store = createStore(
   manageActions,
   reduxBatch,
-  applyMiddleware(thunkMiddleware, logger),
+  applyMiddleware(thunkMiddleware),
   reduxBatch
 );
 

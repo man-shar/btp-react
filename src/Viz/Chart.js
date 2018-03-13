@@ -90,7 +90,14 @@ class Chart extends React.Component {
           >
           <rect width={chartWidth + marginLeft + marginRight} height={chartHeight + marginTop + marginBottom} fill="#fff"></rect>
 
-          <Axes/>
+          <Axes
+            chartWidth={chartWidth}
+            chartHeight={chartHeight}
+            marginLeft={marginLeft}
+            marginTop={marginTop}
+            marginRight={marginRight}
+            marginBottom={marginBottom}
+          />
 
           {layerIds.map((layerId, i) =>
             <g key={i} id={layerId} transform={"scale(1, -1) translate("+ marginLeft +"," + (-chartHeight - marginTop) + ")"}>

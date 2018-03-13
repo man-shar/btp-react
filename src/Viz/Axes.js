@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import ShapeUtil from "../Util/ShapeUtil";
-import XAxis from './XAxis';
-import YAxis from './YAxis';
+import Axis from './Axis';
+import * as d3 from "d3";
 
 // axis.scale([scale])
 // axis.ticks(arguments…) 
@@ -16,33 +16,38 @@ import YAxis from './YAxis';
 
 class Axes extends React.Component {
   render() {
-    const drawing = this.props.drawing;
-    const xScale = ShapeUtil.axes["xAxis"];
-    const yScale = ShapeUtil.axes["yAxis"]
-    const xTicks = drawing["overallAttributes$xAxis$ticks"];
-    const xTicks = drawing["overallAttributes$xAxis$tickArguments"];
-    const xTicks = drawing["overallAttributes$xAxis$tickFormat"];
-    const xTicks = drawing["overallAttributes$xAxis$tickSize"];
-    const xTicks = drawing["overallAttributes$xAxis$tickSizeInner"];
-    const xTicks = drawing["overallAttributes$xAxis$tickSizeOuter"];
-    const xTicks = drawing["overallAttributes$xAxis$tickPadding"];
-
+    const xScale = ShapeUtil.scales["xAxis"];
+    const yScale = ShapeUtil.scales["yAxis"];
+    const { chartWidth, chartHeight, marginLeft, marginTop, marginRight, marginBottom } = this.props;
 
     return (
       <g class="axes">
-        <XAxis/>
-        <YAxis/>
+        <Axis
+          chartWidth={chartWidth}
+          chartHeight={chartHeight}
+          marginLeft={marginLeft}
+          marginTop={marginTop}
+          marginRight={marginRight}
+          marginBottom={marginBottom}
+          scale={xScale}
+          orientationFunc={d3.axisBottom}
+          orientationName={"bottom"}
+          id="x-axis"/>
+
+        <Axis
+          chartWidth={chartWidth}
+          chartHeight={chartHeight}
+          marginLeft={marginLeft}
+          marginTop={marginTop}
+          marginRight={marginRight}
+          marginBottom={marginBottom}
+          scale={yScale}
+          orientationFunc={d3.axisLeft}
+          orientationName={"left"}
+          id="y-axis"/>
       </g>
     );
   }
 }
-
-const mapStateToProps = state => {
-  return {
-    drawing: state.drawing,
-  };
-};
-
-Axes = connect(mapStateToProps)(Axes);
 
 export default Axes;

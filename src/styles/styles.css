@@ -267,8 +267,7 @@ a{
   display: flex; /* I now declare this as a flex-container */
   display: -webkit-flex; /* This is the Chrome notation */
   position: absolute;
-  flex-direction: column;
-  top: 2%;
+  top: 1%;
   left: 2%;
 }
 

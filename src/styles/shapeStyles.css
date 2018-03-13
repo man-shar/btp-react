@@ -12,3 +12,12 @@
 .shape:hover {
   fill: #fccc66 !important;
 }
+
+text {
+  stroke: none;
+}
+
+/* axis */
+.left text, .right text{
+  transform: scale(1, -1);
+}
