@@ -1,8 +1,6 @@
 **TODO**
 * codemirror doesn't render same mark consecutively on delete, drag drop.
 
-* um, things don't update when other things update. plis. do something.
-
 * Add DragLayer component for showing component while dragging.
 * clear out the own Attributes from the deleted layers and shapes though.
 
@@ -11,7 +9,7 @@
 
 * check for cyclic reference in reference attributes
 
-* um, have to figure out something about the y axis inversion.
+* remove dependency on whole of d3.
 
 
 FEEDBACK

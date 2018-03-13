@@ -11,6 +11,4 @@
 
 .shape:hover {
   fill: #fccc66 !important;
-  stroke: steelblue !important;
-  stroke-width: 2 !important;
 }

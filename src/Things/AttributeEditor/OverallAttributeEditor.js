@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import ShapeUtil from '../../Util/ShapeUtil'
-import AttributeFlexRow from './AttributeFlexRow'
+import AttributeRow from './AttributeRow'
 
 // Attributes are both dimensions and styles.
 
@@ -24,13 +24,13 @@ class OverallAttributeEditor extends React.Component {
 
     if (this.props.drawing['overallAttributes$ownDimensionList']) {
       return (
-        <div className='AttributeFlexContainer'>
+        <div className='AttributeContainer'>
         {axisList.map((attribute, i) => {
             const attributeName = this.props.drawing["overallAttributes$" + attribute + '$name']
             const attributeValue = this.props.drawing["overallAttributes$" + attribute + '$value']
             const attributeExprString = this.props.drawing["overallAttributes$" + attribute + '$exprString']
 
-            return (<AttributeFlexRow
+            return (<AttributeRow
               key={i}
               attributeIndex={i}
               attributeId={'overallAttributes' + '$' + attribute}
@@ -49,7 +49,7 @@ class OverallAttributeEditor extends React.Component {
             const attributeValue = overallAttributesDimensionsAllProperties[attribute + '$value']
             const attributeExprString = overallAttributesDimensionsAllProperties[attribute + '$exprString']
 
-            return (<AttributeFlexRow
+            return (<AttributeRow
               key={i}
               attributeIndex={i}
               attributeId={'overallAttributes' + '$' + attribute}
@@ -68,7 +68,7 @@ class OverallAttributeEditor extends React.Component {
             const attributeValue = overallAttributesStylesAllProperties[attribute + '$value']
             const attributeExprString = overallAttributesStylesAllProperties[attribute + '$exprString']
 
-            return (<AttributeFlexRow
+            return (<AttributeRow
               key={i}
               attributeIndex={i}
               attributeId={'overallAttributes' + '$' + attribute}

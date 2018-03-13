@@ -10,15 +10,17 @@ const ShapeUtil = {};
 // keymaps to shape to switch the shape that is drawng when dragging.
 // #########################################
 
-ShapeUtil.keysToShapes = ["r", "c", "R", "C"];
+ShapeUtil.keysToShapes = ["r", "c", "R", "C", "l", "L"];
 
-ShapeUtil.knownShapes = ["rect", "circle"];
+ShapeUtil.knownShapes = ["rect", "circle", "line"];
 
 ShapeUtil.keyToShape = {
   "r": "rect",
   "c": "circle",
   "R": "rect",
-  "C": "circle"
+  "C": "circle",
+  "l": "line",
+  "L": "line"
 };
 
 ShapeUtil.loopKeyCombinations = ["ctrl+l", "ctrl+shift+l"];
@@ -138,7 +140,7 @@ ShapeUtil.axisThisAttributeWillNeed = {
 // Axes functions.
 // #########################################
 
-ShapeUtil.axes = {
+ShapeUtil.scales = {
   "xAxis": null,
   "yAxis": null
 };
@@ -189,9 +191,7 @@ ShapeUtil.updateAxisDomain = function(newExprString, axisId, drawing) {
   if(currentAxisType === "band")
     domain = d3.range(domain[0], domain[1]);
 
-  console.log(domain);
-
-  self.axes[axis].domain(domain);
+  self.scales[axis].domain(domain);
 }
 
 ShapeUtil.updateAxisRange = function(axisId, drawing) {
@@ -205,7 +205,7 @@ ShapeUtil.updateAxisRange = function(axisId, drawing) {
                       (drawing["overallAttributes$chartWidth$value"])
                       : drawing["overallAttributes$chartHeight$value"])];
 
-  self.axes[axis].range(range);
+  self.scales[axis].range(range);
 }
 
 ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
@@ -214,12 +214,12 @@ ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
   const currentAxisType = self.axisToAxisType[axis];
   const currentAxisFunction = self.axisTypes[currentAxisType];
 
-  self.axes[axis] = currentAxisFunction();
+  self.scales[axis] = currentAxisFunction();
 
   self.updateAxisDomain(newExprString, axisId, drawing);
   self.updateAxisRange(axisId, drawing);
 
-  return self.axes[axis];
+  return self.scales[axis];
 }
 
 ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesValues, referredDataAttributes) {
@@ -574,12 +574,23 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
       const shapeIndex = drawing[shapeId + "$index"];
       const axisThisAttributeWillNeed = self.axisThisAttributeWillNeed[dimension];
 
+      // see if the axis this attribute needs is defined yet.
+      try {
+        let x = self.scales[axisThisAttributeWillNeed].domain();
+      }
+      // else return the error. This error isn't really used yet but I'm just returning it for future use anyways.
+      catch (e) {
+        return axisThisAttributeWillNeed[0].toUpperCase() + " axis is not defined.";
+      }
+
       self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
+        // if this is not a data attribute, get it's value.
         if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
         {
           // TODO better error handling here.
           let referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing, shapeId);
 
+          // if error, return "error".
           if(referredAttributesValue[0] !== null)
             return "error";
 
@@ -587,6 +598,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
             referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
         }
 
+        // else find the value of this data attribute based on the shapeIndex.
         else {
           // so earlier I was using isPurelyDependentOnData function, but I think we can just use the axis to calculate data attributes and the other can remain as such. so far seems fine.
           // so now, for example, we have (sin(index)), then instead of replacing index inside bracket with value from axis, we need to replace sin(index) with the value from axis. i feel like this would be a better use case. i mean why else would someone wrap a data in some function, not like they know the value that's going to come out of the axis.
@@ -608,7 +620,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
               }
 
               // now pass *this* value through axis function.
-              value = self.axes[axisThisAttributeWillNeed](value);
+              value = self.scales[axisThisAttributeWillNeed](value);
 
               // now replace this string in attributeExprString with the calculates value.
               const re = new RegExp(Util.escapeRegExp(node.toString()), "g");
@@ -616,7 +628,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
             }
           });
 
-          referredDataAttributesValues[referredAttributeId] = self.axes[axisThisAttributeWillNeed](+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
+          referredDataAttributesValues[referredAttributeId] = self.scales[axisThisAttributeWillNeed](+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
         }
       });
 
@@ -627,7 +639,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
       //   // if(attributeId === "layer0$cy")
       //   //   debugger;
       //   try {
-      //     let value = self.axes[axisThisAttributeWillNeed](math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
+      //     let value = self.scales[axisThisAttributeWillNeed](math.eval(attributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
       //     var math2 = math;
       //     return value;
       //   }
@@ -894,14 +906,21 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
   if(drawing[attributeId + "$type"] === "axis")
   {
     const axis = attributeId.split("$")[1];
-    self.updateAxisRange(attributeId, drawing);
-    // return  [null, "Domain: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).domain())) + "\n" + "Range: " + Util.shortenString(JSON.stringify((ShapeUtil.axes[axis]).range()))];
-    return  [null, "Domain: " + JSON.stringify((ShapeUtil.axes[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.axes[axis]).range())];
+    // return  [null, "Domain: " + Util.shortenString(JSON.stringify((ShapeUtil.scales[axis]).domain())) + "\n" + "Range: " + Util.shortenString(JSON.stringify((ShapeUtil.scales[axis]).range()))];
+    return  [null, "Domain: " + JSON.stringify((ShapeUtil.scales[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.scales[axis]).range())];
   }
 
   // now check if this is a layer attribute and has a data attributes. if so, return "Dependent on data."
   if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId === null) {
-    return [null, "Dependent on data."];
+    const axisThisAttributeWillNeed = self.axisThisAttributeWillNeed[attributeId.split("$")[1]];
+
+    // check if axis is defined.
+    if(typeof self.scales[axisThisAttributeWillNeed] === "function")
+      return [null, "Dependent on data."];
+
+    // else mention this in the value.
+    else
+      return [null, "Dependent on data. But the " + axisThisAttributeWillNeed[0].toUpperCase() + " axis is not defined yet."];
   }
 
   // check if a shape is asking for a layer attribute dependent on data.
@@ -964,10 +983,9 @@ ShapeUtil.hasDependents = function (attributeId) {
   return false;
 }
 
+// update all dependent attributes of an attribute and all dependents of those dependents recursively.
 ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
   const self = this;
-  debugger;
-
   if(!self.hasDependents(attributeId))
     return {};
 
@@ -976,13 +994,23 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
   self.referenceAttributes[attributeId]["dependentAttributesIdSet"].forEach((dependentId) => {
     // TODO error handing here.
     // check if this referred attrbute has an error in it's value. if so,return error.
+
+    // if the dependent is an axis, update it's range.
+    if(drawing[dependentId + "$type"] === "axis")
+    {
+      ShapeUtil.updateAxisRange(dependentId, drawing);
+    }
+
     const dependentValue = self.getAttributeValue(dependentId, drawing);
     if(dependentValue[0] !== null)
       newValueObj[dependentId + "$value"] = dependentValue[0];
 
     else
       newValueObj[dependentId + "$value"] = dependentValue[1];
-  })
+
+    // update the dependents of this dependent.
+    newValueObj = Object.assign(newValueObj, self.updateDependentsValues(dependentId, drawing));
+  });
 
   return newValueObj;
 }

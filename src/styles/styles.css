@@ -109,13 +109,13 @@ body {
   font-weight: bold;
 }
 
-.AttributeFlexRow {
+.AttributeRow {
   display: flex;
   padding: 0em 0.5em;
   align-items: start;
 }
 
-.AttributeFlexContainer {
+.AttributeContainer {
   text-align: left;
   padding: 0.2em 0.5em;
   margin: 1em auto;
@@ -125,7 +125,7 @@ body {
   width: 80%;
 }
 
-.AttributeFlexName, .codemirror-marker, .DataFlexColumnHeader {
+.AttributeName, .codemirror-marker, .DataFlexColumnHeader {
   width: 10em;
   display: flex;
   background-color: #e1e0e0;
@@ -147,20 +147,20 @@ body {
   /* vertical-align: middle; */
 }
 
-.AttributeFlexName:active { 
+.AttributeName:active { 
   cursor: -webkit-grabbing;
   cursor:-moz-grabbing;
 }
 
-.AttributeFlexExpression {
+.AttributeExpression {
   flex-grow: 1;
 }
 
-.AttributeFlexExpressionEditable {
+.AttributeExpressionEditable {
   padding: 0.2em 0.5em;
 }
 
-.AttributeFlexValue {
+.AttributeValue {
   padding: 0.2em 0.5em;
   color: #aaa;
 }
@@ -181,7 +181,7 @@ body {
 /*   box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.1); */
 }
 
-.EditableTextAttributeFlexName {
+.EditableTextAttributeName {
   display: inline-block;
   cursor: text;
 }

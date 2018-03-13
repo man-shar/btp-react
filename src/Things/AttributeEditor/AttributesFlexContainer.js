@@ -1,14 +1,14 @@
 import React from 'react';
-import { AttributeFlexRow } from './AttributeFlexRow'
+import { AttributeRow } from './AttributeRow'
 
-class AttributeFlexContainer extends React.Component {
+class AttributeContainer extends React.Component {
   render() {
     const attributes = Object.keys(this.props.attributes);
 
     return (
       <div>
       {attributes.map((attribute, i) => {
-        <AttributeFlexRow key={i} attribute={attribute} value={}/>
+        <AttributeRow key={i} attribute={attribute} value={}/>
       })
       }        
       </div>
@@ -17,4 +17,4 @@ class AttributeFlexContainer extends React.Component {
   }
 }
 
-export default AttributeFlexContainer;
+export default AttributeContainer;

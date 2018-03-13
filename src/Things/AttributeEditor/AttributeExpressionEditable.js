@@ -32,7 +32,7 @@ function collect (connect, monitor) {
   }
 }
 
-class AttributeFlexExpressionEditable extends React.Component {
+class AttributeExpressionEditable extends React.Component {
   constructor () {
     super()
 
@@ -154,7 +154,7 @@ class AttributeFlexExpressionEditable extends React.Component {
               mode : 'edit'
             }
           }}
-          className='AttributeFlexExpressionEditable'
+          className='AttributeExpressionEditable'
           onChange={this.onMirrorChange.bind(this)}
           onDrop={this.onMirrorDrop.bind(this)}
           editorDidMount={(editor) => {
@@ -179,7 +179,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onAttributeExprStringChange: (attributeId, newExprString, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex) => {
-      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex))
+      dispatch(changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex));
     },
     onAttributeReferenceDrop: (editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex) => {
       dispatch(addAttributeReferenceToAttribute(editor, event, attributeId, droppedAttributeMonitorItem, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex))
@@ -187,10 +187,10 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-AttributeFlexExpressionEditable.contextTypes = {
+AttributeExpressionEditable.contextTypes = {
   store: PropTypes.object
 }
 
-AttributeFlexExpressionEditable = connect(mapStateToProps, mapDispatchToProps)(AttributeFlexExpressionEditable)
+AttributeExpressionEditable = connect(mapStateToProps, mapDispatchToProps)(AttributeExpressionEditable)
 
-export default DropTarget([ItemTypesDnd.ATTRIBUTE, ], dropMethods, collect)(AttributeFlexExpressionEditable)
+export default DropTarget([ItemTypesDnd.ATTRIBUTE, ], dropMethods, collect)(AttributeExpressionEditable)

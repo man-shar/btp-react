@@ -150,7 +150,7 @@ export function updateAttributeValue(attributeId, typeOfAttributeReceivingDrop) 
 export function changeAttributeExpressionStringThunk(attributeId, newExprString, typeOfAttributeReceivingDrop, actionOccuredAtId, attributeIndex) {
   return (dispatch, getState) => {
     let state = getState();
-    const drawing = state.drawing;
+    let drawing = state.drawing;
     // for eg: attributeId: layer0$width, attributeAccessorName:"width"
     const attributeAccessorName = attributeId.split("$")[1];
     // now construct an id from the attrbute name and id of the object where the action occured for eg: layer0rect0 + "$width" = "layer0rect0$width"
@@ -174,6 +174,10 @@ export function changeAttributeExpressionStringThunk(attributeId, newExprString,
 
     // get latest state
     state = getState();
+    drawing = state.drawing;
+
+    // update values of attributes depending on this attribute.
+    dispatch(updateDependentsValues(ownAttributeId, typeOfAttributeReceivingDrop));
 
     // now check if this was a layer. if it was, change this attribute for all the child shapes.
     // if(state["drawing"][actionOccuredAtId + "$whatAmI"] === "layer" && ShapeUtil.isDependentOnData(ownAttributeId, state["drawing"]))
@@ -201,9 +205,6 @@ export function changeAttributeExpressionStringThunk(attributeId, newExprString,
     //     dispatch(updateAttributeValue(ownAttributeIdForShape, typeOfAttributeReceivingDrop));
     //   })
     // }
-    
-    // update values of attributes depending on this attribute.
-    dispatch(updateDependentsValues(ownAttributeId, typeOfAttributeReceivingDrop));
   }
 }
 
@@ -221,7 +222,7 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
 
   return (dispatch, getState) => {
     let state = getState();
-    const drawing = state.drawing
+    let drawing = state.drawing
     // for eg: attributeId: layer0$width, attributeAccessorName:"width"
     const attributeAccessorName = attributeId.split("$")[1];
     const ownAttributeId = actionOccuredAtId + "$" + attributeAccessorName;
@@ -251,6 +252,10 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
 
     // get latest state
     state = getState();
+    drawing = state.drawing;
+
+    // update values of attributes depending on this attribute.
+    dispatch(updateDependentsValues(ownAttributeId, typeOfAttributeReceivingDrop));
 
     // let batchedActions = [];
 

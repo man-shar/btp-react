@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { startDragDraw, updateDragDraw, endDragDraw, toggleCurrentShape, checkIfNewLayerIsValid, changeActiveLayerAndShape, loopAll, loopLayer } from '../Actions/actions';
 import ShapeUtil from "../Util/ShapeUtil";
 import Layer from './Layer';
+import Axes from './Axes';
 // Handles svg mouse events. Drag draw etc. Dispatches actions for user drawing.
 
 class Chart extends React.Component {
@@ -88,6 +89,8 @@ class Chart extends React.Component {
           style={overallStyles}
           >
           <rect width={chartWidth + marginLeft + marginRight} height={chartHeight + marginTop + marginBottom} fill="#fff"></rect>
+
+          <Axes/>
 
           {layerIds.map((layerId, i) =>
             <g key={i} id={layerId} transform={"scale(1, -1) translate("+ marginLeft +"," + (-chartHeight - marginTop) + ")"}>

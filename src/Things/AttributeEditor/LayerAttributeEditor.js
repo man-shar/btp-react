@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import ShapeUtil from '../../Util/ShapeUtil'
 import Util from '../../Util/Util'
-import AttributeFlexRow from './AttributeFlexRow'
+import AttributeRow from './AttributeRow'
 
 // Attributes are both dimensions and styles.
 // Attributes of a particular Layer.
@@ -20,7 +20,7 @@ class LayerAttributeEditor extends React.Component {
           <div className="AttributesSectionHeading">
             <span>{drawing[layerId + "$name"]}'s Shared Attributes</span>
           </div>
-          <div className='AttributeFlexContainer'>
+          <div className='AttributeContainer'>
             {dimensionList.map((attribute, i) => {
               const attributeProperties = ShapeUtil.getLayerDimensionAllProperties(attribute, layerId, drawing)
               const attributeName = attributeProperties[attribute + '$name']
@@ -29,7 +29,7 @@ class LayerAttributeEditor extends React.Component {
               const isAttributeOwn = ShapeUtil.isLayerOwn(attribute, layerId, drawing)
               const inheritedFrom = isAttributeOwn ? layerId : 'overallAttributes'
 
-              return (<AttributeFlexRow
+              return (<AttributeRow
                 key={i}
                 attributeIndex={i}
                 attributeId={inheritedFrom + '$' + attribute}
@@ -52,7 +52,7 @@ class LayerAttributeEditor extends React.Component {
               const inheritedFrom = isAttributeOwn ? layerId : 'overallAttributes'
 
               return (
-                <AttributeFlexRow
+                <AttributeRow
                   key={i}
                   attributeIndex={i}
                   attributeId={inheritedFrom + '$' + attribute}

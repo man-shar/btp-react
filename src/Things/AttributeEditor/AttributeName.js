@@ -30,7 +30,7 @@ function collect (connect, monitor) {
 // TODO: Add DragLayer component for showing component while dragging.
 
 // render editable attribute name
-class AttributeFlexName extends React.Component {
+class AttributeName extends React.Component {
   render () {
     const { isDragging, connectDragSource, attributeName, attributeId, actionOccuredAt, actionOccuredAtId, hoveredAttributeId } = this.props
 
@@ -38,7 +38,7 @@ class AttributeFlexName extends React.Component {
 
     // have to wrap span in div to allow for drag events to happen with contenteditable;
 
-    const className = 'AttributeFlexName' + ((attributeId === hoveredAttributeId) ? ' isHovered' : '')
+    const className = 'AttributeName' + ((attributeId === hoveredAttributeId) ? ' isHovered' : '')
 
     return connectDragSource(
       <div
@@ -50,7 +50,7 @@ class AttributeFlexName extends React.Component {
           updateHoveredAttribute('')
         }}
         >
-        <div className='EditableTextAttributeFlexName'>
+        <div className='EditableTextAttributeName'>
           <span>{attributeName}</span>
         </div>
       </div>
@@ -72,4 +72,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default DragSource(ItemTypesDnd.ATTRIBUTE, attributeSource, collect)(connect(mapStateToProps, mapDispatchToProps)(AttributeFlexName))
+export default DragSource(ItemTypesDnd.ATTRIBUTE, attributeSource, collect)(connect(mapStateToProps, mapDispatchToProps)(AttributeName))
