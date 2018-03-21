@@ -60,7 +60,7 @@ ShapeUtil.styleDefaults = {
   "fill$value": "#ccc",
   "fill$exprString": "#ccc",
   "fillOpacity$name": "fill-opacity",
-  "fillOpacity$options": [  "<opacity-value>", "inherit"],
+  "fillOpacity$options": ["<opacity-value>", "inherit"],
   "fillOpacity$value": "1",
   "fillOpacity$exprString": "1",
   "fontFamily$name": "font-family",
@@ -114,7 +114,7 @@ ShapeUtil.styleList = ["alignmentBaseline", "baselineShift", "direction", "displ
 // defining basic dimensions and styles. because if I don't render the list similarly everytime, then my approach of saving inherited and own attributes separately results in the div jumping to the own list and codemirror cursor also jumping to the end after every change.
 ShapeUtil.allDimensions = {
   "rect": ["width", "height", "x", "y", "rx", "ry"],
-  "circle": ["cx","cy", "r"],
+  "circle": ["cx", "cy", "r"],
   "line": ["x", "y"]
 }
 
@@ -145,117 +145,162 @@ ShapeUtil.scales = {
   "yAxis": null
 };
 
-ShapeUtil.axisTypes = {
+ShapeUtil.scaleTypes = {
   "linear": d3.scaleLinear,
   "band": d3.scaleBand
 };
 
-ShapeUtil.axisToAxisType = {
+ShapeUtil.axisToScaleType = {
   "xAxis": "linear",
   "yAxis": "linear"
 };
 
-ShapeUtil.updateAxisDomain = function(newExprString, axisId, drawing) {
+ShapeUtil.updateScaleDomain = function(newExprString, axisId, drawing) {
   const self = this;
   const data = drawing.data;
   // yAxis or xAxis
   const axis = axisId.split("$")[1];
 
-  // pass math.eval object containing referredAttributesValues
+  // pass math.eval an object containing referredAttributesValues
   let referredAttributesValues = {};
-  // also keep a record of data attributes to construct silimar object for dataattributevalues when we loop in findDomain.
+  // also keep a record of data attributes to construct similar object for dataAttributeValues when we loop in findDomain.
   let referredDataAttributes = [];
 
   self.referenceAttributes[axisId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
-    if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-    {
+    if (drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute") {
       referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing);
       // TODO: better error handling.
-      if(referredAttributesValue[0] !== null)
+      // this return works because we used an arrow function.
+      if (referredAttributesValue[0] !== null)
         return "error";
 
       else
         referredAttributesValues[referredAttributeId] = referredAttributesValue[1];
-    }
-    else
+    } else {
       referredDataAttributes.push(referredAttributeId);
+    }
   });
 
-  // const currentAxisType = self.axisTypes[drawing["overallAttributes$" + axis + "Type" + "$value"]];
-  const currentAxisType = self.axisToAxisType[axis];
-  const currentAxisFunction = self.axisTypes[currentAxisType];
+  const currentScaleType = self.axisToScaleType[axis];
+  const currentScaleFunction = self.scaleTypes[currentScaleType];
 
-  let domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes);
-
-  // if this is band scale, change domain to discrete.
-  if(currentAxisType === "band")
-    domain = d3.range(domain[0], domain[1]);
+  let domain = self.findDomain(data, newExprString, drawing, referredAttributesValues, referredDataAttributes, currentScaleType);
 
   self.scales[axis].domain(domain);
 }
 
-ShapeUtil.updateAxisRange = function(axisId, drawing) {
+ShapeUtil.updateScaleRange = function(axisId, drawing) {
   const self = this;
   // yAxis or xAxis
   const axis = axisId.split("$")[1];
-  const currentAxisType = self.axisToAxisType[axis];
-  const currentAxisFunction = self.axisTypes[currentAxisType];
+  const currentScaleType = self.axisToScaleType[axis];
+  const currentScaleFunction = self.scaleTypes[currentScaleType];
 
   const range = [0, ((axis === "xAxis") ?
-                      (drawing["overallAttributes$chartWidth$value"])
-                      : drawing["overallAttributes$chartHeight$value"])];
+    (drawing["overallAttributes$chartWidth$value"]) :
+    drawing["overallAttributes$chartHeight$value"])];
 
   self.scales[axis].range(range);
 }
 
-ShapeUtil.updateAxis = function(newExprString, axisId, drawing) {
+// loops over data to find the domain using referredDataAttributes.
+ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesValues, referredDataAttributes, currentScaleType) {
   const self = this;
-  const axis = axisId.split("$")[1];
-  const currentAxisType = self.axisToAxisType[axis];
-  const currentAxisFunction = self.axisTypes[currentAxisType];
-
-  self.scales[axis] = currentAxisFunction();
-
-  self.updateAxisDomain(newExprString, axisId, drawing);
-  self.updateAxisRange(axisId, drawing);
-
-  return self.scales[axis];
-}
-
-ShapeUtil.findDomain = function(data, exprString, drawing, referredAttributesValues, referredDataAttributes) {
-  let max = - Infinity;
+  let max = -Infinity;
   let min = Infinity;
 
-  data.forEach((row, i) => {
-    // construct an object for math.eval for current row with values of referredDataAttributes
-    let referredDataAttributesValues = {};
+  // use math.eval only if the scale type is linear, else append to bandDomain set and return bandDomain.
+  if (currentScaleType !== "linear") {
+    let bandDomain = new Set();
+    // loop over data if there are data attributes
+    if (Object.keys(referredDataAttributes).length !== 0) {
+      data.forEach((row, i) => {
+        // construct an object for math.eval for current row with values of referredDataAttributes
+        let referredDataAttributesValues = {};
 
-    referredDataAttributes.forEach((referredAttributeId) => {
-      const columnName = drawing[referredAttributeId + "$name"];
+        referredDataAttributes.forEach((referredAttributeId) => {
+          const columnName = drawing[referredAttributeId + "$name"];
 
-      referredDataAttributesValues[referredAttributeId] = +row[columnName];
-    });
+          referredDataAttributesValues[referredAttributeId] = row[columnName] + "";
+        });
 
-    const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
+        const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
+        // simply replace string with values from allValues without eval
+        const str = Object.keys(allValues).reduce((acc, val) => {
+          let regex = new RegExp(Util.escapeRegExp(val), "g");
+          acc = acc.replace(regex, allValues[val])
+          return acc;
+        }, exprString);
 
-    try {
-      const value = math.eval(exprString, allValues);
-      if(value <= min)
-        min = value;
-      if(value >= max)
-        max = value;
+        bandDomain.add(str);
+      });
     }
-    catch(e) {
-      return [e.toString(), e.toString()];
-    }
+    return Array.from(bandDomain);
+  }
+
+  // loop over data if there are data attributes
+  if (Object.keys(referredDataAttributes).length !== 0) {
+    data.forEach((row, i) => {
+      // construct an object for math.eval for current row with values of referredDataAttributes
+      let referredDataAttributesValues = {};
+
+      referredDataAttributes.forEach((referredAttributeId) => {
+        const columnName = drawing[referredAttributeId + "$name"];
+
+        referredDataAttributesValues[referredAttributeId] = +row[columnName];
+      });
+
+      const allValues = Object.assign(referredAttributesValues, referredDataAttributesValues);
+
+      try {
+        const value = math.eval(exprString, allValues);
+        if (value <= min)
+          min = value;
+        if (value >= max)
+          max = value;
+      } catch (e) {
+        return [e.toString(), e.toString()];
+      }
     });
+  }
 
   // fukin' edge cases!
-
-  if(min === max)
+  if (min === max)
     min = 0;
 
   return [min, max];
+}
+
+ShapeUtil.updateScaleType = function(axisId, drawing) {
+  const self = this;
+  const axis = axisId.split("$")[1];
+
+  self.axisToScaleType[axis] = "linear";
+  self.referenceAttributes[axisId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
+    if (drawing[referredAttributeId + "$whatAmI"] === "dataAttribute") {
+      // if this data attribute is not a number, change the axis's scale to a band scale.
+      if (drawing[referredAttributeId + "$type"] !== "number" && self.axisToScaleType[axis] !== "band") {
+        self.axisToScaleType[axis] = "band";
+      }
+    }
+  });
+}
+
+ShapeUtil.updateScale = function(newExprString, axisId, drawing) {
+  const self = this;
+  const axis = axisId.split("$")[1];
+  // update scale type.
+  self.updateScaleType(axisId, drawing);
+  // console.log(self.axisToScaleType[axis]);
+  const currentScaleType = self.axisToScaleType[axis];
+  const currentScaleFunction = self.scaleTypes[currentScaleType];
+
+  self.scales[axis] = currentScaleFunction();
+
+  self.updateScaleDomain(newExprString, axisId, drawing);
+  self.updateScaleRange(axisId, drawing);
+
+  return self.scales[axis];
 }
 
 
@@ -343,7 +388,7 @@ ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e)
     newObj[activeLayerId + "$r$value"] = e.nativeEvent.offsetX - state[activeLayerId + "$cx$value"];
     newObj[activeLayerId + "$r$exprString"] = "" + newObj[activeLayerId + "$r$value"];
   }
-  
+
 
   if (type === "line") {
     newObj[activeLayerId + "$x2$value"] = e.nativeEvent.offsetX;
@@ -353,7 +398,7 @@ ShapeUtil.updateDragDrawShape = function(activeShapeId, activeLayerId, state, e)
   return newObj;
 };
 
-ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
+ShapeUtil.checkIfNewLayerIsValid = function(drawing) {
   const activeLayerId = drawing.activeLayerId;
 
   const el = document.getElementById(activeLayerId);
@@ -361,7 +406,7 @@ ShapeUtil.checkIfNewLayerIsValid = function (drawing) {
 
   // if diagonal is less than 10 px, return false: shape is not valid.
   // TODO throw error notification
-  if(Math.hypot(size.width, size.height) <= 30)
+  if (Math.hypot(size.width, size.height) <= 30)
     return false
 
   return true;
@@ -383,7 +428,7 @@ ShapeUtil.getOverallAttributesStyleProperty = function(style, drawing, property)
 };
 
 // particular property: value, exprstring or name of all overall attributes styles
-ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
+ShapeUtil.getAllOverallAttributesStylesProperty = function(drawing, property) {
   const self = this;
   const styleList = drawing["overallAttributes$ownStyleList"].slice();
 
@@ -396,7 +441,7 @@ ShapeUtil.getAllOverallAttributesStylesProperty = function (drawing, property) {
 };
 
 // particular property: value, exprstring or name of all overall attributes dimensions
-ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, property) {
+ShapeUtil.getAllOverallAttributesDimensionsProperty = function(drawing, property) {
   const self = this;
   const dimensionList = drawing["overallAttributes$ownDimensionList"].slice();
 
@@ -409,11 +454,11 @@ ShapeUtil.getAllOverallAttributesDimensionsProperty = function (drawing, propert
 };
 
 // all propertoes: value, exprstring or name of all overall attributes styles
-ShapeUtil.getAllOverallAttributesStylesAllProperties = function (drawing) {
+ShapeUtil.getAllOverallAttributesStylesAllProperties = function(drawing) {
   const self = this;
   const styleList = drawing["overallAttributes$ownStyleList"].slice();
 
-    let allOverallAttributesStylesAllProperties = {};
+  let allOverallAttributesStylesAllProperties = {};
   styleList.forEach((style) => {
     allOverallAttributesStylesAllProperties[style + "$value"] = self.getOverallAttributesStyleProperty(style, drawing, "value")
     allOverallAttributesStylesAllProperties[style + "$name"] = self.getOverallAttributesStyleProperty(style, drawing, "name")
@@ -424,11 +469,11 @@ ShapeUtil.getAllOverallAttributesStylesAllProperties = function (drawing) {
 };
 
 // all propertoes: value, exprstring or name of all overall attributes dimensions
-ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function (drawing) {
+ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function(drawing) {
   const self = this;
   const dimensionList = drawing["overallAttributes$ownDimensionList"].slice();
 
-    let allOverallAttributesDimensionsAllProperties = {};
+  let allOverallAttributesDimensionsAllProperties = {};
   dimensionList.forEach((dimension) => {
     allOverallAttributesDimensionsAllProperties[dimension + "$value"] = self.getOverallAttributesDimensionProperty(dimension, drawing, "value")
     allOverallAttributesDimensionsAllProperties[dimension + "$name"] = self.getOverallAttributesDimensionProperty(dimension, drawing, "name")
@@ -444,9 +489,9 @@ ShapeUtil.getAllOverallAttributesDimensionsAllProperties = function (drawing) {
 // ################################################
 
 // check if attribute is a shape's own attribute.
-ShapeUtil.isShapeOwn = function (dimensionOrStyle, shapeId, drawing) {
+ShapeUtil.isShapeOwn = function(dimensionOrStyle, shapeId, drawing) {
   // we can check just the value. as name is defined first and then value and exprstring are defined.
-  if(drawing[shapeId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
+  if (drawing[shapeId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
     return true;
 
   return false;
@@ -457,7 +502,7 @@ ShapeUtil.getShapeDimensionProperty = function(dimension, shapeId, layerId, draw
   var self = this;
 
   // check if this dimension is defined in the shape.
-  if(drawing[shapeId + "$" + dimension + "$" + property] !== undefined)
+  if (drawing[shapeId + "$" + dimension + "$" + property] !== undefined)
     return drawing[shapeId + "$" + dimension + "$" + property];
 
   // otherwise check in layer. we pass shapeId because if this layer attribute is dependent on data, we should be able to calculate dimension for this shape from index.
@@ -469,7 +514,7 @@ ShapeUtil.getShapeStyleProperty = function(style, shapeId, layerId, drawing, pro
   var self = this;
 
   // check if this style is defined in the shape.
-  if(drawing[shapeId + "$" + style + "$" + property] !== undefined)
+  if (drawing[shapeId + "$" + style + "$" + property] !== undefined)
     return drawing[shapeId + "$" + style + "$" + property];
 
   // otherwise check in layer.
@@ -483,8 +528,7 @@ ShapeUtil.getShapeDimensionAllProperties = function(dimension, shapeId, layerId,
   var shapeDimensionAllProperties = {};
 
   // check if this dimension is defined in the shape.
-  if(drawing[shapeId + "$" + dimension + "$" + "name"] !== undefined)
-  {
+  if (drawing[shapeId + "$" + dimension + "$" + "name"] !== undefined) {
     shapeDimensionAllProperties[dimension + "$" + "name"] = drawing[shapeId + "$" + dimension + "$" + "name"];
     shapeDimensionAllProperties[dimension + "$" + "value"] = drawing[shapeId + "$" + dimension + "$" + "value"];
     shapeDimensionAllProperties[dimension + "$" + "exprString"] = drawing[shapeId + "$" + dimension + "$" + "exprString"];
@@ -503,8 +547,7 @@ ShapeUtil.getShapeStyleAllProperties = function(style, shapeId, layerId, drawing
   var shapeStyleAllProperties = {};
 
   // check if this style is defined in the shape.
-  if(drawing[shapeId + "$" + style + "$" + "name"] !== undefined)
-  {
+  if (drawing[shapeId + "$" + style + "$" + "name"] !== undefined) {
     shapeStyleAllProperties[style + "$" + "name"] = drawing[shapeId + "$" + style + "$" + "name"];
     shapeStyleAllProperties[style + "$" + "value"] = drawing[shapeId + "$" + style + "$" + "value"];
     shapeStyleAllProperties[style + "$" + "exprString"] = drawing[shapeId + "$" + style + "$" + "exprString"];
@@ -519,21 +562,20 @@ ShapeUtil.getShapeStyleAllProperties = function(style, shapeId, layerId, drawing
 /*====================================
 =            MathJS utils            =
 ====================================*/
-ShapeUtil.nodeContainsDataAttribute = function (node, attributeId) {
+ShapeUtil.nodeContainsDataAttribute = function(node, attributeId) {
   let nodeContainsDataAttribute = false;
   const self = this;
 
-  if(node.name === attributeId)
+  if (node.name === attributeId)
     return true;
 
   node.forEach((childNode) => {
-    if(childNode.name === attributeId)
+    if (childNode.name === attributeId)
       nodeContainsDataAttribute = true;
 
-    else
-    {
+    else {
       childNodeContainsDataAttribute = self.nodeContainsDataAttribute(childNode, attributeId)
-      if(childNodeContainsDataAttribute)
+      if (childNodeContainsDataAttribute)
         nodeContainsDataAttribute = true;
     }
   });
@@ -547,7 +589,7 @@ ShapeUtil.nodeContainsDataAttribute = function (node, attributeId) {
 // ################################################
 
 // get a particular dimension property from a layer. returns just the property of the dimension, not an object.
-ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, property , shapeId) {
+ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, property, shapeId) {
   const self = this;
 
   const attributeId = layerId + "$" + dimension;
@@ -556,17 +598,14 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
   let nodes;
   try {
     nodes = math.parse(attributeExprString);
-  }
-  catch(e) {
+  } catch (e) {
     return e.toString()
   }
 
   // check if this dimension is defined in the layer.
-  if(drawing[attributeId + "$" + property] !== undefined)
-  {
+  if (drawing[attributeId + "$" + property] !== undefined) {
     // check if a shape is asking for this dimension and this layer dimension is dependent on data. if so, use shape index to calculate data reference attribute values for this.
-    if(shapeId !== null && self.isDependentOnData(attributeId, drawing))
-    {
+    if (shapeId !== null && self.isDependentOnData(attributeId, drawing)) {
       // find what non data attributes and data attributes this attribute depends on.
       let referredAttributesValues = {};
       // this is a list because I don't know the value yet. I'll construct an object later with the values.
@@ -574,24 +613,23 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
       const shapeIndex = drawing[shapeId + "$index"];
       const axisThisAttributeWillNeed = self.axisThisAttributeWillNeed[dimension];
 
-      // see if the axis this attribute needs is defined yet.
+      // see if the scale of the axis this attribute needs is defined yet.
       try {
         let x = self.scales[axisThisAttributeWillNeed].domain();
       }
-      // else return the error. This error isn't really used yet but I'm just returning it for future use anyways.
+      // else return the error. This error message isn't really used yet but I'm just returning it for future use anyways.
       catch (e) {
         return axisThisAttributeWillNeed[0].toUpperCase() + " axis is not defined.";
       }
 
       self.referenceAttributes[attributeId]["referredAttributesIdSet"].forEach((referredAttributeId) => {
         // if this is not a data attribute, get it's value.
-        if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
-        {
+        if (drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute") {
           // TODO better error handling here.
           let referredAttributesValue = self.getAttributeValue(referredAttributeId, drawing, shapeId);
 
           // if error, return "error".
-          if(referredAttributesValue[0] !== null)
+          if (referredAttributesValue[0] !== null)
             return "error";
 
           else
@@ -604,18 +642,16 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
           // so now, for example, we have (sin(index)), then instead of replacing index inside bracket with value from axis, we need to replace sin(index) with the value from axis. i feel like this would be a better use case. i mean why else would someone wrap a data in some function, not like they know the value that's going to come out of the axis.
           // we use mathjs.parse function, and whenever we encounter a FunctionNode containing a SymbolNode with name as referredAttributeId, we calculate it's value and *then* transform it with the axis.
 
-          var filtered = nodes.filter(function (node) {
+          var filtered = nodes.filter(function(node) {
             // if this is a function node that contains a data attribute
-            if(node.isFunctionNode && self.nodeContainsDataAttribute(node, referredAttributeId))
-            {
+            if (node.isFunctionNode && self.nodeContainsDataAttribute(node, referredAttributeId)) {
               let valueObj = {}
               valueObj[referredAttributeId] = (+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
               let value;
 
               try {
                 value = math.eval(node.toString(), valueObj);
-              }
-              catch(e) {
+              } catch (e) {
                 return e.toString()
               }
 
@@ -628,7 +664,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
             }
           });
 
-          referredDataAttributesValues[referredAttributeId] = self.scales[axisThisAttributeWillNeed](+drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
+          referredDataAttributesValues[referredAttributeId] = self.scales[axisThisAttributeWillNeed](drawing["data"][shapeIndex][drawing[referredAttributeId + "$name"]]);
         }
       });
 
@@ -663,7 +699,9 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
       //   }
       // }
       **/
-      
+
+      debugger;
+
       try {
         let value = (math.eval(constructedAttributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
         // var math2 = math;
@@ -671,8 +709,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
         // if(attributeId === "layer0$height")
         //   debugger;
         return value;
-      }
-      catch(e) {
+      } catch (e) {
         return e.toString();
       }
     }
@@ -687,7 +724,7 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
 // get a particular style property from a layer. returns just the property of the style, not an object.
 ShapeUtil.getLayerStyleProperty = function(style, layerId, drawing, property) {
   // check if this style is defined in the layer.
-  if(drawing[layerId + "$" + style + "$" + property] !== undefined)
+  if (drawing[layerId + "$" + style + "$" + property] !== undefined)
     return drawing[layerId + "$" + style + "$" + property];
 
   // otherwise return from overallAttributes
@@ -699,8 +736,7 @@ ShapeUtil.getLayerDimensionAllProperties = function(dimension, layerId, drawing)
   var layerDimensionAllProperties = {};
 
   // check if this dimension is defined in the layer.
-  if(drawing[layerId + "$" + dimension + "$" + "name"] !== undefined)
-  {
+  if (drawing[layerId + "$" + dimension + "$" + "name"] !== undefined) {
     layerDimensionAllProperties[dimension + "$" + "name"] = drawing[layerId + "$" + dimension + "$" + "name"];
     layerDimensionAllProperties[dimension + "$" + "value"] = drawing[layerId + "$" + dimension + "$" + "value"];
     layerDimensionAllProperties[dimension + "$" + "exprString"] = drawing[layerId + "$" + dimension + "$" + "exprString"];
@@ -712,7 +748,7 @@ ShapeUtil.getLayerDimensionAllProperties = function(dimension, layerId, drawing)
   layerDimensionAllProperties[dimension + "$" + "name"] = drawing["overallAttributes" + "$" + dimension + "$" + "name"];
   layerDimensionAllProperties[dimension + "$" + "value"] = drawing["overallAttributes" + "$" + dimension + "$" + "value"];
   layerDimensionAllProperties[dimension + "$" + "exprString"] = drawing["overallAttributes" + "$" + dimension + "$" + "exprString"];
-  
+
   return layerDimensionAllProperties;
 }
 
@@ -721,8 +757,7 @@ ShapeUtil.getLayerStyleAllProperties = function(style, layerId, drawing) {
   var layerStyleAllProperties = {};
 
   // check if this style is defined in the layer.
-  if(drawing[layerId + "$" + style + "$" + "name"] !== undefined)
-  {
+  if (drawing[layerId + "$" + style + "$" + "name"] !== undefined) {
     layerStyleAllProperties[style + "$" + "name"] = drawing[layerId + "$" + style + "$" + "name"];
     layerStyleAllProperties[style + "$" + "value"] = drawing[layerId + "$" + style + "$" + "value"];
     layerStyleAllProperties[style + "$" + "exprString"] = drawing[layerId + "$" + style + "$" + "exprString"];
@@ -734,14 +769,14 @@ ShapeUtil.getLayerStyleAllProperties = function(style, layerId, drawing) {
   layerStyleAllProperties[style + "$" + "name"] = drawing["overallAttributes" + "$" + style + "$" + "name"];
   layerStyleAllProperties[style + "$" + "value"] = drawing["overallAttributes" + "$" + style + "$" + "value"];
   layerStyleAllProperties[style + "$" + "exprString"] = drawing["overallAttributes" + "$" + style + "$" + "exprString"];
-  
+
   return layerStyleAllProperties;
 }
 
 // check if attribute is a layer's own attribute.
-ShapeUtil.isLayerOwn = function (dimensionOrStyle, layerId, drawing) {
+ShapeUtil.isLayerOwn = function(dimensionOrStyle, layerId, drawing) {
   // we can check just the value. as name is defined first and then value and exprstring are defined.
-  if(drawing[layerId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
+  if (drawing[layerId + "$" + dimensionOrStyle + "$exprString"] !== undefined)
     return true;
 
   return false;
@@ -762,8 +797,7 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
   const droppedAttributeId = droppedAttributeMonitorItem["attributeId"];
 
   // create a new object in ShapeUtil's referenceAttributes object for current attribute if not present already
-  if(!self.referenceAttributes[attributeId])
-  {
+  if (!self.referenceAttributes[attributeId]) {
     self.referenceAttributes[attributeId] = {};
     // javascript set to store unique values.
     self.referenceAttributes[attributeId]["referredAttributesIdSet"] = new Set();
@@ -775,8 +809,7 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
   self.referenceAttributes[attributeId]["referredAttributesIdSet"].add(droppedAttributeId);
 
   // add the attribute on which droppedAttribute is dropped to dependents of droppedAttribute
-  if(!self.referenceAttributes[droppedAttributeId])
-  {
+  if (!self.referenceAttributes[droppedAttributeId]) {
     self.referenceAttributes[droppedAttributeId] = {};
     // javascript set to store unique values.
     self.referenceAttributes[droppedAttributeId]["referredAttributesIdSet"] = new Set();
@@ -787,11 +820,11 @@ ShapeUtil.addAttributeReferenceToAttribute = function(editor, event, attributeId
 
   self.referenceAttributes[droppedAttributeId]["dependentAttributesIdSet"].add(attributeId);
 
-  console.log(self.referenceAttributes);
+  // console.log(self.referenceAttributes);
 }
 
 // remove reference attribute from an attribute's referred attribute Set.
-ShapeUtil.removeReferenceAttribute = function (attributeId, referredAttribute) {
+ShapeUtil.removeReferenceAttribute = function(attributeId, referredAttribute) {
   const self = this;
 
   self.referenceAttributes[attributeId]["referredAttributesIdSet"].delete(referredAttribute);
@@ -807,7 +840,7 @@ ShapeUtil.removeDependent = function(referredAttributeId, dependentAttributeId) 
 ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
   const self = this;
 
-  if(!self.referenceAttributes[attributeId])
+  if (!self.referenceAttributes[attributeId])
     return
 
   const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"];
@@ -818,8 +851,7 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
     // in case a reference is deleted completely, we will get no references to it in the string and will then remove it.
     let c = 0;
     let start = -1;
-    while ((start = newExprString.indexOf(referredAttributeId, start)) > -1)
-    {
+    while ((start = newExprString.indexOf(referredAttributeId, start)) > -1) {
       let end = start + referredAttributeId.length;
 
       let mark = {};
@@ -834,30 +866,30 @@ ShapeUtil.updateMarks = function(attributeId, newExprString, drawing) {
     }
 
     // if we didn't find the referredAttribute in the expession string, remove it. ALso remove this attribute from the dependents of the referredAttribute.
-    if(c === 0) {
+    if (c === 0) {
       self.removeReferenceAttribute(attributeId, referredAttributeId);
       self.removeDependent(referredAttributeId, attributeId);
     }
   });
-  console.log(self.referenceAttributes)
+  // console.log(self.referenceAttributes)
 }
 
 // recursive function to check if an attribute is dependent on data.
 ShapeUtil.isDependentOnData = function(attributeId, drawing) {
   const self = this;
   let referenceAttributes = self.referenceAttributes[attributeId];
-  if(!referenceAttributes)
+  if (!referenceAttributes)
     return false
 
   let referredAttributesIdSet = referenceAttributes["referredAttributesIdSet"]
 
-  if(!referredAttributesIdSet)
+  if (!referredAttributesIdSet)
     return false
 
   let isDependentOnData = false;
 
   referredAttributesIdSet.forEach((referredAttributeId) => {
-    if(self.isDependentOnData(referredAttributeId, drawing) || drawing[referredAttributeId + "$whatAmI"] === "dataAttribute")
+    if (self.isDependentOnData(referredAttributeId, drawing) || drawing[referredAttributeId + "$whatAmI"] === "dataAttribute")
       isDependentOnData = true;
   });
 
@@ -868,19 +900,19 @@ ShapeUtil.isDependentOnData = function(attributeId, drawing) {
 ShapeUtil.isPurelyDependentOnData = function(attributeId, drawing) {
   const self = this;
   let referenceAttributes = self.referenceAttributes[attributeId];
-  if(!referenceAttributes)
+  if (!referenceAttributes)
     return false
 
   let referredAttributesIdSet = referenceAttributes["referredAttributesIdSet"]
 
-  if(!referredAttributesIdSet || referredAttributesIdSet.size === 0)
+  if (!referredAttributesIdSet || referredAttributesIdSet.size === 0)
     return false
 
   let isPurelyDependentOnData = true;
 
   referredAttributesIdSet.forEach((referredAttributeId) => {
     // if this is not a data attribute, check if this is purely dependent on data.
-    if(drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
+    if (drawing[referredAttributeId + "$whatAmI"] !== "dataAttribute")
       isPurelyDependentOnData = false;
   });
 
@@ -892,30 +924,28 @@ ShapeUtil.isPurelyDependentOnData = function(attributeId, drawing) {
 // return value if no error is [null, value]
 // return value if error is [error string, null]
 // TODO: check for cyclic reference.
-ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
+ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId = null) {
   const self = this;
   const attributeExprString = drawing[attributeId + "$exprString"];
   const attributeOwnerId = attributeId.split("$")[0];
 
-  if(attributeOwnerId === "overallAttributes" && drawing[attributeId + "$type"] !== "axis")
-  {
+  if (attributeOwnerId === "overallAttributes" && drawing[attributeId + "$type"] !== "axis") {
     return [null, math.eval(drawing[attributeId + "$exprString"])];
   }
 
   // if this is an axis, return text showing the domain and range of the axis.
-  if(drawing[attributeId + "$type"] === "axis")
-  {
+  if (drawing[attributeId + "$type"] === "axis") {
     const axis = attributeId.split("$")[1];
     // return  [null, "Domain: " + Util.shortenString(JSON.stringify((ShapeUtil.scales[axis]).domain())) + "\n" + "Range: " + Util.shortenString(JSON.stringify((ShapeUtil.scales[axis]).range()))];
-    return  [null, "Domain: " + JSON.stringify((ShapeUtil.scales[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.scales[axis]).range())];
+    return [null, "Domain: " + JSON.stringify((ShapeUtil.scales[axis]).domain()) + "\n" + "Range: " + JSON.stringify((ShapeUtil.scales[axis]).range())];
   }
 
   // now check if this is a layer attribute and has a data attributes. if so, return "Dependent on data."
-  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId === null) {
+  if ((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId === null) {
     const axisThisAttributeWillNeed = self.axisThisAttributeWillNeed[attributeId.split("$")[1]];
 
     // check if axis is defined.
-    if(typeof self.scales[axisThisAttributeWillNeed] === "function")
+    if (typeof self.scales[axisThisAttributeWillNeed] === "function")
       return [null, "Dependent on data."];
 
     // else mention this in the value.
@@ -924,7 +954,7 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
   }
 
   // check if a shape is asking for a layer attribute dependent on data.
-  if((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId !== null) {
+  if ((drawing[attributeOwnerId + "$whatAmI"] === "layer") && (self.isDependentOnData(attributeId, drawing)) && shapeId !== null) {
     return [null, self.getLayerDimensionProperty(attributeId.split("$")[1], attributeOwnerId, drawing, "value", shapeId)];
   }
 
@@ -936,25 +966,18 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
     try {
       value = math.eval(attributeExprString);
       return [null, value];
-    }
-
-    catch (e) {
+    } catch (e) {
       return [e.toString(), null];
     }
-  }
-
-
-  else if (self.referenceAttributes[attributeId] !== undefined && self.referenceAttributes[attributeId]["referredAttributesIdSet"].size !== 0)
-  {
+  } else if (self.referenceAttributes[attributeId] !== undefined && self.referenceAttributes[attributeId]["referredAttributesIdSet"].size !== 0) {
     const referredAttributesIdSet = self.referenceAttributes[attributeId]["referredAttributesIdSet"]
-    if(referredAttributesIdSet.size !== 0)
-    {
+    if (referredAttributesIdSet.size !== 0) {
       referredAttributesIdSet.forEach(function(referredAttributeId) {
         const referredAttributeExprString = drawing[referredAttributeId + "$exprString"];
         const referredAttributeValue = self.getAttributeValue(referredAttributeId, drawing)
 
         // check if this referred attrbute has an error in it's value. if so,return error.
-        if(referredAttributeValue[0] !== null)
+        if (referredAttributeValue[0] !== null)
           return [referredAttributeValue[0], null];
 
         // otherwise add it's value to object
@@ -966,27 +989,25 @@ ShapeUtil.getAttributeValue = function(attributeId, drawing, shapeId=null) {
   try {
     value = [null, math.eval(attributeExprString, referredAttributesValues)]
     return value;
-  }
-
-  catch (e) {
+  } catch (e) {
     return [e.toString(), null];
   }
 }
 
 // check if an attribute has dependents.
-ShapeUtil.hasDependents = function (attributeId) {
+ShapeUtil.hasDependents = function(attributeId) {
   const self = this;
 
-  if((self.referenceAttributes[attributeId]) && (self.referenceAttributes[attributeId]["dependentAttributesIdSet"].size > 0))
+  if ((self.referenceAttributes[attributeId]) && (self.referenceAttributes[attributeId]["dependentAttributesIdSet"].size > 0))
     return true;
 
   return false;
 }
 
 // update all dependent attributes of an attribute and all dependents of those dependents recursively.
-ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
+ShapeUtil.updateDependentsValues = function(attributeId, drawing) {
   const self = this;
-  if(!self.hasDependents(attributeId))
+  if (!self.hasDependents(attributeId))
     return {};
 
   let newValueObj = {};
@@ -996,13 +1017,12 @@ ShapeUtil.updateDependentsValues = function (attributeId, drawing) {
     // check if this referred attrbute has an error in it's value. if so,return error.
 
     // if the dependent is an axis, update it's range.
-    if(drawing[dependentId + "$type"] === "axis")
-    {
-      ShapeUtil.updateAxisRange(dependentId, drawing);
+    if (drawing[dependentId + "$type"] === "axis") {
+      ShapeUtil.updateScaleRange(dependentId, drawing);
     }
 
     const dependentValue = self.getAttributeValue(dependentId, drawing);
-    if(dependentValue[0] !== null)
+    if (dependentValue[0] !== null)
       newValueObj[dependentId + "$value"] = dependentValue[0];
 
     else
@@ -1031,15 +1051,15 @@ ShapeUtil.initialiseReferenceAttributes = function() {
   const self = this;
 
   self.referenceAttributes["overallAttributes$chartWidth"] = {
-    dependentAttributesIdSet:new Set(["overallAttributes$xAxis"]),
-    marks:[],
-    referredAttributesIdSet:new Set()
+    dependentAttributesIdSet: new Set(["overallAttributes$xAxis"]),
+    marks: [],
+    referredAttributesIdSet: new Set()
   };
 
   self.referenceAttributes["overallAttributes$chartHeight"] = {
-    dependentAttributesIdSet:new Set(["overallAttributes$yAxis"]),
-    marks:[],
-    referredAttributesIdSet:new Set()
+    dependentAttributesIdSet: new Set(["overallAttributes$yAxis"]),
+    marks: [],
+    referredAttributesIdSet: new Set()
   };
 };
 

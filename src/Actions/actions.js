@@ -166,7 +166,7 @@ export function changeAttributeExpressionStringThunk(attributeId, newExprString,
 
     if(typeOfAttributeReceivingDrop === "axis")
     {
-      const newAxis = ShapeUtil.updateAxis(newExprString, ownAttributeId, drawing);
+      const newAxisScale = ShapeUtil.updateScale(newExprString, ownAttributeId, drawing);
     }
 
     dispatch(changeAttributeExpressionString(ownAttributeId, newExprString, typeOfAttributeReceivingDrop));
@@ -240,10 +240,10 @@ export function addAttributeReferenceToAttribute(editor, event, attributeId, dro
 
     const newExprString = attributeExprString + droppedAttributeMonitorItem["attributeId"];
 
-    // if the user is dropping data on an axis, initiate/update axis.
+    // if the user is dropping data on an axis, initiate/update axis's scale.
     if(typeOfAttributeReceivingDrop === "axis" && droppedAttributeMonitorItem["type"] === "data")
     {
-      const newAxis = ShapeUtil.updateAxis(newExprString, attributeId, drawing);
+      const newAxisScale = ShapeUtil.updateScale(newExprString, attributeId, drawing);
     }
 
     // now change attribute Expression string of *own* attribute.
@@ -373,6 +373,7 @@ export function loopLayer(layerId) {
       return
     }
 
+    // if already looped
     if(data.length === state["drawing"][layerId + "$shapeIds"].length)
     {
       // do nothing
