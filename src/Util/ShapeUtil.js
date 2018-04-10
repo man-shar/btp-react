@@ -704,10 +704,6 @@ ShapeUtil.getLayerDimensionProperty = function(dimension, layerId, drawing, prop
 
       try {
         let value = (math.eval(constructedAttributeExprString, Object.assign(referredAttributesValues, referredDataAttributesValues)));
-        // var math2 = math;
-
-        // if(attributeId === "layer0$height")
-        //   debugger;
         return value;
       } catch (e) {
         return e.toString();
