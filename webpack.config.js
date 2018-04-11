@@ -16,10 +16,7 @@ var config = {
   devtool: PROD ? 'source-map' : 'eval-source-map',
   plugins: [
     new UglifyJSPlugin({
-        sourceMap: true
-      }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production')
+      sourceMap: true
     })
   ],
   module : {
