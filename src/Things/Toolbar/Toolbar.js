@@ -12,10 +12,10 @@ class Toolbar extends React.Component {
     return (
       <div id="ToolbarFlexContainer">
         {
-          knownShapes.map((shape) => {
+          knownShapes.map((shape, i) => {
             const className = "ToolbarItemFlex " + ((currentShape === shape) ? "activeToolbarItem" : "");
             return (
-              <div className={className}>
+              <div className={className} key={i}>
                 <div className="toolbar-key">
                   <span>{shape.substr(0, 1)}</span>
                 </div>
@@ -25,10 +25,10 @@ class Toolbar extends React.Component {
           })
         }
         {
-          loopKeyCombinations.map((loopKeyCombination) => {
+          loopKeyCombinations.map((loopKeyCombination, i) => {
             const className = "ToolbarItemFlex";
             return (
-              <div className={className}>
+              <div className={className} key={i}>
                 <div className="toolbar-key">
                   <span>{loopKeyCombination}</span>
                 </div>

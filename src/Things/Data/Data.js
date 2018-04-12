@@ -54,25 +54,31 @@ class Data extends React.Component {
     }
 
     return (
-      <Dropzone onDrop={this.toggleLoader.bind(this)} style={{}} onDropAccepted={this.handleDataDropSuccess.bind(this)} disableClick={isLoaded}>
-        <div id='data-drop-container'>
-
-          <div className='things-label'>
-            Data
-          </div>
-
-          {isLoaded ? (
-            <ReactTable
-              id='data-table-container'
-              data={data}
-              columns={columns}
-              showPagination={false} />
-            ) : (
-              <p id='data-drop-placeholder-text'>Drag your data here<br />or<br />Click to choose a file</p>
-          )}
-
+      <div id="data-container">
+        <div
+          className='things-label accordion'
+          onClick={this.props.togglePanel.bind(this)}
+        >
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="panel-collapse-svg relative dib pen relative v-top"><polyline points="10 18 16 12 10 6"></polyline></svg>
+          Data
         </div>
-      </Dropzone>
+        <div className="panel">
+          <Dropzone onDrop={this.toggleLoader.bind(this)} style={{}} onDropAccepted={this.handleDataDropSuccess.bind(this)} disableClick={isLoaded}>
+            <div id='data-drop-container'>
+              {isLoaded ? (
+                <ReactTable
+                  id='data-table-container'
+                  data={data}
+                  columns={columns}
+                  showPagination={false} />
+                ) : (
+                  <p id='data-drop-placeholder-text'>Drag your data here<br />or<br />Click to choose a file</p>
+              )}
+
+            </div>
+          </Dropzone>
+        </div>
+      </div>
     )
   }
 }

@@ -11,16 +11,24 @@ class AttributeEditor extends React.Component {
     const { activeLayerId, activeShapeId, drawing } = this.props;
 
     return (
-      <div id="attribute-container">
-        <div className="things-label" draggable="true">
+      <div id="attribute-editor">
+        <div
+          className="things-label accordion"
+          onClick={this.props.togglePanel.bind(this)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="panel-collapse-svg relative dib pen relative v-top"><polyline points="10 18 16 12 10 6"></polyline></svg>
           Attributes
         </div>
-        <div className="AttributesSectionHeading">
-          <span>Default Attributes</span>
+        <div className="panel">
+          <div id="attribute-container">
+            <div className="AttributesSectionHeading">
+              <span>Default Attributes</span>
+            </div>
+            <OverallAttributeEditor />
+            <LayerAttributeEditor layerId={activeLayerId} />
+            <ShapeAttributeEditor shapeId={activeShapeId} layerId={activeLayerId}/>
+          </div>
         </div>
-        <OverallAttributeEditor />
-        <LayerAttributeEditor layerId={activeLayerId} />
-        <ShapeAttributeEditor shapeId={activeShapeId} layerId={activeLayerId}/>
       </div>
     );
   }

@@ -21,7 +21,7 @@ class Axes extends React.Component {
     const { chartWidth, chartHeight, marginLeft, marginTop, marginRight, marginBottom } = this.props;
 
     return (
-      <g class="axes">
+      <g className="axes">
         <Axis
           chartWidth={chartWidth}
           chartHeight={chartHeight}
