@@ -1,10 +1,8 @@
 import React from 'react'
 import Dropzone from 'react-dropzone'
-import ReactTable from 'react-table'
-import 'react-table/react-table.css'
+import DataTable from './DataTable'
 import { connect } from 'react-redux'
 import { readFile } from '../../Actions/actions'
-import DataFlexColumnHeader from './DataFlexColumnHeader'
 
 class Data extends React.Component {
   constructor () {
@@ -36,41 +34,22 @@ class Data extends React.Component {
     let columns = this.props.data.columns ? this.props.data.columns : []
     let data = this.props.data
 
-    if (isLoaded) {
-      columns = columns.map((column) => {
-        return {
-          Header: () => {
-            return (
-              <DataFlexColumnHeader attributeId={"dataAttribute" + "$" + column} />
-            );
-          },
-          accessor: column,
-          sortable: false,
-          resizable: false,
-          filterable: false
-        }
-      })
-      data = this.props.data
-    }
-
     return (
-      <div id="data-container">
+      <div id="data-container" className="panel pad-bot active">
         <div
           className='things-label accordion'
           onClick={this.props.togglePanel.bind(this)}
         >
-         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="panel-collapse-svg relative dib pen relative v-top"><polyline points="10 18 16 12 10 6"></polyline></svg>
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="panel-collapse-svg relative dib pen relative v-top rotate-90"><polyline points="10 18 16 12 10 6"></polyline></svg>
           Data
         </div>
-        <div className="panel">
+        <div>
           <Dropzone onDrop={this.toggleLoader.bind(this)} style={{}} onDropAccepted={this.handleDataDropSuccess.bind(this)} disableClick={isLoaded}>
             <div id='data-drop-container'>
               {isLoaded ? (
-                <ReactTable
+                <DataTable
                   id='data-table-container'
-                  data={data}
-                  columns={columns}
-                  showPagination={false} />
+                  data={data}/>
                 ) : (
                   <p id='data-drop-placeholder-text'>Drag your data here<br />or<br />Click to choose a file</p>
               )}
@@ -100,4 +79,4 @@ const mapDispatchToProps = dispatch => {
 
 Data = connect(mapStateToProps, mapDispatchToProps)(Data)
 
-export default Data
+export default Data;

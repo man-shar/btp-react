@@ -6,23 +6,32 @@ import Toolbar from './Toolbar/Toolbar'
 class Things extends React.Component {
   togglePanel(e) {
     var el = e.nativeEvent.target;
-    el.classList.toggle("active-panel");
     el.getElementsByTagName('svg')[0].classList.toggle("rotate-90");
 
-    /* Toggle between hiding and showing the active panel */
-    var panel = el.nextElementSibling;
-    if (panel.style.maxHeight){
-      panel.style.maxHeight = null;
-    } else {
-      panel.style.maxHeight = panel.scrollHeight + "px";
-    }
+    var attributesContainer = el.nextElementSibling;
+    var parent = el.parentElement;
+
+      if (parent.classList.contains("active")) {
+        parent.classList.remove("active");
+        attributesContainer.classList.add("hidden");
+      } else {
+        parent.classList.add("active");
+        attributesContainer.classList.remove("hidden");
+      }
+    
+    // if (panel.style.maxHeight){
+    //   panel.style.maxHeight = null;
+    // } else {
+    //   panel.style.maxHeight = panel.scrollHeight + "px";
+    // }
   }
 
-  render () {
+  render() {
     return (
       <div id='things'>
         <Data togglePanel={this.togglePanel}/>
-        <AttributeEditor togglePanel={this.togglePanel}/>
+        <AttributeEditor togglePanel={this.togglePanel} activeOnly={false}/>
+        <AttributeEditor togglePanel={this.togglePanel} activeOnly={true}/>
         <Toolbar />
       </div>
     )

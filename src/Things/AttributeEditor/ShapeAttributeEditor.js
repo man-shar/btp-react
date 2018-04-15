@@ -19,10 +19,10 @@ class ShapeAttributeEditor extends React.Component {
       return (
         <div>
           <div className="AttributesSectionHeading">
-            <span>{drawing[shapeId + "$name"]}'s Shape Attributes</span>
+            <span>{drawing[shapeId + "$name"]}'s Attributes</span>
           </div>
           <div className='AttributeContainer'>
-            {dimensionList.map((attribute, i) => {
+            {/*dimensionList.map((attribute, i) => {
               const attributeProperties = ShapeUtil.getShapeDimensionAllProperties(attribute, shapeId, layerId, drawing)
 
               const attributeName = attributeProperties[attribute + '$name']
@@ -45,7 +45,7 @@ class ShapeAttributeEditor extends React.Component {
                 isAttributeOwn={isAttributeOwn}
                   />)
             }
-            )}
+            )*/}
             {styleList.map((attribute, i) => {
               const attributeProperties = ShapeUtil.getShapeStyleAllProperties(attribute, shapeId, layerId, drawing)
 

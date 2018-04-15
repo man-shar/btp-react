@@ -10,11 +10,13 @@ class Chart extends React.Component {
   constructor() {
     super();
 
+    this.mouseDown = false;
+
     // slight lag on mousemove updates so throttling the action to be dispatched every "x" (guessed from trial and error) events. Declaring local state because throttle not really needed elsewhere (yet).
 
-    this.state = {
-      throttle: 0,
-    }
+    // this.state = {
+    //   throttle: 0,
+    // }
   }
 
   // componentDidMount() {
@@ -31,7 +33,7 @@ class Chart extends React.Component {
       return;
     }
 
-    this.props.onMouseDown(e);
+    this.mouseDown = true;
   }
 
   render () {
@@ -55,57 +57,65 @@ class Chart extends React.Component {
     // SVG doesn't support ondrag events so have to work with mousedown, mousemove and mouseup here.
 
     return (
-      <div id="chart-container">
-        <svg 
-          id="chart"
-          width={chartWidth + marginRight + marginLeft}
-          height={chartHeight + marginBottom + marginTop}
-          onMouseDown={this.onMouseDown.bind(this)}
-          onMouseMove={(e) => {
-            e.preventDefault();
+      <div id="artboard">
+        <div id="chart-container" className="mar-60-60-0-60">
+          <svg 
+            id="chart"
+            width={chartWidth + marginRight + marginLeft}
+            height={chartHeight + marginBottom + marginTop}
+            onMouseDown={this.onMouseDown.bind(this)}
+            onMouseMove={(e) => {
+              e.preventDefault();
 
-            if(beingDrawn) {
-              if(this.state.throttle % 1 === 0)
-              {
-                onMouseMove(e);
+              if(!beingDrawn && this.mouseDown) {
+                this.props.onMouseDown(e);
               }
 
-              this.setState({
-                throttle: this.state.throttle + 1
-              });
-            }
-          }}
-          onMouseUp={(e) => {
-            e.preventDefault();
-            if(beingDrawn) {
-              checkIfNewLayerIsValid();
-              onMouseUp(e);
-            }
+              if(this.mouseDown) {
+                // if(this.state.throttle % 1 === 0)
+                // {
+                onMouseMove(e);
+                // }
 
-            this.setState({
-              throttle: 0
-            }) 
-          }}
-          style={overallStyles}
-          >
-          <rect width={chartWidth + marginLeft + marginRight} height={chartHeight + marginTop + marginBottom} fill="#fff"></rect>
+                // this.setState({
+                //   throttle: this.state.throttle + 1
+                // });
+              }
+            }}
+            onMouseUp={(e) => {
+              e.preventDefault();
+              if(beingDrawn) {
+                checkIfNewLayerIsValid();
+                onMouseUp(e);
+              }
 
-          <Axes
-            chartWidth={chartWidth}
-            chartHeight={chartHeight}
-            marginLeft={marginLeft}
-            marginTop={marginTop}
-            marginRight={marginRight}
-            marginBottom={marginBottom}
-          />
+              this.mouseDown = false;
 
-          {layerIds.map((layerId, i) =>
-            <g key={i} id={layerId} transform={"scale(1, -1) translate("+ marginLeft +"," + (-chartHeight - marginTop) + ")"}>
-              <Layer className="layer" id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
-            </g>
-          )}
+              // this.setState({
+              //   throttle: 0
+              // }) 
+            }}
+            style={overallStyles}
+            >
+            <rect width={chartWidth + marginLeft + marginRight} height={chartHeight + marginTop + marginBottom} fill="#fff"></rect>
 
-        </svg>
+            <Axes
+              chartWidth={chartWidth}
+              chartHeight={chartHeight}
+              marginLeft={marginLeft}
+              marginTop={marginTop}
+              marginRight={marginRight}
+              marginBottom={marginBottom}
+            />
+
+            {layerIds.map((layerId, i) =>
+              <g key={i} id={layerId} transform={"scale(1, -1) translate("+ marginLeft +"," + (-chartHeight - marginTop) + ")"}>
+                <Layer className="layer" id={layerId} type={drawing[layerId + "$type"]} attributeList={drawing[layerId + "$attributeList"]} />
+              </g>
+            )}
+
+          </svg>
+        </div>
       </div>
     );
   }

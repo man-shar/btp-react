@@ -1,5 +1,5 @@
 import math from "mathjs-expression-parser";
-import * as d3 from "d3";
+import { scaleLinear, scaleBand } from "d3-scale";
 import Util from "./Util"
 
 const ShapeUtil = {};
@@ -146,8 +146,8 @@ ShapeUtil.scales = {
 };
 
 ShapeUtil.scaleTypes = {
-  "linear": d3.scaleLinear,
-  "band": d3.scaleBand
+  "linear": scaleLinear,
+  "band": scaleBand
 };
 
 ShapeUtil.axisToScaleType = {
@@ -299,6 +299,8 @@ ShapeUtil.updateScale = function(newExprString, axisId, drawing) {
 
   self.updateScaleDomain(newExprString, axisId, drawing);
   self.updateScaleRange(axisId, drawing);
+
+  console.log(self.scales);
 
   return self.scales[axis];
 }
@@ -1014,6 +1016,11 @@ ShapeUtil.updateDependentsValues = function(attributeId, drawing) {
 
     // if the dependent is an axis, update it's range.
     if (drawing[dependentId + "$type"] === "axis") {
+      // yAxis or xAxis
+      const axis = dependentId.split("$")[1];
+      if(!self.scales[axis])
+        return;
+      
       ShapeUtil.updateScaleRange(dependentId, drawing);
     }
 

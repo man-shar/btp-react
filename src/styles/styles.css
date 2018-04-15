@@ -1,19 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=PT+Sans');
 
-body {
-  margin: 0;
-  padding: 0;
-  color: #304352;
-  font-size: 12px;
-}
-
-* {
-  font-family: 'PT Sans', sans-serif;
-  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-  -moz-box-sizing: border-box; /* Firefox, other Gecko */ 
-  box-sizing: border-box; /* Opera/IE 8+ */ 
-}
-
 .panel-collapse-svg {
   transition: transform 0.2s;
   width: 0.85em;
@@ -23,27 +9,6 @@ body {
   margin: auto 2px;
 }
 
-.v-top {
-  vertical-align: top;
-}
-
-.relative {
-  position: relative;
-}
-
-.dib {
-  display: inline-block;
-}
-
-.rotate-90 {
-  -webkit-transform: rotate(90deg);
-  transform: rotate(90deg);
-}
-
-.pen {
-  pointer-events: none;
-}
-
 #main-container {
   margin: 0 auto;
   display: flex;
@@ -51,59 +16,81 @@ body {
 }
 
 #chart-container, #things {
-  font-size: 12px;
-  overflow-x: auto;
   vertical-align:top;
 }
 
 #chart-container {
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+#artboard {
   background-color: white;
   min-width: 300px;
   position: relative;
   width: 100%;
+  overflow-x: auto;
 }
 
 #things {
   min-width: 400px;
   max-width: 400px;
-  /* position: absolute; */
   flex-grow: 1;
   border-left: 0.1em solid #ddd;
   background-color: #fff;
   right: 0;
   top: 0;
   height: 100%;
-  
+  display: flex;
+  flex-direction: column;  
 }
 
-/* .things-label {
-  background-color: #e1e0e0;
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-  height: 20px;
-  position: sticky;
-  left: 0;
+.panel {
+  overflow-y: auto;
+  display: block;
+  /* flex-grow: 1; */
+  /* position: relative;
   top: 0;
-  box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  z-index: 10;
+  left: 0;
+  min-width: 0; */
+
+  max-height: 70%;
+  
+  transition: flex-grow 0.4s ease, font-size 0.2s ease, background-color 0.25s ease, color 0.25s ease;
+  will-change: flex-grow, font-size, background-color, color;
+  cursor: pointer;
+  
+  &.active {
+    flex-grow: 100;
+    transition: flex-grow 1s ease-in-out, font-size 0.35s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  &:not(.active):hover {
+    flex-grow: 10;
+  }
 }
- */
+
+.hidden {
+  display: none;
+}
 
 .things-label {
+  cursor: pointer;
   background-color: #556270;
   color: #fff;
-  text-align: center;
-  font-size: 16px;
+  /* text-align: center; */
+  font-size: 14px;
   height: 25px;
   position: sticky;
   left: 0;
   top: 0;
   z-index: 10;
+  display: flex;
+  align-items: center;
 }
 
-#data-container, #attribute-container {
-  margin-bottom: 0.85em;
+#data-container {
+  min-height: max-content;
 }
 
 #data-drop-container > #data-drop-placeholder-text {
@@ -117,8 +104,9 @@ body {
 }
 
 #data-drop-container {
+  max-height: 200px;
   height: 20%;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 #data-drop-placeholder-text {
@@ -126,10 +114,10 @@ body {
   font-style: italic;
 }
 
-#attribute-container {
-  height: 80%;
-  overflow: auto;
-}
+/* .attribute-container {
+  max-height: 30%;
+  overflow-y: scroll;
+} */
 
 .column-name {
   cursor: pointer;
@@ -139,17 +127,25 @@ body {
   font-weight: bold;
 }
 
-.accordion {
-  transition: 0.4s;
+#data-table {
   display: flex;
-  align-items: center;
-  cursor: pointer;
+  justify-content: space-between;
+  /* padding: 1em; */
 }
 
-.panel {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
+.column-flex-table {
+  margin: 0.5em;
+  border-right: 1px solid #ddd;
+}
+
+.column-flex-table > .AttributeName {
+  margin: 0.5em 1em 0em 0em;
+  background-color: #b6d6ff;
+}
+
+.column-flex-table > .AttributeName:hover{
+  background-color: #556270;
+  color: #fff;
 }
 
 .AttributeRow {
@@ -160,19 +156,20 @@ body {
 
 .AttributeContainer {
   text-align: left;
-  padding: 0.2em 0.5em;
+  /* padding: 0.2em 0.5em;
   margin: 1em auto;
-  padding: 1em;
+  padding: 1em; */
   max-height: 175px;
   overflow-y: scroll;
-  width: 80%;
+  border-right: 1px solid #ddd;
+  /* width: 80%; */
 }
 
 .AttributeName, .codemirror-marker, .DataFlexColumnHeader {
   width: 10em;
   display: flex;
   background-color: #e1e0e0;
-  border-radius: 10px;
+  border-radius: 5px;
   padding: 0.2em 0.5em;
   margin-right: 1em;
   cursor: -webkit-grab;
@@ -180,7 +177,7 @@ body {
 }
 
 .DataFlexColumnHeader {
-  width: 100%;
+  margin-bottom: 1em;
 }
 
 .codemirror-marker {
@@ -215,12 +212,12 @@ body {
 }
 
 .AttributesSectionHeading {
-  text-align: center;
+  /* text-align: center; */
   font-size: 1.2em;
   color: #556270;
   /* background-color: #556270; */
   margin: 0.5em 0.5em;
-  border-top: 1px solid #ddd;
+  /* border-bottom: 1px solid #ddd; */
 /*   box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.1); */
 }
 
@@ -288,22 +285,22 @@ a{
 *::-webkit-scrollbar-track
 {
   /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); */
-  border-radius: 3px;
-  background-color: #e1e0e0;
+  /* border-radius: 3px; */
+  background-color: #fff;
 }
 
 *::-webkit-scrollbar
 {
   width: 7px;
   height: 7px;
-  background-color: #e1e0e0;
+  background-color: #fff;
 }
 
 *::-webkit-scrollbar-thumb
 {
-  border-radius: 3px;
+  /* border-radius: 3px; */
   /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.6); */
-  background-color: #556270;
+  background-color: #898989;
 }
 
 #ToolbarFlexContainer {
@@ -327,4 +324,56 @@ a{
 .toolbar-key {
   display: inline-block;
   margin-right: 0.6em;
+}
+
+/* tab styles, stolen shamelessly from: https://codepen.io/oknoblich/pen/tfjFl?editors=1100; */
+
+label {
+  display: inline-block;
+  margin: 0 -1px -1px;
+  padding: 1em 1em;
+  font-weight: 600;
+  text-align: center;
+  color: #bbb;
+  border: 1px solid transparent;
+}
+
+label:before {
+  font-family: fontawesome;
+  font-weight: normal;
+  margin-right: 10px;
+}
+
+input:checked + label {
+  color: #555;
+  border: 1px solid #ddd;
+  /* border-top: 4px solid #556270; */
+  border-bottom: 1px solid #fff;
+}
+
+label:hover {
+  color: #888;
+  cursor: pointer;
+}
+
+#default-attributes-tab-input:checked ~ #default-attributes-tab,
+#layer-attributes-tab-input:checked ~ #layer-attributes-tab,
+#shape-attributes-tab-input:checked ~ #shape-attributes-tab,
+#artboard-tree-tab-input:checked ~ #artboard-tree-tab 
+{
+  display: block;
+}
+
+section {
+  display: none;
+  padding: 20px 0 0;
+  border-top: 1px solid #ddd;
+}
+
+.attribute-container section {
+  padding: 1em 1em 0 1em;
+}
+
+input {
+  display: none;
 }

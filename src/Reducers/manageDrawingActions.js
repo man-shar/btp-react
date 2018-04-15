@@ -281,7 +281,7 @@ export function manageDrawingActions(state = initialState["drawing"], action) {
 
     case ADD_DATA_COLUMNS_TO_ATTRIBUTES:
       data = action.data;
-      newObj = {};
+      newObj = Util.getColumnProps(data);;
 
       data.columns.forEach((column, i) => {
         newObj["dataAttribute" + "$" + column + "$" + "name"] = column;

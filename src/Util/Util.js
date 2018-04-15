@@ -1,6 +1,6 @@
 import ShapeUtil from "./ShapeUtil"
 
-// contains Utility functions that may not be shape functions
+// contains reusable Utility functions
 const Util = {};
 
 Util.toSentenceCase = function(text) {
@@ -34,8 +34,8 @@ Util.shortenString =  function (fullStr, separator) {
 
   var sepLen = separator.length,
       charsToShow = self.strLen - sepLen,
-      frontChars = Math.ceil(charsToShow/2),
-      backChars = Math.floor(charsToShow/2);
+      frontChars = Math.ceil(charsToShow / 2),
+      backChars = Math.floor(charsToShow / 2);
 
   return fullStr.substr(0, frontChars) +
          separator +
@@ -44,6 +44,52 @@ Util.shortenString =  function (fullStr, separator) {
 
 Util.escapeRegExp= function(s) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
+Util.getColumnProps = function(data) {
+  const self = this;
+  let props = {};
+  const columns = data.columns;
+
+  for (let i = 0; i < columns.length - 1; i++) {
+    const column = columns[i];
+    if(self.columnType(data, column) === "string")
+      continue;
+
+    let mean = 0,
+        sum = 0,
+        max = -Infinity,
+        min = Infinity;
+
+    for (let i = 0; i < data.length - 1; i++) {
+      const value = +data[i][column];
+      sum += value;
+
+      if (value > max)
+        max = value;
+
+      if (value < min)
+        min = value;
+    }
+
+    props["dataAttribute$" + column + "$mean$name"] = "MEAN " + column;
+    props["dataAttribute$" + column + "$mean$value"] = sum / data.length;
+    props["dataAttribute$" + column + "$mean$exprString"] = "" + sum / data.length;
+    props["dataAttribute$" + column + "$sum$name"] = "SUM " + column;;
+    props["dataAttribute$" + column + "$sum$value"] = sum;
+    props["dataAttribute$" + column + "$sum$exprString"] = "" + sum;
+    props["dataAttribute$" + column + "$max$name"] = "MAX " + column;
+    props["dataAttribute$" + column + "$max$value"] = max;
+    props["dataAttribute$" + column + "$max$exprString"] = "" + max;
+    props["dataAttribute$" + column + "$min$name"] = "MIN " + column;;
+    props["dataAttribute$" + column + "$min$value"] = min;
+    props["dataAttribute$" + column + "$min$exprString"] = "" + min;
+    props["dataAttribute$" + column + "$count$name"] = "COUNT " + column;;;
+    props["dataAttribute$" + column + "$count$value"] = data.length;
+    props["dataAttribute$" + column + "$count$exprString"] = "" + data.length;
+  }
+
+  return props;
 };
 
 export default Util;

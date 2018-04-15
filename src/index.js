@@ -15,11 +15,12 @@ import ShapeUtil from "./Util/ShapeUtil";
 import 'codemirror/lib/codemirror.css'
 import "./styles/styles.css";
 import "./styles/shapeStyles.css";
+import "./styles/generic.css"; 
 
 let store = createStore(
   manageActions,
   reduxBatch,
-  applyMiddleware(thunkMiddleware),
+  applyMiddleware(thunkMiddleware, logger),
   reduxBatch
 );
 

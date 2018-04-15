@@ -34,4 +34,4 @@
     }
 }
 
-  export default AttributeRow
+export default AttributeRow

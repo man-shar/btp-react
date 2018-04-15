@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import ShapeUtil from "../Util/ShapeUtil";
 import Axis from './Axis';
-import * as d3 from "d3";
+import { axisBottom, axisLeft } from "d3-axis";
 
 // axis.scale([scale])
 // axis.ticks(arguments…) 
@@ -30,7 +30,7 @@ class Axes extends React.Component {
           marginRight={marginRight}
           marginBottom={marginBottom}
           scale={xScale}
-          orientationFunc={d3.axisBottom}
+          orientationFunc={axisBottom}
           orientationName={"bottom"}
           id="x-axis"/>
 
@@ -42,7 +42,7 @@ class Axes extends React.Component {
           marginRight={marginRight}
           marginBottom={marginBottom}
           scale={yScale}
-          orientationFunc={d3.axisLeft}
+          orientationFunc={axisLeft}
           orientationName={"left"}
           id="y-axis"/>
       </g>

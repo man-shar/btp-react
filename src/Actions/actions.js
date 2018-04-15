@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import { csvParse } from "d3-dsv";
 import ShapeUtil from "../Util/ShapeUtil"
 import Util from "../Util/Util"
 
@@ -96,7 +96,7 @@ export function addDataColumnsToAttributes(parsed) {
 export function fileLoaded(fileAsText, fileObj) {
   return (dispatch) => {
     // parse file with d3
-    let parsed = d3.csvParse(fileAsText)
+    let parsed = csvParse(fileAsText)
     // add index column to parsed file.
     parsed = Util.addIndexColumnToParsedFile(parsed);
     // dispatch file loaded and parsed event.

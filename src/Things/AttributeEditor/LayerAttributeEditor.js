@@ -18,7 +18,7 @@ class LayerAttributeEditor extends React.Component {
       return (
         <div>
           <div className="AttributesSectionHeading">
-            <span>{drawing[layerId + "$name"]}'s Shared Attributes</span>
+            <span>{drawing[layerId + "$name"]}'s Attributes</span>
           </div>
           <div className='AttributeContainer'>
             {dimensionList.map((attribute, i) => {

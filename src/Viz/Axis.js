@@ -1,6 +1,6 @@
 import React from "react";
 import { findDOMNode } from "react-dom";
-import * as d3 from "d3";
+import { select, call, attr } from "d3-selection";
 
 class Axis extends React.Component {
   componentDidUpdate() {
@@ -29,7 +29,7 @@ class Axis extends React.Component {
     }
 
     // d3 magic.
-    d3.select(findDOMNode(this))
+    select(findDOMNode(this))
       .call(orientationFunc(scale))
       .attr("transform", transform);
   }

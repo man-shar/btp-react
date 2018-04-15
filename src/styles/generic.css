@@ -1,0 +1,46 @@
+body {
+  margin: 0;
+  padding: 0;
+  color: #304352;
+  font-size: 12px;
+}
+
+* {
+  font-family: 'PT Sans', sans-serif;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box; /* Firefox, other Gecko */ 
+  box-sizing: border-box; /* Opera/IE 8+ */ 
+}
+
+.v-top {
+  vertical-align: top;
+}
+
+.relative {
+  position: relative;
+}
+
+.dib {
+  display: inline-block;
+}
+
+.rotate-90 {
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.pen {
+  pointer-events: none;
+}
+
+.mar-bot {
+  margin-bottom: 0.85em;
+}
+
+.pad-bot {
+  margin-bottom: 1.85em;
+}
+
+.mar-60-60-0-60 {
+  margin: 60px 60px 0px 60px;
+}
