@@ -10,7 +10,8 @@
 
 
 .shape:hover {
-  fill: #fccc66 !important;
+  /* fill: #fccc66 !important; */
+  stroke: steelblue !important;
 }
 
 text {

@@ -364,6 +364,9 @@ label:hover {
   display: block;
 }
 
+
+/* Can't do display none as browser was not rendering codemirror elements i.e. elements unrndered due to display:none.*/
+
 section {
   display: none;
   padding: 20px 0 0;

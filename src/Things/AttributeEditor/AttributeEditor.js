@@ -7,6 +7,37 @@ import ShapeAttributeEditor from "./ShapeAttributeEditor";
 // Attributes are both dimensions and styles.
 
 class AttributeEditor extends React.Component {
+  componentDidMount() {
+    console.log("mounted");
+    try {
+      document.getElementById('layer-attributes-tab-input').checked = true;
+      console.log('layer-attributes-tab-input');
+    } catch(e) {
+
+    }
+    // document.getElementById('layer-attributes-tab-input').checked = false;
+    try {
+      document.getElementById('shape-attributes-tab-input').checked = true;
+      document.getElementById('shape-attributes-tab-input').checked = false;
+    } catch(e) {
+
+    }
+    try {
+      document.getElementById('default-attributes-tab-input').checked = true;
+      debugger;
+      console.log('default-attributes-tab-input');
+    } catch(e) {
+
+    }
+    // document.getElementById('default-attributes-tab-input').checked = false;
+    try {
+      document.getElementById('artboard-tree-tab-input').checked = true;
+      document.getElementById('artboard-tree-tab-input').checked = false;
+    } catch(e) {
+
+    }
+  }
+
   render() {
     const { activeLayerId, activeShapeId, drawing, activeOnly, togglePanel } = this.props;
 
