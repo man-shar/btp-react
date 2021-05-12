@@ -1300,10 +1300,10 @@ codemirror-colorpicker@^1.5.0:
   resolved "https://registry.yarnpkg.com/codemirror-colorpicker/-/codemirror-colorpicker-1.9.72.tgz#e6c9cb29e4e4bb7fe27cc8f8f0bbc4386996cf37"
   integrity sha512-ZD8IenGqnj3gfutn2mxuinvEkBZnLJalcs/v6809KQe7UjevYrwx0BWSmXpp/kHp/o/cpoSrdUnrlkaI6d8t5Q==
 
-codemirror@^5.34.0:
-  version "5.58.1"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.58.1.tgz#ec6bf38ad2a17f74c61bd00cc6dc5a69bd167854"
-  integrity sha512-UGb/ueu20U4xqWk8hZB3xIfV2/SFqnSLYONiM3wTMDqko0bsYrsAkGGhqUzbRkYm89aBKPyHtuNEbVWF9FTFzw==
+codemirror@^5.58.2:
+  version "5.58.2"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.58.2.tgz#ed54a1796de1498688bea1cdd4e9eeb187565d1b"
+  integrity sha512-K/hOh24cCwRutd1Mk3uLtjWzNISOkm4fvXiMO7LucCrqbh6aJDdtqUziim3MZUI6wOY0rvY1SlL1Ork01uMy6w==
 
 collection-visit@^1.0.0:
   version "1.0.0"
