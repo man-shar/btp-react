@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@manaflair/redux-batch": "^0.1.0",
-    "codemirror": "^5.34.0",
+    "codemirror": "^5.58.2",
     "codemirror-colorpicker": "^1.5.0",
     "d3": "^4.13.0",
     "mathjs-expression-parser": "^1.0.0",
