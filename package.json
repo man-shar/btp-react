@@ -15,7 +15,7 @@
     "@manaflair/redux-batch": "^0.1.0",
     "codemirror": "^5.34.0",
     "codemirror-colorpicker": "^1.5.0",
-    "d3": "^4.13.0",
+    "d3": "^7.6.1",
     "mathjs-expression-parser": "^1.0.0",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
